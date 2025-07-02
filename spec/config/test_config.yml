@@ -1,0 +1,10 @@
+server:
+  url: "https://api.fastpix.io/v1/live"
+  username: "2616eb1e-bd36-41cc-b4b6-273afef3b97a"
+  password: "e0c95611-621e-4a95-a17a-118e4c55450b"
+  timeout: 30                     # Request timeout in seconds
+
+test_video:
+  path: "spec/fixtures/test_video.mp4"  # Path to test video file
+  title: "Test Video"
+  description: "Test video for automated testing" 

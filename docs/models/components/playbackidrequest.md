@@ -1,0 +1,8 @@
+# PlaybackIdRequest
+
+
+## Fields
+
+| Field                                                                                                                | Type                                                                                                                 | Required                                                                                                             | Description                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `access_policy`                                                                                                      | [T.nilable(Models::Components::PlaybackIdRequestAccessPolicy)](../../models/shared/playbackidrequestaccesspolicy.md) | :heavy_minus_sign:                                                                                                   | Determines if access to the streamed content is kept private or available to all.                                    |

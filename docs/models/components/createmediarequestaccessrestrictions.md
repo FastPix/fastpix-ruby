@@ -1,0 +1,9 @@
+# CreateMediaRequestAccessRestrictions
+
+
+## Fields
+
+| Field                                                                                                              | Type                                                                                                               | Required                                                                                                           | Description                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `domains`                                                                                                          | [T.nilable(Models::Components::CreateMediaRequestDomains)](../../models/shared/createmediarequestdomains.md)       | :heavy_minus_sign:                                                                                                 | N/A                                                                                                                |
+| `user_agents`                                                                                                      | [T.nilable(Models::Components::CreateMediaRequestUserAgents)](../../models/shared/createmediarequestuseragents.md) | :heavy_minus_sign:                                                                                                 | N/A                                                                                                                |

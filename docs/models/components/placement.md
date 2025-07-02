@@ -1,0 +1,11 @@
+# Placement
+
+
+## Fields
+
+| Field                                                                  | Type                                                                   | Required                                                               | Description                                                            | Example                                                                |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `x_align`                                                              | [T.nilable(Models::Components::XAlign)](../../models/shared/xalign.md) | :heavy_minus_sign:                                                     | Horizontal alignment of the watermark.                                 | left                                                                   |
+| `x_margin`                                                             | *T.nilable(::String)*                                                  | :heavy_minus_sign:                                                     | Horizontal margin from the edge of the video.                          | 10%                                                                    |
+| `y_align`                                                              | [T.nilable(Models::Components::YAlign)](../../models/shared/yalign.md) | :heavy_minus_sign:                                                     | Vertical alignment of the watermark.                                   | top                                                                    |
+| `y_margin`                                                             | *T.nilable(::String)*                                                  | :heavy_minus_sign:                                                     | Vertical margin from the edge of the video.                            | 10%                                                                    |

@@ -1,0 +1,11 @@
+# PatchResponseDataSrtPlaybackResponse
+
+This object contains the livestream playback response details for SRT Protocol.
+
+
+## Fields
+
+| Field                                                                                                                         | Type                                                                                                                          | Required                                                                                                                      | Description                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `srt_playback_stream_id`                                                                                                      | *T.nilable(::String)*                                                                                                         | :heavy_minus_sign:                                                                                                            | A unique identifier for the SRT playback stream. This ID is used to distinguish between different playback streams.           |
+| `srt_playback_secret`                                                                                                         | *T.nilable(::String)*                                                                                                         | :heavy_minus_sign:                                                                                                            | A playback secret used for securing the SRT playback stream. This ensures that only authorized users can access the playback. |

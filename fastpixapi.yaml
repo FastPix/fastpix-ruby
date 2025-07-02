@@ -1,0 +1,4495 @@
+openapi: 3.0.0
+servers:
+  - description: LIVE STREAM
+    url: https://api.fastpix.io/v1/live
+info:
+  description: >-
+    The Live Stream APIs in FastPix simplifies the process of creating,managing,
+    and distributing live content. This set of API endpoints is designed to help
+    developers initiate live broadcasts, configure stream settings, and extend
+    streams to external platforms (via simulcasting). By integrating FastPix’s
+    live streaming capabilities into your applications, you can provide users
+    with seamless and high-quality live video experiences, whether for events,
+    webinars, gaming, or live content creation. 
+
+      Live streams can be customized with various parameters, such as stream metadata, privacy settings, and playback configurations. Additionally, the API supports real-time interaction with streams, including updating stream details, managing playback IDs, and extending the reach of a stream through simulcasting to platforms like YouTube or Facebook. 
+
+    <h3>Use case scenarios</h3>
+
+      **Event Broadcasting**: A developer integrates FastPix live streaming APIs into an event management platform. By leveraging these APIs, the platform can enable event organizers to set up live streams for conferences, concerts, or webinars, allowing viewers to tune in from multiple platforms simultaneously via simulcasting. 
+
+      **Live Content Platforms**: Developers working on a live content platform for creators can use the live stream APIs to allow users to broadcast gaming, vlogs, or tutorials. Creators can manage their streams in real time, control playback options, and extend their reach by simulcasting to popular platforms like Twitch or YouTube. 
+
+      **Corporate Streaming Services**: A corporate communication tool can integrate live streaming functionality for internal town halls or global employee meetings. The live streams can be made accessible to different employee groups through privacy settings and playback control, ensuring secure and efficient internal communication. 
+  version: 1.0.0
+  title: LIVE STREAMING API
+  contact:
+    email: support@fastpix.io
+tags:
+  - name: livestream
+    description: Livestream APIs
+paths:
+  /streams:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - Start live stream
+      summary: Create a new stream
+      description: >-
+        Allows you to initiate a new RTMP or SRT live stream on FastPix. Upon
+        creating a stream, FastPix generates a unique stream key and SRT secret,
+        which can be used with any broadcasting software (like OBS) to connect
+        to FastPix's RTMP or SRT servers. Users can configure the stream
+        settings, including metadata (such as stream name and description),
+        reconnect window (in case of disconnection), privacy options (public or
+        private), and advanced features like enabling DVR mode.
+
+        Leverage SRT for live streaming in environments with unstable networks,
+        taking advantage of its error correction and encryption features for a
+        resilient and secure broadcast. 
+
+
+        <h4>How it works</h4> 
+
+
+        When a user sends a POST request to this endpoint, FastPix returns the
+        stream details for both RTMP and SRT configurations. These keys and IDs
+        from the stream details are essential for connecting the broadcasting
+        software to FastPix’s servers and transmitting the live stream to
+        viewers.
+
+        FastPix uses <a
+        href=https://docs.fastpix.io/docs/webhooks-for-status#/>webhooks</a> to
+        tell your application about things that happen in the background,
+        outside of the API regular request flow. For instance, once the live
+        stream is created, we’ll shoot a POST message to the address you give us
+        with the webhook event <a
+        href=https://docs.fastpix.io/docs/video-live_stream-created#/>video.live_stream.created</a>.
+        Here’re <a
+        href=https://docs.fastpix.io/docs/webhooks-for-status#/live-stream-related-events>other
+        live stream event related</a> webhooks you would want to look for. 
+
+
+        **Use case:** A gaming content creator initiates a live stream through
+        the API, specifying a 1080p resolution and public access. They receive
+        the stream key, RTMP and SRT details in the response. Using the SRT
+        connection, they broadcast a high-action gaming session with reduced
+        latency, offering viewers a seamless experience. 
+
+
+
+        **Detailed example:** 
+          Imagine a gaming platform that allows users to live stream gameplay directly from their dashboard. The API creates a new stream, provides the necessary stream key, and sets it to "private" so that only specific viewers can access it. 
+      operationId: create-new-stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLiveStreamRequest'
+      responses:
+        '201':
+          description: Stream created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/liveStreamResponseDTO'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - Manage live stream
+      summary: Get all live streams
+      description: >-
+        Retrieves a list of all live streams associated with the user’s account
+        (workspace). It provides an overview of both current and past live
+        streams, including details like streamId, title, status, and creation
+        time. 
+      operationId: get-all-streams
+      parameters:
+        - name: limit
+          in: query
+          description: Limit specifies the maximum number of items to display per page.
+          schema:
+            type: string
+            default: 10
+            minimum: 1
+            maximum: 50
+            example: 20
+        - name: offset
+          in: query
+          description: >-
+            Offset determines the starting point for data retrieval within a
+            paginated list.
+          schema:
+            type: string
+            default: 1
+            example: 1
+        - name: orderBy
+          in: query
+          description: >-
+            The list of value can be order in two ways DESC (Descending) or ASC
+            (Ascending). In case not specified, by default it will be DESC.
+          schema:
+            type: string
+            example: desc
+            default: desc
+            enum:
+              - asc
+              - desc
+      responses:
+        '200':
+          description: All streams retrieved sucessfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getStreamsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /streams/{streamId}:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - Manage live stream
+      summary: Get stream by ID
+      description: >-
+        This endpoint retrieves detailed information about a specific live
+        stream by its unique streamId. It includes data such as the stream’s
+        status (idle, preparing, active, disabled), metadata (title,
+        description), and more. 
+
+          **Practical example:** Suppose a news agency is broadcasting a live event and wants to track the configurations set for the live stream while also checking the stream's status.
+      operationId: get-live-stream-by-id
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 61a264dcc447b63da6fb79ef925cd76d
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stream details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/livestreamgetResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    delete:
+      security:
+        - basicAuth: []
+      tags:
+        - Manage live stream
+      summary: Delete a stream
+      description: >-
+        Permanently removes a specified live stream from the workspace. If the
+        stream is still active, the encoder will be disconnected, and the
+        ingestion will stop. This action cannot be undone, and any future
+        playback attempts will fail. 
+
+          By providing the streamId, the API will terminate any active connections to the stream and remove it from the list of available live streams. You can further look for video.live_stream.deleted webhook to notify your system about the status. 
+
+          **Example:** For an online concert platform, a trial stream was mistakenly made public. The event manager deletes the stream before the concert begins to avoid confusion among viewers. 
+      operationId: delete-live-stream
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 8717422d89288ad5958d4a86e9afe2a2
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stream deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStreamDeleteResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    patch:
+      security:
+        - basicAuth: []
+      tags:
+        - Manage live stream
+      summary: Update a stream
+      description: >-
+        This endpoint allows users to modify the parameters of an existing live
+        stream, such as its metadata (title, description) or the reconnect
+        window. It’s useful for making changes to a stream that has already been
+        created but not yet ended. Once the live stream is disabled, you cannot
+        update a stream. 
+
+
+          The updated stream parameters and the streamId needs to be shared in the request, and FastPix will return the updated stream details. Once updated, video.live_stream.updated webhook event notifies your system. 
+
+          **Practical example:** A host realizes they need to extend the reconnect window for their live stream in case they lose connection temporarily during the event. Or suppose during a multi-day online conference, the event organizers need to update the stream title to reflect the next day's session while keeping the same stream ID for continuity. 
+      operationId: update-live-stream
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 91a264dcc447b63da6fb79ef925cd76d
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/patchLiveStreamRequest'
+      responses:
+        '200':
+          description: Stream details updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/patchResponseDTO'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /streams/{streamId}/playback-ids:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - Playback
+      summary: Create a playbackId
+      description: >-
+        Generates a new playback ID for the live stream, allowing viewers to
+        access the stream through this ID. The playback ID can be shared with
+        viewers for direct access to the live broadcast. 
+
+          By calling this endpoint with the streamId, FastPix returns a unique playbackId, which can be used to stream the live content. 
+
+          **Use case:** A media platform needs to distribute a unique playback ID to users for an exclusive live concert. The platform can also embed the stream on various partner websites. 
+      operationId: create-playbackId-of-stream
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 8717422d89288ad5958d4a86e9afe2a2
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/playbackIdRequest'
+      responses:
+        '201':
+          description: New PlaybackId created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/playbackIdResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    delete:
+      security:
+        - basicAuth: []
+      tags:
+        - Playback
+      summary: Delete a playbackId
+      description: >-
+        Deletes a previously created playback ID for a live stream. This will
+        prevent any new viewers from accessing the stream through the playback
+        ID, though current viewers will be able to continue watching for a
+        limited time before being disconnected. By providing the playbackId,
+        FastPix deletes the ID and ensures new playback requests will fail. 
+
+          **Use case:** A streaming service wants to prevent new users from joining a live stream that is nearing its end. The host can delete the playback ID to ensure no one can join the stream or replay it once it ends. 
+      operationId: delete-playbackId-of-stream
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 8717422d89288ad5958d4a86e9afe2a2
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+        - name: playbackId
+          in: query
+          required: true
+          example: 88b7ac0f-2504-4dd5-b7b4-d84ab4fee1bd
+          description: Unique identifier for the playbackId
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stream's playbackId deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStreamDeleteResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream/Simulcast Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorPlaybackId'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /streams/{streamId}/playback-ids/{playbackId}:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - Playback
+      summary: Get stream's playbackId
+      description: >-
+        Retrieves details about a previously created playback ID. If you provide
+        the distinct playback ID that was given back to you in the previous
+        stream or playbackId create request, FastPix will provide the relevant
+        playback details such as the access policy. 
+
+          **Use case:** A developer needs to confirm the playback ID details to ensure the right stream is being accessed by viewers. 
+      operationId: get-live-stream-playback-id
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 61a264dcc447b63da6fb79ef925cd76d
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+        - name: playbackId
+          in: path
+          required: true
+          example: 61a264dcc447b63da6fb79ef925cd76d
+          description: >-
+            Upon creating a new playbackId, FastPix assigns a unique identifier
+            to the playback.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stream details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/playbackIdResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorPlaybackId'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /streams/{streamId}/simulcast:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - Simulcast stream
+      summary: Create a simulcast
+      description: >-
+        Lets you to create a simulcast for a parent live stream. A simulcast
+        enables you to broadcast the live stream to multiple platforms
+        simultaneously (e.g., YouTube, Facebook, or Twitch). This feature is
+        useful for expanding your audience reach across different platforms.
+        However, a simulcast can only be created when the parent live stream is
+        in an idle state (i.e., not currently live or disabled). Additionally,
+        only one simulcast target can be created per API call. 
+
+          <h4>How it works</h4> 
+
+
+          Upon calling this endpoint, you need to provide the parent streamId and the details of the simulcast target (platform and credentials). The system will generate a unique simulcastId, which can be used to manage the simulcast later. 
+
+
+
+        To notify your application about the status of simulcast related events
+        check for the webhooks for simulcast target events. 
+
+
+        **Practical example:** An event manager sets up a live stream for a
+        virtual conference and wants to simulcast the stream on YouTube and
+        Facebook Live. They first create the primary live stream in FastPix,
+        ensuring it's in the idle state. Then, they use the API to create a
+        simulcast target for YouTube. 
+      operationId: create-simulcast-of-stream
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 8717422d89288ad5958d4a86e9afe2a2
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/simulcastRequest'
+      responses:
+        '201':
+          description: New Simulcast created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simulcastResponse'
+        '400':
+          description: Simulcast is not available for trial streams
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulcastUnavailable'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /streams/{streamId}/simulcast/{simulcastId}:
+    delete:
+      security:
+        - basicAuth: []
+      tags:
+        - Simulcast stream
+      summary: Delete a simulcast
+      description: >-
+        Allows you to delete a simulcast using its unique simulcastId, which was
+        returned during the simulcast creation process. Deleting a simulcast
+        stops the broadcast to the associated platform, but the parent stream
+        will continue to run if it is live. This action is irreversible, and a
+        new simulcast would need to be created if you want to resume streaming
+        to the same platform. 
+
+          **Use case:** A broadcaster needs to stop simulcasting to one platform due to technical difficulties while keeping the stream active on others. For example, a tech company is simulcasting a product launch on multiple platforms. Midway through the event, they decide to stop the simulcast on Facebook due to performance issues, but keep it running on YouTube. They call this API to delete the Facebook simulcast target. 
+      operationId: delete-simulcast-of-stream
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 8717422d89288ad5958d4a86e9afe2a2
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+        - name: simulcastId
+          in: path
+          required: true
+          example: 9217422d89288ad5958d4a86e9afe2a1
+          description: >-
+            When you create the new simulcast, FastPix assign a universal unique
+            identifier which can contain a maximum of 255 characters.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stream's simulcast deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simulcastdeleteResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream/Simulcast Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorSimulcast'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - Simulcast stream
+      summary: Get a specific simulcast of a stream
+      description: >-
+        Retrieves the details of a specific simulcast associated with a parent
+        live stream. By providing both the streamId of the parent stream and the
+        simulcastId, FastPix returns detailed information about the simulcast,
+        such as the stream URL, the status of the simulcast (active or idle),
+        and metadata. 
+
+          **Use case:** This endpoint can be used to verify the status of the simulcast on external platforms before the live stream begins. For instance, before starting a live gaming event, the organizer wants to ensure that the simulcast to Twitch is set up correctly. They retrieve the simulcast information to confirm that everything is properly configured. 
+      operationId: get-specific-simulcast-of-stream
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 8717422d89288ad5958d4a86e9afe2a2
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+        - name: simulcastId
+          in: path
+          required: true
+          example: 8717422d89288ad5958d4a86e9afe2a2
+          description: >-
+            When you create the new simulcast, FastPix assign a universal unique
+            identifier which can contain a maximum of 255 characters.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stream's simulcast details fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simulcastResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream/Simulcast Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorSimulcast'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    put:
+      security:
+        - basicAuth: []
+      tags:
+        - Simulcast stream
+      summary: Update a specific simulcast of a stream
+      description: >-
+        Allows you to enable or disable a specific simulcast associated with a
+        parent live stream. The status of the simulcast can be updated at any
+        point, whether the live stream is active or idle. However, once the live
+        stream is disabled, the simulcast can no longer be modified. 
+
+          **Use case:** When a PATCH request is made to this endpoint, the API updates the status of the simulcast. This can be useful for pausing or resuming a simulcast on a particular platform without stopping the parent live stream. 
+      operationId: update-specific-simulcast-of-stream
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          example: 8717422d89288ad5958d4a86e9afe2a2
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+          schema:
+            type: string
+        - name: simulcastId
+          in: path
+          required: true
+          example: 8717422d89288ad5958d4a86e9afe2a2
+          description: >-
+            When you create the new simulcast, FastPix assign a universal unique
+            identifier which can contain a maximum of 255 characters.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/simulcastUpdateRequest'
+      responses:
+        '200':
+          description: Stream's simulcast details fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simulcastUpdateResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '404':
+          description: Stream/Simulcast Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorSimulcast'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /on-demand:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - Input video
+      summary: Create media from URL
+      description: >
+        This endpoint allows developers or users to create a new video or audio
+        media in FastPix using a publicly accessible URL. FastPix will fetch the
+        media from the provided URL, process it, and store it on the platform
+        for use. 
+
+
+
+
+        #### Public URL requirement:
+
+
+          The provided URL must be publicly accessible and should point to a video stored in one of the following supported formats: .m4v, .ogv, .mpeg, .mov, .3gp, .f4v, .rm, .ts, .wtv, .avi, .mp4, .wmv, .webm, .mts, .vob, .mxf, asf, m2ts 
+
+
+
+        #### Supported storage types:
+
+
+        The URL can originate from various cloud storage services or content
+        delivery networks (CDNs) such as: 
+
+
+
+        * **Amazon S3:** URLs from Amazon's Simple Storage Service. 
+
+
+        * **Google Cloud Storage:** URLs from Google Cloud's storage solution. 
+
+
+        * **Azure Blob Storage:** URLs from Microsoft's Azure storage. 
+
+
+        * **Public CDNs:** URLs from public content delivery networks that host
+        video files. 
+
+
+        Upon successful creation, the API returns an id that should be retained
+        for future operations related to this media. 
+
+
+        #### How it works
+
+
+
+        1. Send a POST request to the /on-demand endpoint with the media URL
+        (typically a video or audio file) and optional media settings. 
+
+
+        2. FastPix uploads the video from the provided URL to its storage. 
+
+
+        3. Receive a response containing the unique id for the newly created
+        media item. 
+
+
+        4. Use the id in subsequent API calls, such as checking the status of
+        the media with the **Get Media by ID** endpoint to determine when the
+        media is ready for playback. 
+
+
+        FastPix uses webhooks to tell your application about things that happen
+        in the background, outside of the API regular request flow. For
+        instance, once the media file is created (but not yet processed or
+        encoded), we’ll shoot a POST message to the address you give us with the
+        webhook event video.media.created. 
+
+
+
+        Once processing is done you can look for the events video.media.ready
+        and video.media.failed to see the status of your new media file.
+
+
+        #### Use case scenario
+
+
+
+        * **Use case:** A developer wants to integrate a user-generated content
+        platform where users can upload links to their videos hosted on
+        third-party platforms like AWS or Google Cloud Storage. This endpoint is
+        used to create media directly from those URLs. 
+
+
+
+        * **Detailed example:** 
+
+        Say you’re building an online learning platform where instructors upload
+        video URLs hosted on their private cloud servers. By providing the video
+        URL to this endpoint, the platform processes and adds it to your media
+        library, ready for playback. 
+      operationId: create-media
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMediaRequest'
+            example:
+              inputs:
+                - type: video
+                  url: https://static.fastpix.io/sample.mp4
+              metadata:
+                key1: value1
+              accessPolicy: public
+              maxResolution: 1080p
+        description: Request body for uploading a video media from URL
+      responses:
+        '201':
+          description: Media is created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: Demonstrates whether the request is successful or not.
+                  data:
+                    description: Displays the result of the request.
+                    $ref: '#/components/schemas/CreateMediaResponse'
+                example:
+                  success: true
+                  data:
+                    id: ffc4e8dd-544c-4ade-bdf1-ac31cb4e6b8f
+                    trial: false
+                    status: Created
+                    createdAt: '2025-01-09T06:39:13.759544Z'
+                    updatedAt: '2025-01-09T06:39:13.759588Z'
+                    playbackIds:
+                      - id: df5be71b-96dc-4edd-bdba-dcc43ab60309
+                        accessPolicy: public
+                        accessRestrictions:
+                          domains:
+                            defaultPolicy: allow
+                            allow: []
+                            deny: []
+                          userAgents:
+                            defaultPolicy: allow
+                            allow: []
+                            deny: []
+                    metadata:
+                      key1: value1
+                    sourceAccess: false
+                    maxResolution: 1080p
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - Manage videos
+      summary: Get list of all media
+      description: >
+        This endpoint returns a list of all media files created from a URL or
+        uploaded as file objects within your organization. Each media entry
+        contains metadata such as the media ID, creation date, status, and type.
+        It allows you to retrieve a comprehensive overview of your media assets,
+        making it easier to manage and review them. 
+
+
+
+        #### How it works
+
+
+        When called, the API provides a paginated response containing the media
+        items in the organization's library. This is helpful for retrieving a
+        large volume of media and managing content in bulk. 
+
+
+
+
+        #### Use case scenario 
+
+
+        * **Use case:** A content manager at a video-on-demand platform wants to
+        see all uploaded media to assess the quality and status of videos. 
+
+
+
+
+        * **Detailed example:** 
+
+        You're managing a video platform and need to check all the uploaded
+        media in your library to ensure no outdated or low-quality content is
+        being served. Using this endpoint, you can retrieve a complete list of
+        media, allowing you to filter, sort, or update items as needed. 
+      operationId: list-media
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+            example: 20
+          description: Limit specifies the maximum number of items to display per page.
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 1
+            example: 1
+          description: >-
+            Offset determines the starting point for data retrieval within a
+            paginated list.
+        - in: query
+          name: orderBy
+          schema:
+            type: string
+            example: desc
+            default: desc
+            enum:
+              - asc
+              - desc
+          description: >-
+            The values in the list can be arranged in two ways: DESC
+            (Descending) or ASC (Ascending).
+      responses:
+        '200':
+          description: List of video media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: Demonstrates whether the request is successful or not.
+                  data:
+                    description: Displays the result of the request.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Media'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                example:
+                  success: true
+                  data:
+                    - thumbnail: >-
+                        https://images.fastpix.io/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
+                      id: cfeec1a3-6cbd-40df-a425-2ed7f8f72ced
+                      workspaceId: 6dc2b4e0-0615-42fd-a580-1f4aad932dfe
+                      metadata:
+                        key1: value1
+                      maxResolution: 1080p
+                      sourceResolution: 1080p
+                      status: Ready
+                      sourceAccess: false
+                      playbackIds:
+                        - id: 837f028b-dcaf-4c23-b368-3748641f74ac
+                          accessPolicy: public
+                          accessRestrictions:
+                            domains:
+                              defaultPolicy: allow
+                              allow: []
+                              deny: []
+                            userAgents:
+                              defaultPolicy: allow
+                              allow: []
+                              deny: []
+                      tracks:
+                        - id: f301a2a1-b40d-40fa-b419-4d0cd92a62f8
+                          type: video
+                          width: 1920
+                          height: 1080
+                          frameRate: 30/1
+                          status: Ready
+                          closedCaptions: false
+                      isAudioOnly: false
+                      subtitleAvailable: true
+                      duration: '00:00:10'
+                      frameRate: 30/1
+                      aspectRatio: '16:9'
+                      createdAt: '2025-01-09T06:44:44.617138Z'
+                      updatedAt: '2025-01-09T06:44:53.742648Z'
+                  pagination:
+                    totalRecords: 100
+                    currentOffset: 1
+                    offsetCount: 10
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '422':
+          description: Get video media payload validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /on-demand/{mediaId}:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - Manage videos
+      summary: Get a media by ID
+      description: >
+        By calling this endpoint, you can retrieve detailed information about a
+        specific media item, including its current status and a playbackId. This
+        is particularly useful for retrieving specific media details when
+        managing large content libraries. 
+
+
+
+
+        #### How it works 
+
+
+
+
+        1. Make a GET request to the **/on-demand/`<mediaId>`**  endpoint,
+        replacing `<mediaId>` with the **uploadId** received during the upload
+        process or the id obtained when creating media from a URL. 
+
+
+
+        2. Receive a response that includes details about the media, including: 
+
+
+        * **status:** Indicates whether the media is still “preparing” or has
+        transitioned to "ready."  
+
+
+        * **playbackId:** The playbackId is a unique identifier that allows you
+        to stream the media once it is ready. You can construct the stream URL
+        dynamically using the playbackId in the following format:
+        `https://stream.fastpix.io/<playbackId>.m3u8`
+
+
+
+
+        **Please note:** Polling this API will let you know the status that
+        whether the upload media has been moved to ready status, so that you can
+        get started with streaming your media. 
+
+
+        #### Use case scenario
+
+
+        **Use case:** Suppose your platform provides users with an interface
+        where they can manage their uploaded content. A user requests detailed
+        information about a specific video to see if it has been fully processed
+        and is available for playback. Using the media ID, you can fetch the
+        information from FastPix and display it in the user’s dashboard. 
+      operationId: get-media
+      parameters:
+        - in: path
+          name: mediaId
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 4fa85f64-5717-4562-b3fc-2c963f66afa6
+          description: >-
+            The Media Id is assigned a universal unique identifier, which can
+            contain a maximum of 255 characters.
+      responses:
+        '200':
+          description: Get a video media by id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: Demonstrates whether the request is successful or not.
+                  data:
+                    $ref: '#/components/schemas/Media'
+                example:
+                  success: true
+                  data:
+                    thumbnail: >-
+                      https://images.fastpix.io/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
+                    id: cfeec1a3-6cbd-40df-a425-2ed7f8f72ced
+                    workspaceId: 6dc2b4e0-0615-42fd-a580-1f4aad932dfe
+                    metadata:
+                      key1: value1
+                    maxResolution: 1080p
+                    sourceResolution: 1080p
+                    status: Ready
+                    sourceAccess: false
+                    playbackIds:
+                      - id: 837f028b-dcaf-4c23-b368-3748641f74ac
+                        accessPolicy: public
+                        accessRestrictions:
+                          domains:
+                            defaultPolicy: allow
+                            allow: []
+                            deny: []
+                          userAgents:
+                            defaultPolicy: allow
+                            allow: []
+                            deny: []
+                    tracks:
+                      - id: f301a2a1-b40d-40fa-b419-4d0cd92a62f8
+                        type: video
+                        width: 1920
+                        height: 1080
+                        frameRate: 30/1
+                        closedCaptions: false
+                    isAudioOnly: false
+                    subtitleAvailable: true
+                    duration: '00:00:10'
+                    frameRate: 30/1
+                    aspectRatio: '16:9'
+                    createdAt: '2025-01-09T06:44:44.617138Z'
+                    updatedAt: '2025-01-09T06:44:53.742648Z'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: media workspace relation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaNotFound'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    patch:
+      security:
+        - basicAuth: []
+      tags:
+        - Manage videos
+      summary: Update a media by ID
+      description: >
+        This endpoint allows you to update specific parameters of an existing
+        media file. You can modify the key-value pairs of the metadata that were
+        provided in the payload during the creation of media from a URL or when
+        uploading the media as a file object. 
+
+
+
+        #### How it works
+
+
+        1. Make a PATCH request to the **/on-demand/`<mediaId>`**  endpoint,
+        replacing `<mediaId>` with the uploadId or the id of the media you want
+        to update. 
+
+
+        2. Include the updated parameters in the request body. 
+
+
+        3. Receive a response containing the updated media data, confirming the
+        changes made. 
+
+
+        Once you have made the update request, you can also look for the webhook
+        event **video.media.updated** to notify your system about update
+        status. 
+
+
+
+        **Use case:** Imagine a scenario where a user uploads a video and later
+        realizes they need to change the title, add a new description or tags.
+        You can use this endpoint to update the media metadata without having to
+        re-upload the entire video.
+      operationId: updated-media
+      parameters:
+        - in: path
+          name: mediaId
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 4fa85f64-5717-4562-b3fc-2c963f66afa6
+          description: >-
+            When creating the media, FastPix assigns a universally unique
+            identifier with a maximum length of 255 characters.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  type: object
+                  example:
+                    key1: value1
+                  description: >-
+                    You can search for videos with specific key value pairs
+                    using metadata, when you tag a video in "key" : "value"
+                    pairs. Dynamic Metadata allows you to define a key that
+                    allows any value pair. You can have maximum of 255
+                    characters and upto 10 entries are allowed.
+              example:
+                metadata:
+                  user: fastpix_admin
+      responses:
+        '200':
+          description: Media details updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: Demonstrates whether the request is successful or not.
+                  data:
+                    $ref: '#/components/schemas/Media'
+                example:
+                  success: true
+                  data:
+                    thumbnail: >-
+                      https://images.fastpix.io/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
+                    id: cfeec1a3-6cbd-40df-a425-2ed7f8f72ced
+                    workspaceId: 6dc2b4e0-0615-42fd-a580-1f4aad932dfe
+                    metadata:
+                      user: fastpix_admin
+                    maxResolution: 1080p
+                    sourceResolution: 1080p
+                    status: Ready
+                    sourceAccess: false
+                    playbackIds:
+                      - id: 837f028b-dcaf-4c23-b368-3748641f74ac
+                        accessPolicy: public
+                        accessRestrictions:
+                          domains:
+                            defaultPolicy: allow
+                            allow: []
+                            deny: []
+                          userAgents:
+                            defaultPolicy: allow
+                            allow: []
+                            deny: []
+                    tracks:
+                      - id: f301a2a1-b40d-40fa-b419-4d0cd92a62f8
+                        type: video
+                        width: 1920
+                        height: 1080
+                        frameRate: 30/1
+                        closedCaptions: false
+                    isAudioOnly: false
+                    subtitleAvailable: true
+                    duration: '00:00:10'
+                    frameRate: 30/1
+                    aspectRatio: '16:9'
+                    createdAt: '2025-01-09T06:44:44.617138Z'
+                    updatedAt: '2025-01-09T06:44:53.742648Z'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: media workspace relation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaNotFound'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    delete:
+      security:
+        - basicAuth: []
+      tags:
+        - Manage videos
+      summary: Delete a media by ID
+      operationId: delete-media
+      description: >
+        This endpoint allows you to permanently delete a a specific video or
+        audio media file along with all associated data. If you wish to remove a
+        media file from FastPix storage, use this endpoint with the **mediaId**
+        (either **uploadId** or **id**) received during the media's creation or
+        upload. 
+
+
+
+        #### How it works
+
+
+
+        1. Make a DELETE request to the **/on-demand/`<mediaId>`**  endpoint,
+        replacing `<mediaId>` with the uploadId or the id of the media you want
+        to delete. 
+
+
+        2. Confirm the deletion: Since this action is irreversible, ensure that
+        you no longer need the media before proceeding. Once deleted, the media
+        cannot be retrieved or played back. 
+
+
+        3. Webhook event to look for: **video.media.deleted** 
+
+
+        **Use case:** A user on a video-sharing platform decides to remove an
+        old video from their profile, or suppose you're running a content
+        moderation system, and one of the videos uploaded by a user violates
+        your platform’s policies. Using this endpoint, the media is permanently
+        deleted from your library, ensuring it’s no longer accessible or
+        viewable by other users. 
+      parameters:
+        - in: path
+          name: mediaId
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 4fa85f64-5717-4562-b3fc-2c963f66afa6
+          description: >-
+            When creating the media, FastPix assigns a universally unique
+            identifier with a maximum length of 255 characters.
+      responses:
+        '200':
+          description: Delete a video media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: Demonstrates whether the request is successful or not.
+                example:
+                  success: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: media workspace relation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaNotFound'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  
+  
+  /on-demand/{mediaId}/input-info:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - Manage videos
+      summary: Get info of media inputs
+      operationId: retrieveMediaInputInfo
+      description: >
+        Allows you to retrieve detailed information about the media inputs
+        associated with a specific media item. You can use this endpoint to
+        verify the media file’s input URL, track creation status, and container
+        format. The mediaId (either uploadId or id) must be provided to fetch
+        the information. 
+
+
+
+        #### How it works
+
+
+
+
+        Upon making a GET request with the mediaId, FastPix returns a response
+        that includes: 
+
+
+        * **Input-url:** The URL of the uploaded media file. 
+
+
+        * **tracks:** Information about the tracks associated with the media,
+        including both video and audio tracks, indicating whether they have been
+        successfully created. 
+
+
+        * **containerFormat:** The format of the uploaded media file container
+        (e.g., MP4, MKV). 
+
+
+
+
+        This endpoint is particularly useful for ensuring that all necessary
+        tracks (video and audio) have been correctly associated with the media
+        during the upload or media creation process. 
+      parameters:
+        - in: path
+          name: mediaId
+          description: >-
+            Pass the list of the input objects used to create the media, along
+            with applied settings.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 4fa85f64-5717-4562-b3fc-2c963f66afa6
+      responses:
+        '200':
+          description: Get video media input information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Demonstrates whether the request is successful or not.
+                  data:
+                    description: Displays the result of the request.
+                    configuration:
+                          type: object
+                          description: >-
+                            Represents a collection of configuration details.
+                            Each object provides specific information about a
+                            particular configuration.
+                          properties:
+                            url:
+                              type: string
+                              example: >-
+                                https://static.fastpix.io/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4
+                              description: >-
+                                The url hosts the media file for FastPix, which
+                                needs to be download to use further.  It
+                                supports formats like MP3, MP4, MOV, MKV, or TS,
+                                and includes text tracks for subtitles/CC (SRT
+                                file/VTT file). While FastPix can handle various
+                                audio and video formats and codecs, using
+                                standard inputs can help with optimal processing
+                                speed.
+                          file:
+                            type: object
+                            description: >-
+                              Contains metadata and structural details about the
+                              media file, including its container format and
+                              individual tracks.
+                            properties:
+                              containerFormat:
+                                type: string
+                                example: mp4
+                                description: >-
+                                  Holds different types of multimedia data in a
+                                  single file.
+                              tracks:
+                                type: array
+                                description: >-
+                                  Represents the individual tracks within the
+                                  media, such as video, audio, and subtitle.
+                                items:
+                                  $ref: '#/components/schemas/Track'
+                example:
+                  success: true
+                  data:
+                    configuration:
+                      url: https://static.fastpix.io/sample.mp4
+                    file:
+                      containerFormat: mp4
+                      tracks:
+                        - id: 00dad16c-555c-454a-b552-38d1ac5a26b3
+                          type: audio
+                          closedCaptions: false
+                        - id: 6eb56a83-9a8b-47a5-94b2-cadb4458cf4d
+                          type: video
+                          width: 1280
+                          height: 720
+                          frameRate: 30/1
+                          closedCaptions: false
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Get video media input information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaNotFound'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  
+  /on-demand/{mediaId}/playback-ids:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - Playback
+      summary: Create a playback ID
+      description: >
+        You can create a new playback ID for a specific media asset. If you have
+        already retrieved an existing playbackId using the "Get Media by ID"
+        endpoint for a media asset, you can use this endpoint to generate a new
+        playback ID with a specified access policy. 
+
+
+
+
+        If you want to create a private playback ID for a media asset that
+        already has a public playback ID, this endpoint also allows you to do so
+        by specifying the desired access policy. 
+
+
+        #### How it works
+
+
+        1. **Make a POST request** to the
+        **/on-demand/`<mediaId>`/playback-ids** endpoint, replacing `<mediaId>`
+        with the uploadId or id of the media asset. 
+
+
+        2. Include the **access policy** in the request body to indicate whether
+        the new playback ID should be private or public. 
+
+
+        3. Receive a response containing the newly created playback ID with the
+        requested access level. 
+
+
+
+        **Use case:** A video streaming service generates playback IDs for each
+        media file when users request to view specific content. The playback ID
+        is then used by the video player to stream the video.
+      operationId: create-media-playback-id
+      parameters:
+        - in: path
+          name: mediaId
+          required: true
+          description: >-
+            When creating the media, FastPix assigns a universally unique
+            identifier with a maximum length of 255 characters.
+          schema:
+            type: string
+            format: uuid
+            example: dbb8a39a-e4a5-4120-9f22-22f603f1446e
+            description: >-
+              When creating the media, FastPix assigns a universally unique
+              identifier with a maximum length of 255 characters.
+      requestBody:
+        description: Request body for creating playback id for an media
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accessPolicy
+              properties:
+                accessPolicy:
+                  type: string
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - drm
+                  description: >-
+                    Determines if access to the streamed content is kept private
+                    or available to all.
+                accessRestrictions:
+                  type: object
+                  properties:
+                    domains:
+                      type: object
+                      properties:
+                        defaultPolicy:
+                          type: string
+                          enum:
+                            - allow
+                            - deny
+                          description: >
+                            Specifies the default access policy for domains. 
+
+                            If set to `allow`, all domains are allowed access
+                            unless otherwise specified in the `deny` list. 
+
+                            If set to `deny`, all domains are denied access
+                            unless otherwise specified in the `allow` list.
+                        allow:
+                          type: array
+                          items:
+                            type: string
+                          example:
+                            - example.com
+                            - trustedsite.org
+                          description: >
+                            A list of domain names or patterns that are
+                            explicitly allowed access. 
+
+                            This list is only effective when the `defaultPolicy`
+                            is set to `deny`.
+                        deny:
+                          type: array
+                          items:
+                            type: string
+                          example:
+                            - malicioussite.io
+                            - spamdomain.net
+                          description: >
+                            A list of domain names or patterns that are
+                            explicitly denied access. 
+
+                            This list is only effective when the `defaultPolicy`
+                            is set to `allow`.
+                    userAgents:
+                      type: object
+                      properties:
+                        defaultPolicy:
+                          type: string
+                          enum:
+                            - allow
+                            - deny
+                          description: >
+                            Specifies the default access policy for user agents
+                            (browsers, bots, etc.). 
+
+                            If set to `allow`, all user agents are allowed
+                            access unless otherwise specified in the `deny`
+                            list. 
+
+                            If set to `deny`, all user agents are denied access
+                            unless otherwise specified in the `allow` list.
+                        allow:
+                          type: array
+                          items:
+                            type: string
+                          example:
+                            - >-
+                              Mozilla/5.0 (Linux; Android 10; K)
+                              AppleWebKit/537.36 (KHTML, like Gecko)
+                              Chrome/114.0.0.0 Mobile Safari/537.36
+                            - curl/7.68.0
+                          description: >
+                            A list of user agents (identified by string names or
+                            patterns) that are explicitly allowed access. 
+
+                            This list is only effective when the `defaultPolicy`
+                            is set to `deny`.
+                        deny:
+                          type: array
+                          items:
+                            type: string
+                          example:
+                            - >-
+                              Mozilla/5.0 (Linux; Android 10; K)
+                              AppleWebKit/537.36 (KHTML, like Gecko)
+                              Chrome/114.0.0.0 Safari/537.36
+                            - PostmanRuntime/7.29.0
+                          description: >
+                            A list of user agents (identified by string names or
+                            patterns) that are explicitly denied access. 
+
+                            This list is only effective when the `defaultPolicy`
+                            is set to `allow`.
+              example:
+                accessPolicy: public
+      responses:
+        '201':
+          description: Playback id for an media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: Demonstrates whether the request is successful or not.
+                  data:
+                    description: Displays the result of the request.
+                    type: object
+                    properties:
+                      playbackIds:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PlaybackId'
+                        description: >-
+                          A collection of Playback ID objects utilized for
+                          crafting HLS playback URLs.
+                example:
+                  success: true
+                  data:
+                    id: b331e0d8-bef4-4ad2-8760-757fdb2818b7
+                    accessPolicy: public
+                    accessRestrictions:
+                      domains:
+                        defaultPolicy: allow
+                        allow: []
+                        deny: []
+                      userAgents:
+                        defaultPolicy: allow
+                        allow: []
+                        deny: []
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: media workspace relation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaNotFound'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    delete:
+      security:
+        - basicAuth: []
+      tags:
+        - Playback
+      summary: Delete a playback ID
+      description: >
+        This endpoint allows you to remove a specific playback ID associated
+        with a media asset. Deleting a playbackId will revoke access to the
+        media content linked to that ID. 
+
+
+
+        #### How it works
+
+
+        1. Make a DELETE request to the **/on-demand/`<mediaId>`/playback-ids**
+        endpoint, replacing `<mediaId>` with the uploadId or id of the media
+        asset from which you want to delete the playback ID. 
+
+
+        2. Specify the playback ID you wish to delete in the request body. 
+
+
+        **Use case:** Your platform offers limited-time access to premium
+        content. When the subscription expires, you can revoke access to the
+        content by deleting the associated playback ID, preventing users from
+        streaming the video further. 
+      operationId: delete-media-playback-id
+      parameters:
+        - in: path
+          name: mediaId
+          description: >-
+            Return the universal unique identifier for media which can contain a
+            maximum of 255 characters.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: dbb8a39a-e4a5-4120-9f22-22f603f1446e
+            description: >-
+              When creating the media, FastPix assigns a universally unique
+              identifier with a maximum length of 255 characters.
+        - in: query
+          name: playbackId
+          description: >-
+            Return the universal unique identifier for playbacks  which can
+            contain a maximum of 255 characters. 
+          required: true
+          schema:
+            type: string
+            example: dbb8a39a-e4a5-4120-9f22-22f603f1446e
+            format: uuid
+            description: >-
+              when creating the plyabackIds, FastPix assigns a universal unique
+              identifier with a maximum of 255 characters.
+      responses:
+        '200':
+          description: Deleted a Playback Id successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: Demonstrates whether the request is successful or not.
+                example:
+                  success: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Media/PlaybackId not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaOrPlaybackNotFound'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  
+  /on-demand/uploads:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - Input video
+      summary: Upload media from device
+      operationId: direct-upload-video-media
+      description: >
+        This endpoint enables you to upload a video file directly from your
+        local device to FastPix for processing, storage. When you invoke this
+        API with your preferred media settings, the response returns an uploadId
+        and a pre-signed URL, providing a streamlined experience for uploading.
+
+
+
+
+        #### How it works
+
+
+        1. Send a POST request to the /on-demand/uploads endpoint with optional
+        media settings.  
+
+
+        2. The response includes an **uploadId** and a pre-signed URL for direct
+        video file upload.
+
+
+        3. Upload your video file to the provided **URL** by making **PUT**
+        request. The API accepts the media file from the device and uploads it
+        to the FastPix platform. 
+
+
+        4. Once uploaded, the media undergoes processing and is assigned a
+        unique ID for tracking. Retain this **uploadId** for any future
+        operations related to this upload. 
+
+
+
+
+
+        After uploading, you can use the **Get Media by ID** endpoint to check
+        the status of the uploaded media asset and see if it has transitioned to
+        a "ready" status for playback. 
+
+
+        To notify your application about the status of this API request check
+        for the webhooks for Upload related events.  
+
+
+
+        #### Use case scenario 
+
+
+        **Use case:** A social media platform allows users to upload video
+        content directly from their phones or computers. This endpoint
+        facilitates the upload process. For example, if you are developing a
+        video-sharing app where users can upload short clips from their mobile
+        devices, this endpoint enables them to select a video, upload it to the
+        platform.
+      requestBody:
+        description: Request body for direct upload
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - corsOrigin
+              properties:
+                corsOrigin:
+                  type: string
+                  example: '*'
+                  description: >-
+                    Upload media directly from a device using the URL name or
+                    enter '*' to allow all.
+                pushMediaSettings:
+                  title: Push Media Settings
+                  type: object
+                  required:
+                    - accessPolicy
+                  description: Configuration settings for media upload.
+                  properties:
+                    accessPolicy:
+                      type: string
+                      example: public
+                      enum:
+                        - public
+                        - private
+                      description: >-
+                        Determines if access to the streamed content is kept
+                        private or available to all.
+                    startTime:
+                      type: number
+                      example: '0'
+                      description: >-
+                        Start time indicates where encoding should begin within
+                        the video file, in seconds.
+                    endTime:
+                      type: number
+                      example: '60'
+                      description: >-
+                        End time indicates where encoding should end within the
+                        video file, in seconds.
+                    inputs:
+                      type: array
+                      items:
+                        anyOf:
+                          - $ref: '#/components/schemas/VideoInput'
+                          - $ref: '#/components/schemas/WatermarkInput'
+                          - $ref: '#/components/schemas/AudioInput'
+                          - $ref: '#/components/schemas/SubtitleInput'
+                    metadata:
+                      type: object
+                      example:
+                        key1: value1
+                      description: >-
+                        Tag a video in "key" : "value" pairs for searchable
+                        metadata. Maximum 10 entries, 255 characters each.
+                    subtitles:
+                      type: object
+                      description: |
+                        Generates subtitle files for audio/video files.
+                      properties:
+                        languageName:
+                          type: string
+                          example: english
+                          description: Name of the language for the subtitles.
+                        metadata:
+                          type: object
+                          example:
+                            key1: value1
+                          description: >-
+                            Searchable metadata tags for the video in key-value
+                            pairs.
+                        languageCode:
+                          type: string
+                          example: en
+                          enum:
+                            - en
+                            - it
+                            - pl
+                            - es
+                            - fr
+                            - ru
+                            - nl
+                          description: >
+                            Language codes (BCP 47 compliant) used for text
+                            files.
+                    optimizeAudio:
+                      type: boolean
+                      default: true
+                      example: true
+                      enum:
+                        - true
+                        - false
+                      description: >
+                        Enhance the quality and volume of the audio track. This
+                        is available for pre-recorded content only.
+                    maxResolution:
+                      type: string
+                      example: 1080p
+                      default: 1080p
+                      enum:
+                        - 2160p
+                        - 1440p
+                        - 1080p
+                        - 720p
+                        - 480p
+                        - 360p
+                      description: |
+                        Determines the highest quality resolution available.
+                    sourceAccess:
+                      type: boolean
+                      example: true
+                      enum:
+                        - true
+                        - false
+                      description: >-
+                        The sourceAccess parameter determines whether the
+                        original media file is accessible. Set to true to enable
+                        access or false to restrict it
+                    mp4Support:
+                      type: string
+                      example: capped_4k
+                      enum:
+                        - capped_4k
+                        - audioOnly
+                        - audioOnly,capped_4k
+                      description: >
+                        Generates MP4 video up to 4K ("capped_4k"), m4a audio
+                        only ("audioOnly"), or both for offline viewing.
+                    summary:
+                      type: object
+                      properties:
+                        generate:
+                          type: boolean
+                          enum:
+                            - true
+                            - false
+                          example: true
+                          description: >
+                            Enable or disable the summary feature for the media.
+                            Set to true to enable summary or false to disable.
+                        summaryLength:
+                          type: integer
+                          example: 100
+                          default: 100
+                          maximum: 250
+                          minimum: 30
+                          description: >
+                            Specifies the desired word count for the generated
+                            summary. 
+
+                            - The value must be between **30** and **250**
+                            words.
+                    chapters:
+                      type: boolean
+                      example: true
+                      description: >
+                        Enable or disable the chapters feature for the media.
+                        Set to `true` to enable chapters or `false` to disable.
+                    namedEntities:
+                      type: boolean
+                      example: true
+                      description: >
+                        Enable or disable named entity extraction. Set to `true`
+                        to enable or `false` to disable.
+                    moderation:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          example: video
+                          enum:
+                            - video
+                            - audio
+                            - av
+                          description: >
+                            Defines the type of input. Possible values include
+                            video, audio, av.
+                    accessRestrictions:
+                      type: object
+                      properties:
+                        domains:
+                          type: object
+                          properties:
+                            defaultPolicy:
+                              type: string
+                              enum:
+                                - allow
+                                - deny
+                              description: >
+                                Specifies the default access policy for
+                                domains. 
+
+                                If set to `allow`, all domains are allowed
+                                access unless otherwise specified in the `deny`
+                                list. 
+
+                                If set to `deny`, all domains are denied access
+                                unless otherwise specified in the `allow` list.
+                            allow:
+                              type: array
+                              items:
+                                type: string
+                              example:
+                                - example.com
+                                - trustedsite.org
+                              description: >
+                                A list of domain names or patterns that are
+                                explicitly allowed access. 
+
+                                This list is only effective when the
+                                `defaultPolicy` is set to `deny`.
+                            deny:
+                              type: array
+                              items:
+                                type: string
+                              example:
+                                - malicioussite.io
+                                - spamdomain.net
+                              description: >
+                                A list of domain names or patterns that are
+                                explicitly denied access. 
+
+                                This list is only effective when the
+                                `defaultPolicy` is set to `allow`.
+                        userAgents:
+                          type: object
+                          properties:
+                            defaultPolicy:
+                              type: string
+                              enum:
+                                - allow
+                                - deny
+                              description: >
+                                Specifies the default access policy for user
+                                agents (browsers, bots, etc.). 
+
+                                If set to `allow`, all user agents are allowed
+                                access unless otherwise specified in the `deny`
+                                list. 
+
+                                If set to `deny`, all user agents are denied
+                                access unless otherwise specified in the `allow`
+                                list.
+                            allow:
+                              type: array
+                              items:
+                                type: string
+                              example:
+                                - >-
+                                  Mozilla/5.0 (Linux; Android 10; K)
+                                  AppleWebKit/537.36 (KHTML, like Gecko)
+                                  Chrome/114.0.0.0 Mobile Safari/537.36
+                                - curl/7.68.0
+                              description: >
+                                A list of user agents (identified by string
+                                names or patterns) that are explicitly allowed
+                                access. 
+
+                                This list is only effective when the
+                                `defaultPolicy` is set to `deny`.
+                            deny:
+                              type: array
+                              items:
+                                type: string
+                              example:
+                                - >-
+                                  Mozilla/5.0 (Linux; Android 10; K)
+                                  AppleWebKit/537.36 (KHTML, like Gecko)
+                                  Chrome/114.0.0.0 Safari/537.36
+                                - PostmanRuntime/7.29.0
+                              description: >
+                                A list of user agents (identified by string
+                                names or patterns) that are explicitly denied
+                                access. 
+
+                                This list is only effective when the
+                                `defaultPolicy` is set to `allow`.
+              example:
+                corsOrigin: '*'
+                pushMediaSettings:
+                  metadata:
+                    key1: value1
+                  accessPolicy: public
+                  maxResolution: 1080p
+      responses:
+        '201':
+          description: Direct upload created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: Demonstrates whether the request is successful or not.
+                  data:
+                    $ref: '#/components/schemas/DirectUpload'
+                example:
+                  success: true
+                  data:
+                    uploadId: beff5537-de85-42e1-a673-2a405cd94177
+                    trial: false
+                    status: waiting
+                    url: >-
+                      https://storage-iad01.fastpix.io/uploads/6dc2b4e0-0615-42fd-a580-1f4aad932dfe/beff5537-de85-42e1-a673-2a405cd94177?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=on-demand-svc%2F20250109%2Fiad01%2Fs3%2Faws4_request&X-Amz-Date=20250109T070118Z&X-Amz-Expires=14400&X-Amz-SignedHeaders=host&X-Amz-Signature=473db87247ff580cc4df12de6ab81a83665074abde9effc07b8a87f0d71e8d51
+                    timeout: 14400
+                    corsOrigin: '*'
+                    pushMediaSettings:
+                      playbackIds:
+                        - accessPolicy: public
+                          accessRestrictions:
+                            domains:
+                              defaultPolicy: allow
+                              allow: []
+                              deny: []
+                            userAgents:
+                              defaultPolicy: allow
+                              allow: []
+                              deny: []
+                      metadata:
+                        key1: value1
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidPermission'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '422':
+          description: Payload Validation Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: |
+        - Username : Access token ID
+        - Password : Secret Key
+  schemas:
+    patchLiveStreamRequest:
+      type: object
+      properties:
+        metadata:
+          type: object
+          description: >-
+            You can search for videos with specific key value pairs using
+            metadata, when you tag a video in "key":"value"s pairs. Dynamic
+            Metadata allows you to define a key that allows any value pair. You
+            can have maximum of 255 characters and upto 10 entries are allowed.
+        reconnectWindow:
+          type: integer
+          example: 60
+          maximum: 1800
+          minimum: 60
+          default: 60
+          description: >-
+            In case the software streaming the live, get disrupted for any
+            reason and get disconnect from FastPix, the reconnect window
+            specifies the waiting time span of FastPix will wait before ending
+            the stream. Before starting the stream, you can set the reconnect
+            window time set which is up to 1800 seconds.
+      example:
+        metadata:
+          livestream_name: Gaming_stream
+        reconnectWindow: 100
+    CreateLiveStreamRequest:
+      type: object
+      required:
+        - playbackSettings
+        - inputMediaSettings
+      properties:
+        playbackSettings:
+          $ref: '#/components/schemas/playbackSettings'
+        inputMediaSettings:
+          type: object
+          description: Displays the result of the input Media settings.
+          properties:
+            maxResolution:
+              type: string
+              default: 1080p
+              enum:
+                - 1080p
+                - 720p
+                - 480p
+              description: >-
+                Max resolution can be used to control the maximum resolution
+                your media is encoded, stored, and streamed at.
+            reconnectWindow:
+              type: integer
+              example: 60
+              maximum: 1800
+              minimum: 60
+              default: 60
+              description: >-
+                In case the software streaming the live, get disrupted for any
+                reason and get disconnect from FastPix, the reconnect window
+                specifies the waiting time span of FastPix will wait before
+                ending the stream. Before starting the stream, you can set the
+                reconnect window time set which is up to 1800 seconds.
+            mediaPolicy:
+              type: string
+              default: public
+              enum:
+                - public
+                - private
+              description: >-
+                Determines whether the recorded stream should be publicly
+                accessible or private in Live to VOD (Video on Demand).
+            metadata:
+              type: object
+              description: >-
+                You can search for videos with specific key value pairs using
+                metadata, when you tag a video in "key":"value"s pairs. Dynamic
+                Metadata allows you to define a key that allows any value pair.
+                You can have maximum of 255 characters and upto 10 entries are
+                allowed.
+            
+      example:
+        playbackSettings:
+          accessPolicy: public
+        inputMediaSettings:
+          maxResolution: 1080p
+          reconnectWindow: 60
+          mediaPolicy: public
+          metadata:
+            livestream_name: fastpix_livestream
+    playbackSettings:
+      type: object
+      description: Displays the result of the playback settings.
+      required:
+        - isPublic
+      properties:
+        accessPolicy:
+          type: string
+          description: >-
+            Determines if access to the streamed content is kept private or
+            available to all.
+          default: public
+          enum:
+            - public
+            - private
+    liveStreamResponseDTO:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: It demonstrates whether the request is successful or not.
+        data:
+          $ref: '#/components/schemas/getCreateLiveStreamResponseDTO'
+      example:
+        success: true
+        data:
+          streamId: fa7f8c0950ea48ebcc5ef9de8c23deaa
+          streamKey: 3dc5d7641f918baa083a5c52a5bd9cbckfa7f8c0950ea48ebcc5ef9de8c23deaa
+          srtSecret: c51739512d0088d98a46925c9b74c73akfa7f8c0950ea48ebcc5ef9de8c23deaa
+          trial: false
+          status: idle
+          maxResolution: 1080p
+          maxDuration: 43200
+          createdAt: '2024-10-15T08:48:31.551351Z'
+          reconnectWindow: 60
+          enableRecording: true
+          mediaPolicy: public
+          metadata:
+            livestream_name: fastpix_livestream
+          playbackIds:
+            - id: 4e43ec52-4775-4f68-a3ff-a57d8a59bba8
+              accessPolicy: public
+          srtPlaybackResponse:
+            srtPlaybackStreamId: playfa7f8c0950ea48ebcc5ef9de8c23deaa
+            srtPlaybackSecret: 490e707dd4d165c9e38d261b252f9457kfa7f8c0950ea48ebcc5ef9de8c23deaa
+    livestreamgetResponse:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: It demonstrates whether the request is successful or not.
+        data:
+          $ref: '#/components/schemas/getCreateLiveStreamResponseDTO'
+      example:
+        success: true
+        data:
+          streamId: fa7f8c0950ea48ebcc5ef9de8c23deaa
+          streamKey: 3dc5d7641f918baa083a5c52a5bd9cbckfa7f8c0950ea48ebcc5ef9de8c23deaa
+          srtSecret: c51739512d0088d98a46925c9b74c73akfa7f8c0950ea48ebcc5ef9de8c23deaa
+          trial: false
+          status: idle
+          maxResolution: 1080p
+          maxDuration: 43200
+          createdAt: '2024-10-15T08:48:31.551351Z'
+          reconnectWindow: 60
+          enableRecording: true
+          mediaPolicy: public
+          metadata:
+            livestream_name: fastpix_livestream
+          playbackIds:
+            - id: 4e43ec52-4775-4f68-a3ff-a57d8a59bba8
+              accessPolicy: public
+          srtPlaybackResponse:
+            srtPlaybackStreamId: playfa7f8c0950ea48ebcc5ef9de8c23deaa
+            srtPlaybackSecret: 490e707dd4d165c9e38d261b252f9457kfa7f8c0950ea48ebcc5ef9de8c23deaa
+    patchResponseDTO:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: It demonstrates whether the request is successful or not.
+        data:
+          $ref: '#/components/schemas/patchResponseData'
+      example:
+        success: true
+        data:
+          streamId: fa7f8c0950ea48ebcc5ef9de8c23deaa
+          streamKey: 3dc5d7641f918baa083a5c52a5bd9cbckfa7f8c0950ea48ebcc5ef9de8c23deaa
+          srtSecret: c51739512d0088d98a46925c9b74c73akfa7f8c0950ea48ebcc5ef9de8c23deaa
+          trial: false
+          status: idle
+          maxResolution: 1080p
+          maxDuration: 43200
+          createdAt: '2024-10-15T08:48:31.551351Z'
+          reconnectWindow: 100
+          enableRecording: true
+          mediaPolicy: public
+          metadata:
+            livestream_name: Gaming_stream
+          playbackIds:
+            - id: 4e43ec52-4775-4f68-a3ff-a57d8a59bba8
+              accessPolicy: public
+          srtPlaybackResponse:
+            srtPlaybackStreamId: playfa7f8c0950ea48ebcc5ef9de8c23deaa
+            srtPlaybackSecret: 490e707dd4d165c9e38d261b252f9457kfa7f8c0950ea48ebcc5ef9de8c23deaa
+    NotFoundError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Displays details about the reasons behind the request's failure.
+          properties:
+            code:
+              type: number
+              example: 404
+              description: Displays the error code indicating the type of the error.
+            message:
+              type: string
+              example: stream not found
+              description: A descriptive message providing more details for the error.
+            description:
+              type: string
+              example: >-
+                The requested resource (eg:streamId) doesn't exist in the
+                workspace
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 404
+          message: stream not found
+          description: 'The requested resource (eg: streamId) doesn''t exist in the workspace'
+    NotFoundErrorSimulcast:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Displays details about the reasons behind the request's failure.
+          properties:
+            code:
+              type: number
+              example: 404
+              description: Displays the error code indicating the type of the error.
+            message:
+              type: string
+              example: stream/simulcast not found
+              description: A descriptive message providing more details for the error.
+            description:
+              type: string
+              example: >-
+                The requested resource (eg:streamId/simulcastId) doesn't exist
+                in the workspace
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 404
+          message: stream/simulcast not found
+          description: >-
+            The requested resource (eg: streamId/simulcastId) doesn't exist in
+            the workspace
+    NotFoundErrorPlaybackId:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Displays details about the reasons behind the request's failure.
+          properties:
+            code:
+              type: number
+              example: 404
+              description: Displays the error code indicating the type of the error.
+            message:
+              type: string
+              example: stream/playbackId not found
+              description: A descriptive message providing more details for the error.
+            description:
+              type: string
+              example: >-
+                The requested resource (eg:streamId/playbackId) doesn't exist in
+                the workspace
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 404
+          message: stream/playbackId not found
+          description: >-
+            The requested resource (eg: streamId/playbackId) doesn't exist in
+            the workspace
+    SimulcastUnavailable:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+          description: It demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: |
+            Returns the problem that has occured.
+          properties:
+            code:
+              type: integer
+              example: 400
+              description: |
+                An error code indicating the type of the error.
+            message:
+              type: string
+              example: Simulcast is not available for trial streams
+              description: |
+                A descriptive message providing more details for the error
+            description:
+              type: string
+              example: >-
+                The requested resource (eg:streamId/playbackId) doesn't exist in
+                the workspace
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 400
+          message: simulcast is not available for trial streams
+          description: Please upgrade plan to continue
+    InvalidPermission:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Displays details about the reasons behind the request's failure.
+          properties:
+            code:
+              type: integer
+              example: 403
+              description: Displays the error code indicating the type of the error.
+            message:
+              type: string
+              example: forbidden
+              description: A descriptive message providing more details for the error.
+            description:
+              type: string
+              example: >-
+                The Access token does not have permissions to perform the
+                request. Check access token's permissions. Read more
+                https://docs.fastpix.io/docs/user-roles
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 403
+          message: forbidden
+          description: >-
+            The Access token does not have permissions to perform the request.
+            Check access token's permissions. Read more
+            https://docs.fastpix.io/docs/user-roles
+    Unauthorized:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Displays details about the reasons behind the request's failure.
+          properties:
+            code:
+              type: integer
+              example: 401
+              description: Displays the error code indicating the type of the error.
+            message:
+              type: string
+              example: unauthorized
+              description: A descriptive message providing more details for the error.
+            description:
+              type: string
+              example: >-
+                This happens because of 1)Miss match between access token and
+                secret key 2)Miss match between access token and workspace 3)No
+                valid Access token provided.
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 401
+          message: unauthorized
+          description: >-
+            This happens because of 1)Miss match between access token and secret
+            key 2)Miss match between access token and workspace 3)No valid
+            Access token provided.
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+          description: It demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Returns the problem that has occured
+          properties:
+            code:
+              type: integer
+              example: 422
+              description: An error code indicating the type of the error.
+            message:
+              type: string
+              example: payload validation failed
+              description: A descriptive message providing more details for the error
+            fields:
+              type: array
+              description: >-
+                It is an array of objects, where each object contains
+                information about a specific field and a corresponding error
+                message.
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: fieldName
+                    description: Displays the specific field associated with the error.
+                  message:
+                    type: string
+                    example: must not be null
+                    description: A descriptive message providing more details for the error
+      example:
+        success: false
+        error:
+          code: 422
+          message: payload validation failed
+          fields:
+            - field: fieldName
+              message: must not be null
+    LiveStreamDeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: It demonstrates whether the request is successful or not.
+      example:
+        success: true
+    playbackIds:
+      type: object
+      description: >-
+        A collection of Playback ID objects utilized for crafting HLS playback
+        urls.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 68b7ac0f-2504-4dd5-b7b4-d84ab4fee1bd
+          description: Unique identifier for the playbackId
+        accessPolicy:
+          type: string
+          example: public
+          description: >-
+            Determines if access to the streamed content is kept private or
+            available to all.
+    Pagination:
+      type: object
+      description: >-
+        Pagination organizes content into pages for better readability and
+        navigation.
+      properties:
+        totalRecords:
+          type: integer
+          example: 12
+          description: >-
+            It gives the total number of media assets that are accessible
+            overall.
+        currentOffset:
+          type: integer
+          example: 5
+          description: >-
+            Determines the current point for data retrieval within a paginated
+            list.
+        offsetCount:
+          type: integer
+          example: 2
+          description: The offset count is expressed as total records by limit.
+    getCreateLiveStreamResponseDTO:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        streamId:
+          type: string
+          example: 61a264dcc447b63da6fb79ef925cd76d
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+        streamKey:
+          type: string
+          description: >-
+            A unique stream key is generated for streaming, allowing the user to
+            start streaming on any third-party platform using this key.
+        srtSecret:
+          type: string
+          description: >-
+            A secret used for securing the SRT stream. This ensures that only
+            authorized users can access the stream.
+        trial:
+          type: boolean
+          example: false
+          description: >-
+            FastPix allows for a to trial the live stream for free. The duration
+            of trial streams is five minutes. After five minutes of activity,
+            the trial stream is turned off, and the recorded asset is removed
+            after a day.
+        status:
+          type: string
+          example:
+            possibleValue: idle, preparing, active, disabled
+            example: idle
+          description: >-
+            The current live stream status can be one of four values:Idle,
+            Preparing, Active or Disabled.The Idle status signifies that there
+            isn't a broadcast in progress.The preparing status indicates that
+            the stream is getting prepared. while, the Active status indicates
+            that a broadcast is currently in progress. The Disabled status means
+            that no more RTMP streams can be published.
+        maxResolution:
+          type: string
+          example:
+            possibleValue: 1080p, 720p, 480p
+            example: 1080p
+            default: 1080p
+          description: >-
+            Max resolution can be used to control the maximum resolution your
+            media is encoded, stored, and streamed at.
+        maxDuration:
+          type: integer
+          example: 43200
+          maximum: 43200
+          minimum: 60
+          description: >-
+            The maximum duration in seconds that a live stream can have before
+            it ends the stream.
+        createdAt:
+          type: string
+          format: date-time
+          description: >-
+            It is the moment when the stream was created Time the media was
+            generated, defined as a localDateTime (UTC Time).
+        reconnectWindow:
+          type: integer
+          example: 60
+          maximum: 1800
+          minimum: 60
+          default: 60
+          description: >-
+            In case the software streaming the live, get disrupted for any
+            reason and get disconnect from FastPix, the reconnect window
+            specifies the waiting time span of FastPix will wait before ending
+            the stream. Before starting the stream, you can set the reconnect
+            window time set which is up to 1800 seconds.
+        enableRecording:
+          type: boolean
+          example:
+            example: true
+            default: true
+          description: >-
+            When set to true, the livestream will be recorded and stored for
+            later viewing purposes. If set to false, the livestream will not be
+            recorded.
+        mediaPolicy:
+          type: string
+          example:
+            possibleValue: public, private
+            example: public
+            default: public
+          description: >-
+            Determines whether the recorded stream should be publicly accessible
+            or private in Live to VOD (Video on Demand).
+        metadata:
+          type: object
+          description: >-
+            You can search for videos with specific key value pairs using
+            metadata, when you tag a video in "key":"value"s pairs. Dynamic
+            Metadata allows you to define a key that allows any value pair. You
+            can have maximum of 255 characters and upto 10 entries are allowed.
+        playbackId:
+          type: array
+          description: >-
+            A collection of Playback ID objects utilized for crafting HLS
+            playback urls.
+          items:
+            $ref: '#/components/schemas/playbackIds'
+        srtPlaybackResponse:
+          type: object
+          description: >-
+            This object contains the livestream playback response details for
+            SRT Protocol.
+          properties:
+            srtPlaybackStreamId:
+              type: string
+              description: >-
+                A unique identifier for the SRT playback stream. This ID is used
+                to distinguish between different playback streams.
+            srtPlaybackSecret:
+              type: string
+              description: >-
+                A playback secret used for securing the SRT playback stream.
+                This ensures that only authorized users can access the playback.
+    patchResponseData:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        streamId:
+          type: string
+          description: >-
+            Upon creating a new live stream, FastPix assigns a unique identifier
+            to the stream.
+        streamKey:
+          type: string
+          description: >-
+            A unique stream key is generated for streaming, allowing the user to
+            start streaming on any third-party platform using this key.
+        srtSecret:
+          type: string
+          description: >-
+            A secret used for securing the SRT stream. This ensures that only
+            authorized users can access the stream.
+        trial:
+          type: boolean
+          example: false
+          description: >-
+            FastPix allows for a to trial the live stream for free. The duration
+            of trial streams is five minutes. After five minutes of activity,
+            the trial stream is turned off, and the recorded asset is removed
+            after a day.
+        status:
+          type: string
+          example:
+            possibleValue: idle, preparing, active, disabled
+            example: idle
+          description: >-
+            The current live stream status can be one of four values:Idle,
+            Preparing, Active or Disabled.The Idle status signifies that there
+            isn't a broadcast in progress.The preparing status indicates that
+            the stream is getting prepared. while, the Active status indicates
+            that a broadcast is currently in progress. The Disabled status means
+            that no more RTMP streams can be published.
+        maxResolution:
+          type: string
+          example:
+            possibleValue: 1080p, 720p, 480p
+            example: 1080p
+            default: 1080p
+          description: >-
+            Max resolution can be used to control the maximum resolution your
+            media is encoded, stored, and streamed at.
+        maxDuration:
+          type: integer
+          example: 43200
+          maximum: 43200
+          minimum: 60
+          description: >-
+            The maximum duration in seconds that a live stream can have before
+            it ends the stream.
+        createdAt:
+          type: string
+          format: date-time
+          description: >-
+            It is the moment when the stream was created Time the media was
+            generated, defined as a localDateTime (UTC Time).
+        reconnectWindow:
+          type: integer
+          example:
+            example: 60
+            maximum: 1800
+            minimum: 60
+            default: 60
+          description: >-
+            In case the software streaming the live, get disrupted for any
+            reason and get disconnect from FastPix, the reconnect window
+            specifies the waiting time span of FastPix will wait before ending
+            the stream. Before starting the stream, you can set the reconnect
+            window time set which is up to 1800 seconds.
+        enableRecording:
+          type: boolean
+          example:
+            example: true
+            default: true
+          description: >-
+            When set to true, the livestream will be recorded and stored for
+            later viewing purposes. If set to false, the livestream will not be
+            recorded.
+        mediaPolicy:
+          type: string
+          example:
+            possibleValue: public, private
+            example: public
+            default: public
+          description: >-
+            Determines whether the recorded stream should be publicly accessible
+            or private in Live to VOD (Video on Demand).
+        metadata:
+          type: object
+          description: >-
+            You can search for videos with specific key value pairs using
+            metadata, when you tag a video in "key":"value"s pairs. Dynamic
+            Metadata allows you to define a key that allows any value pair. You
+            can have maximum of 255 characters and upto 10 entries are allowed.
+        playbackId:
+          type: array
+          items:
+            $ref: '#/components/schemas/playbackIds'
+        srtPlaybackResponse:
+          type: object
+          description: >-
+            This object contains the livestream playback response details for
+            SRT Protocol.
+          properties:
+            srtPlaybackStreamId:
+              type: string
+              description: >-
+                A unique identifier for the SRT playback stream. This ID is used
+                to distinguish between different playback streams.
+            srtPlaybackSecret:
+              type: string
+              description: >-
+                A playback secret used for securing the SRT playback stream.
+                This ensures that only authorized users can access the playback.
+    getStreamsResponse:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: It demonstrates whether the request is successful or not.
+        data:
+          type: array
+          description: Displays the result of the request.
+          items:
+            $ref: '#/components/schemas/getCreateLiveStreamResponseDTO'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      example:
+        success: true
+        data:
+          - streamId: fa7f8c0950ea48ebcc5ef9de8c23deaa
+            streamKey: 3dc5d7641f918baa083a5c52a5bd9cbckfa7f8c0950ea48ebcc5ef9de8c23deaa
+            srtSecret: c51739512d0088d98a46925c9b74c73akfa7f8c0950ea48ebcc5ef9de8c23deaa
+            trial: false
+            status: idle
+            maxResolution: 1080p
+            maxDuration: 43200
+            createdAt: '2024-10-15T08:48:31.551351Z'
+            reconnectWindow: 100
+            enableRecording: true
+            mediaPolicy: public
+            metadata:
+              livestream_name: Gaming_stream
+            playbackIds:
+              - id: 4e43ec52-4775-4f68-a3ff-a57d8a59bba8
+                accessPolicy: public
+            srtPlaybackResponse:
+              srtPlaybackStreamId: playfa7f8c0950ea48ebcc5ef9de8c23deaa
+              srtPlaybackSecret: >-
+                490e707dd4d165c9e38d261b252f9457kfa7f8c0950ea48ebcc5ef9de8c23deaa
+        pagination:
+          totalRecords: 4
+          currentOffset: 1
+          offsetCount: 4
+    playbackIdRequest:
+      type: object
+      properties:
+        accessPolicy:
+          type: string
+          default: public
+          enum:
+            - public
+            - private
+          description: >-
+            Determines if access to the streamed content is kept private or
+            available to all.
+      example:
+        accessPolicy: public
+    playbackIdResponse:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: It demonstrates whether the request is successful or not.
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: 68b7ac0f-2504-4dd5-b7b4-d84ab4fee1bd
+              description: Unique identifier for the playbackId
+            accessPolicy:
+              type: string
+              example: public
+              description: >-
+                Determines if access to the streamed content is kept private or
+                available to all.
+          example:
+            success: true
+            data:
+              id: 88b7ac0f-2504-4dd5-b7b4-d84ab4fee1bd
+              accessPolicy: public
+    simulcastRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          example: rtmp://hyd01.contribute.live-video.net/app/
+          description: >-
+            The RTMP hostname, combined with the application name, is crucial
+            for connecting to third-party live streaming services and
+            transmitting the live stream.
+        streamKey:
+          type: string
+          example: 9310547d1df9c219d851d91d5b768b36k61a264dcc447b63da6fb79ef925cd76d
+          description: >-
+            A unique stream key is generated for streaming, allowing the user to
+            start streaming on any third-party platform using this key.
+      example:
+        url: rtmp://hyd01.contribute.live-video.net/app/
+        streamKey: live_1012464221_DuM8W004MoZYNxQEZ0czODgfHCFBhk
+        metadata:
+          livestream_name: Tech-Connect Summit
+    simulcastUpdateRequest:
+      type: object
+      properties:
+        isEnabled:
+          type: boolean
+          example: false
+          description: >-
+            When the value is set to false, the simulcast will be disabled for
+            the given stream.
+        metadata:
+          type: object
+          description: >-
+            Arbitrary user-supplied metadata that will be included in the
+            simulcast details. Can be used to store your own ID for a video
+            along with the simulcast. Max:255 characters, Upto 10 entries are
+            allowed.
+      example:
+        isEnabled: false
+        metadata:
+          simulcast_name: Tech today
+    simulcastResponse:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: It demonstrates whether the request is successful or not.
+        data:
+          type: object
+          description: Displays the result of the request.
+          properties:
+            simulcastId:
+              type: string
+              example: 8717422d89288ad5958d4a86e9afe2a2
+              description: >-
+                When you create the new simulcast, FastPix assign a universal
+                unique identifier which can contain a maximum of 255 characters.
+            url:
+              type: string
+              example: rtmp://hyd01.contribute.live-video.net/app/
+              description: >-
+                The RTMP hostname, combined with the application name, is
+                crucial for connecting to third-party live streaming services
+                and transmitting the live stream.
+            streamKey:
+              type: string
+              example: >-
+                9310547d1df9c219d851d91d5b768b36k61a264dcc447b63da6fb79ef925cd76d
+              description: >-
+                A unique stream key is generated for streaming, allowing the
+                user to start streaming on any third-party platform using this
+                key.
+            isEnabled:
+              type: boolean
+              example: true
+              description: >-
+                When the value is true, the simulcast will be enabled for the
+                given stream
+            metadata:
+              type: object
+              description: >-
+                Arbitrary user-supplied metadata that will be included in the
+                simulcast details. Can be used to store your own ID for a video
+                along with the simulcast. Max:255 characters, Upto 10 entries
+                are allowed.
+      example:
+        success: true
+        data:
+          simulcastId: 8717422d89288ad5958d4a86e9afe2a2
+          url: rtmp://hyd01.contribute.live-video.net/app/
+          streamKey: live_1012464221_DuM8W004MoZYNxQEZ0czODgfHCFBhk
+          isEnabled: true
+          metadata:
+            livestream_name: Tech-Connect Summit
+    simulcastUpdateResponse:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: It demonstrates whether the request is successful or not.
+        data:
+          type: object
+          description: Displays the result of the request.
+          properties:
+            simulcastId:
+              type: string
+              example: 8717422d89288ad5958d4a86e9afe2a2
+              description: >-
+                When you create the new simulcast, FastPix assign a universal
+                unique identifier which can contain a maximum of 255 characters.
+            url:
+              type: string
+              example: rtmp://hyd01.contribute.live-video.net/app/
+              description: >-
+                The RTMP hostname, combined with the application name, is
+                crucial for connecting to third-party live streaming services
+                and transmitting the live stream.
+            streamKey:
+              type: string
+              example: >-
+                9310547d1df9c219d851d91d5b768b36k61a264dcc447b63da6fb79ef925cd76d
+              description: >-
+                A unique stream key is generated for streaming, allowing the
+                user to start streaming on any third-party platform using this
+                key.
+            isEnabled:
+              type: boolean
+              example: false
+              description: >-
+                When the value is set to false, the simulcast will be disabled
+                for the given stream
+            metadata:
+              type: object
+              description: >-
+                Arbitrary user-supplied metadata that will be included in the
+                simulcast details. Can be used to store your own ID for a video
+                along with the simulcast. Max:255 characters, Upto 10 entries
+                are allowed.
+      example:
+        success: true
+        data:
+          simulcastId: 8717422d89288ad5958d4a86e9afe2a2
+          url: rtmp://hyd01.contribute.live-video.net/app/
+          streamKey: live_1012464221_DuM8W004MoZYNxQEZ0czODgfHCFBhk
+          isEnabled: false
+          metadata:
+            simulcast_name: Tech today
+    simulcastdeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: It demonstrates whether the request is successful or not.
+          
+    Media:
+      type: object
+      properties:
+        thumbnail:
+          type: string
+          example: >-
+            https://images.fastpix.io/6b13fdaf-f9ac-4970-a13b-01ea417e8783/thumbnail.png
+          description: >-
+            A video thumbnail is a still image that acts as the preview image
+            for your video.
+        id:
+          type: string
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+          description: >-
+            When creating the media, FastPix assigns a universally unique
+            identifier with a maximum length of 255 characters.
+        workspaceId:
+          type: string
+          format: uuid
+          example: 5ta85f64-5717-4562-b3fc-2c963f66afa6
+          description: A unique identifier is generated by FastPix for the workspace.
+        metadata:
+          type: object
+          example:
+            key1: value1
+          description: >-
+            You can search for videos with specific key value pairs using
+            metadata, when you tag a video in "key" : "value" pairs. Dynamic
+            Metadata allows you to define a key that allows any value pair. You
+            can have maximum of 255 characters and upto 10 entries are allowed.
+        maxResolution:
+          type: string
+          example: 1080p
+          default: 1080p
+          enum:
+            - 2160p
+            - 1440p
+            - 1080p
+            - 720p
+            - 480p
+            - 360p
+          description: The maximum resolution specified by the user for the media.
+        sourceResolution:
+          type: string
+          example: 1080p
+          default: 1080p
+          enum:
+            - 2160p
+            - 1440p
+            - 1080p
+            - 720p
+            - 480p
+            - 360p
+          description: >-
+            The actual resolution of the uploaded media. This represents the
+            native quality of the source media.
+        status:
+          type: string
+          example: preparing
+          description: >-
+            Determines the media's status, which can be one of the possible
+            values.
+        mp4Support:
+          type: string
+          example: capped_4k
+          enum:
+            - none
+            - capped_4k
+            - audioOnly
+            - audioOnly,capped_4k
+          description: >-
+            Determines the type of MP4 support for the media.   - **none**:
+            Disables MP4 support.   - **capped_4k**: Enables MP4 downloads with
+            resolutions up to 4K.   - **audioOnly**: Provides an MP4 stream
+            containing only the audio.   - **audioOnly,capped_4k**: Enables both
+            MP4 video downloads (up to 4K) and an audio-only stream.
+        sourceAccess:
+          type: boolean
+          example: true
+          enum:
+            - true
+            - false
+          description: >-
+            The sourceAccess parameter determines whether the original media
+            file is accessible. Set to true to enable access or false to
+            restrict it
+        playbackIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaybackId'
+          description: >-
+            A collection of Playback ID objects utilized for crafting HLS
+            playback URLs.
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
+          description: >-
+            A media consists of different media tracks, like video, audio, and
+            subtitle, all combined.
+        duration:
+          type: string
+          example: '00:00:10'
+          description: >-
+            The time span of the media, measured in seconds with a maximum
+            allowable duration of 12 hours per individual media.
+        frameRate:
+          type: string
+          example: 30/1
+          description: >-
+            Frame rate quantifies the speed at which frames are displayed per
+            second. It represents the range of frames available for a specific
+            track. If the frame rate of the input file is indeterminable, it
+            will be indicated by a value of -1.
+        aspectRatio:
+          type: string
+          example: '16:9'
+          description: >-
+            The aspect ratio of a video is a value that describes the relative
+            shape of a video based on its width and height.
+        createdAt:
+          type: string
+          format: date-time
+          example: '2023-10-20T10:50:34.594302Z'
+          description: Time the media was created, defined as a localDateTime (UTC Time).
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2023-10-20T10:50:34.594302Z'
+          description: Time the media was updated, defined as a localDateTime (UTC Time).
+    Track:
+      type: object
+      description: >-
+        A media consists of different media tracks, like video, audio, and
+        subtitle, all combined.
+      required:
+        - type
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 9oa85f64-5717-4562-b3fc-2c963f66afa6
+          description: FastPix generates a unique identifier for each track.
+        type:
+          type: string
+          example:
+            availableValue: video
+            possibleValue: video, audio, subtitle
+          description: Defines the type of input. This option is mandatory.
+        width:
+          type: number
+          example: 1920
+          description: >-
+            Track width denotes the range of widths applicable to a specific
+            track. Currently, this setting can be modified only for video tracks
+        height:
+          type: number
+          example: 1080
+          description: >-
+            Track height denotes the range of height applicable to a specific
+            track. Currently, this setting can be modified only for video
+            tracks.
+        frameRate:
+          type: string
+          example: 30/1
+          description: >-
+            Frame rate quantifies the speed at which frames are displayed per
+            second. It represents the range of frames available for a specific
+            track. If the frame rate of the input file is indeterminable, it
+            will be indicated by a value of -1.
+        closedCaptions:
+          type: boolean
+          example: false
+          description: Indicates if the track contains closed captions.
+      example:
+        tracks:
+          - id: 9oa85f64-5717-4562-b3fc-2c963f66afa6
+            type: video
+            width: 1920
+            height: 1080
+            frameRate: 30/1
+            closedCaptions: false
+    MediaOrPlaybackNotFound:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Displays details about the reasons behind the request's failure.
+          properties:
+            code:
+              type: number
+              example: 404
+              description: Displays the error code indicating the type of the error.
+            message:
+              type: string
+              example: Media/PlaybackId not Found
+              description: A descriptive message providing more details for the error.
+            description:
+              type: string
+              example: >-
+                The requested stream or PlaybackId could not be found. Please
+                ensure the ID is correct and try again.
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 404
+          message: media/playbackId not Found
+          description: >-
+            The requested stream or PlaybackId could not be found. Please ensure
+            the ID is correct and try again.
+    PlaybackId:
+      type: object
+      description: >-
+        A collection of Playback ID objects utilized for crafting HLS playback
+        urls.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 6ta85f64-5717-4562-b3fc-2c963f66afa6
+          description: A unique identifier is generated by FastPix for the playbacks.
+        accessPolicy:
+          type: string
+          example: public
+          enum:
+            - public
+            - private
+            - drm
+          description: >-
+            Determines if access to the streamed content is kept private or
+            available to all.
+        accessRestrictions:
+          type: object
+          description: >-
+            Controls access based on domains and user agents. Defines a default
+            policy (either "allow" or "deny") and provides lists for explicitly
+            allowed or denied domains and user agents.
+          properties:
+            domains:
+              type: object
+              description: >-
+                Restrictions based on the originating domain of a request (e.g.,
+                whether requests from certain websites should be allowed or
+                blocked).
+              properties:
+                defaultPolicy:
+                  type: string
+                  enum:
+                    - allow
+                    - deny
+                  example: allow
+                  description: >-
+                    This sets the default behavior for domain access (either
+                    "allow" or "deny").
+                allow:
+                  type: array
+                  items:
+                    type: string
+                  description: A list of domains that are explicitly allowed access.
+                deny:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    A list of domains that are explicitly blocked from accessing
+                    the resource.
+            userAgents:
+              type: object
+              description: >-
+                Restrictions based on the user agent (which is typically a
+                string sent by browsers or bots identifying themselves).
+              properties:
+                defaultPolicy:
+                  type: string
+                  enum:
+                    - allow
+                    - deny
+                  example: allow
+                  description: >-
+                    This sets the default behavior for user agent access (either
+                    "allow" or "deny").
+                allow:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    A list of specific user agents that are allowed to access
+                    the resource.
+                deny:
+                  type: array
+                  items:
+                    type: string
+                  description: A list of specific user agents that are blocked.
+    CreateMediaRequest:
+      required:
+        - accessPolicy
+        - inputs
+      properties:
+        inputs:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/VideoInput'
+              - $ref: '#/components/schemas/WatermarkInput'
+              - $ref: '#/components/schemas/AudioInput'
+              - $ref: '#/components/schemas/SubtitleInput'
+        metadata:
+          type: object
+          example:
+            key1: value1
+          description: >
+            You can search for videos with specific key-value pairs using
+            metadata, when you tag a video in "key" : "value" pairs. Dynamic
+            Metadata allows you to define a key that allows any value pair. You
+            can have a maximum of 255 characters and up to 10 entries are
+            allowed.
+        subtitle:
+          type: object
+          description: |
+            Generates subtitle files for audio/video files.
+          properties:
+            languageName:
+              type: string
+              example: english
+              description: |
+                Name of the language in which the subtitles will be generated.
+            metadata:
+              type: object
+              example:
+                key1: value1
+              description: >
+                You can search for videos with specific key-value pairs using
+                metadata, when you tag a video in "key" : "value" pairs. Dynamic
+                Metadata allows you to define a key that allows any value pair.
+                You can have a maximum of 255 characters and up to 10 entries
+                are allowed.
+            languageCode:
+              type: string
+              example: en
+              enum:
+                - en
+                - it
+                - pl
+                - es
+                - fr
+                - ru
+                - nl
+              description: >
+                Language codes are concise, standardized symbols that denote
+                languages, utilizing either two or three characters for
+                identification. The language code must be compliant with the BCP
+                47 standard to ensure compatibility. (for text only).
+        accessPolicy:
+          type: string
+          example: public
+          enum:
+            - public
+            - private
+            - drm
+          description: >
+            Determines whether access to the streamed content is kept private or
+            available to all.
+        mp4Support:
+          type: string
+          example: capped_4k
+          enum:
+            - capped_4k
+            - audioOnly
+            - audioOnly,capped_4k
+          description: >
+            “capped_4k": Generates an mp4 video file up to 4k resolution
+            "audioOnly": Generates an m4a audio file of the media file
+            "audioOnly,capped_4k": Generates both video and audio media files
+            for offline viewing
+        sourceAccess:
+          type: boolean
+          example: true
+          enum:
+            - true
+            - false
+          description: >-
+            The sourceAccess parameter determines whether the original media
+            file is accessible. Set to true to enable access or false to
+            restrict it
+        optimizeAudio:
+          type: boolean
+          default: false
+          example: true
+          enum:
+            - true
+            - false
+          description: >
+            normalize volume of the audio track. This is available for
+            pre-recorded content only.
+        maxResolution:
+          type: string
+          example: 1080p
+          default: 1080p
+          enum:
+            - 2160p
+            - 1440p
+            - 1080p
+            - 720p
+            - 480p
+            - 360p
+          description: >
+            The maximum resolution tier determines the highest quality your
+            media will be available in.
+        summary:
+          type: object
+          properties:
+            generate:
+              type: boolean
+              enum:
+                - true
+                - false
+              example: true
+              description: >
+                Enable or disable the summary feature for the media. Set to true
+                to enable summary or false to disable.
+            summaryLength:
+              type: integer
+              example: 100
+              default: 100
+              maximum: 250
+              minimum: 30
+              description: |
+                Specifies the desired word count for the generated summary. 
+                - The value must be between **30** and **250** words.
+          required:
+            - generate
+        chapters:
+          type: boolean
+          example: true
+          description: >
+            Enable or disable the chapters feature for the media. Set to `true`
+            to enable chapters or `false` to disable.
+        namedEntities:
+          type: boolean
+          example: true
+          description: >
+            Enable or disable named entity extraction. Set to `true` to enable
+            or `false` to disable.
+        moderation:
+          type: object
+          properties:
+            type:
+              type: string
+              example: video
+              enum:
+                - video
+                - audio
+                - av
+              description: >
+                Defines the type of input. Possible values include video, audio,
+                av.
+          required:
+            - type
+        accessRestrictions:
+          type: object
+          properties:
+            domains:
+              type: object
+              properties:
+                defaultPolicy:
+                  type: string
+                  enum:
+                    - allow
+                    - deny
+                  description: >
+                    Specifies the default access policy for domains. 
+
+                    If set to `allow`, all domains are allowed access unless
+                    otherwise specified in the `deny` lists. 
+
+                    If set to `deny`, all domains are denied access unless
+                    otherwise specified in the `allow` lists.
+                allow:
+                  type: array
+                  items:
+                    type: string
+                  description: >
+                    A list of domain names or patterns that are explicitly
+                    allowed access. 
+
+                    This list is only effective when the `defaultPolicy` is set
+                    to `deny`.
+                deny:
+                  type: array
+                  items:
+                    type: string
+                  description: >
+                    A list of domain names or patterns that are explicitly
+                    denied access. 
+
+                    This list is only effective when the `defaultPolicy` is set
+                    to `allow`.
+            userAgents:
+              type: object
+              properties:
+                defaultPolicy:
+                  type: string
+                  enum:
+                    - allow
+                    - deny
+                  description: >
+                    Specifies the default access policy for user agents
+                    (browsers, bots, etc.).
+
+                    If set to `allow`, all user agents are allowed access unless
+                    otherwise specified in the `deny` lists. 
+
+                    If set to `deny`, all user agents are denied access unless
+                    otherwise specified in the `allow` lists.
+                allow:
+                  type: array
+                  items:
+                    type: string
+                  description: >
+                    A list of user agents (identified by string names or
+                    patterns) that are explicitly allowed access. 
+
+                    This list is only effective when the `defaultPolicy` is set
+                    to `deny`.
+                deny:
+                  type: array
+                  items:
+                    type: string
+                  description: >
+                    A list of user agents (identified by string names or
+                    patterns) that are explicitly denied access. 
+
+                    This list is only effective when the `defaultPolicy` is set
+                    to `allow`.
+      example:
+        inputs:
+          - type: video
+            url: >-
+              https://static.fastpix.io/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4
+            startTime: 0
+            endTime: 60
+          - type: watermark
+            url: https://static.fastpix.io/watermark-4k.png
+            placement:
+              xAlign: left
+              xMargin: 10%
+              yAlign: top
+              yMargin: 10%
+        metadata:
+          key1: value1
+        subtitles:
+          languageName: name
+          metadata:
+            key1: value1
+          languageCode: en
+        accessPolicy: public
+        mp4Support: capped_4k
+        optimizeAudio: true
+        maxResolution: 1080p
+    VideoInput:
+      required:
+        - url
+        - type
+      properties:
+        type:
+          type: string
+          example: video
+          description: |
+            Defines the type of input.
+        url:
+          type: string
+          example: https://static.fastpix.io/sample.mp4
+          description: >
+            The url hosts the media file for FastPix, which needs to be
+            downloaded to use further. It supports formats like MP3, MP4, MOV,
+            MKV, or TS, and includes text tracks for subtitles/CC (SRT file/VTT
+            file). While FastPix can handle various audio and video formats and
+            codecs, using standard inputs can help with optimal processing
+            speed.
+        startTime:
+          type: number
+          example: '0'
+          description: >
+            Start time indicates where encoding should begin within the video
+            file. For example, if you want to encode a segment from 3 minutes
+            (180 seconds) to 6 minutes (360 seconds) in a 10-minute (600
+            seconds) video, the start time is 3 minutes (180 seconds). Note:
+            Start time is always mentioned in seconds.
+        endTime:
+          type: number
+          example: '60'
+          description: >
+            End time indicates where encoding should end within the video file.
+            For example, if you want to encode a segment from 3 minutes (180
+            seconds) to 6 minutes (360 seconds) in a 10-minute (600 seconds)
+            video, the end time is 6 minutes (360 seconds). Note: End time is
+            always mentioned in seconds.
+        introUrl:
+          type: string
+          example: https://static.fastpix.io/sample.mp4
+          description: >
+            The url of the intro video which is to be added at the start of the
+            video.
+        outroUrl:
+          type: string
+          example: https://static.fastpix.io/sample.mp4
+          description: >
+            The url of the outro video which is to be added at the end of the
+            video.
+        expungeSegments:
+          type: array
+          description: >
+            The list of the startTime-endTime of the segments to be removed from
+            the actual video.
+          items:
+            type: string
+            example: 4-6
+          example:
+            - 4-6
+            - 15-19
+        segments:
+          type: array
+          description: >-
+            A list of media segments to be added or processed. Each segment
+            includes details such as the URL of the media file and instructions
+            on where it should be inserted in the final media composition. A
+            segment can either specify an exact timestamp  (`insertAt`) or
+            indicate that it should be added at the end (`insertAtEnd`).
+          items:
+            type: object
+            oneOf:
+              - type: object
+                required:
+                  - url
+                  - insertAt
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: URL of the segment to be added.
+                    example: https://storage.googleapis.com/gtv-videos-mp4
+                  insertAt:
+                    type: integer
+                    description: The timestamp at which the segment should be inserted.
+                    example: 2
+              - type: object
+                required:
+                  - url
+                  - insertAtEnd
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: URL of the segment to be added.
+                    example: https://storage.googleapis.com/gtv-videos-mp4
+                  insertAtEnd:
+                    type: boolean
+                    description: Flag indicating the segment should be inserted at the end.
+                    example: true
+    WatermarkInput:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - watermark
+          description: Type of overlay (currently only supports 'watermark').
+          example: watermark
+        url:
+          type: string
+          format: uri
+          description: URL of the watermark image.
+          example: https://static.fastpix.io/watermark-4k.png
+        placement:
+          type: object
+          properties:
+            xAlign:
+              type: string
+              enum:
+                - left
+                - center
+                - right
+              description: Horizontal alignment of the watermark.
+              example: left
+            xMargin:
+              type: string
+              description: Horizontal margin from the edge of the video.
+              example: 10%
+            yAlign:
+              type: string
+              enum:
+                - top
+                - middle
+                - bottom
+              description: Vertical alignment of the watermark.
+              example: top
+            yMargin:
+              type: string
+              description: Vertical margin from the edge of the video.
+              example: 10%
+        width:
+          type: string
+          description: Width of the watermark in percentage or pixels.
+          example: 25%
+        height:
+          type: string
+          description: Height of the watermark in percentage or pixels.
+          example: 25%
+        opacity:
+          type: string
+          description: Opacity of the watermark in percentage.
+          example: 80%
+    AudioInput:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - audio
+          description: Type of overlay (currently only supports 'audio').
+          example: audio
+        swapTrackUrl:
+          type: string
+          format: uri
+          description: URL of the audio track to replace the existing audio in the video.
+          example: >-
+            https://file-examples.com/storage/fe0e9b723466913cf9611b7/2017/11/file_example_MP3_700KB.mp3
+        imposeTracks:
+          type: array
+          description: List of additional audio tracks to overlay on the video.
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+                description: URL of the audio track to impose on the video.
+                example: >-
+                  http://commondatastorage.googleapis.com/codeskulptor-demos/riceracer_assets/fx/engine-2.ogg
+              startTime:
+                type: integer
+                description: Start time (in seconds) of the imposed audio in the video.
+                example: 0
+              endTime:
+                type: integer
+                description: End time (in seconds) of the imposed audio in the video.
+                example: 5
+              fadeInLevel:
+                type: integer
+                description: >-
+                  Level of fade-in effect (in seconds) at the start of the
+                  imposed audio.
+                example: 1
+              fadeOutLevel:
+                type: integer
+                description: >-
+                  Level of fade-out effect (in seconds) at the end of the
+                  imposed audio.
+                example: 4
+    CreateMediaResponse:
+      properties:
+        id:
+          type: string
+          example: iyuU4HFxhJg1vMHM2uztnJut1hIJBuNBSzJionwUV7c
+          description: >-
+            The Media is assigned a universal unique identifier, which can
+            contain a maximum of 255 characters.
+        trial:
+          type: boolean
+          default: true
+          example: true
+          enum:
+            - true
+            - false
+          description: >
+            FastPix allows for a free trial. Create as many media files as you
+            like during the trial period. Remember, each clip can only be 10
+            seconds long and will be deleted after 24 hours. Also, all trial
+            content will have the FastPix logo watermark.
+        status:
+          type: string
+          example: preparing
+          description: >-
+            Determines the media's status, which can be one of the possible
+            values.
+        createdAt:
+          type: string
+          format: date-time
+          example: '2023-10-20T10:50:34.594302Z'
+          description: Time the media was created, defined as a localDateTime (UTC Time).
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2023-10-20T10:50:34.594302Z'
+          description: Time the media was updated, defined as a localDateTime (UTC Time).
+        playbackIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaybackId'
+          description: >-
+            A collection of Playback ID objects utilized for crafting HLS
+            playback URLs.
+        metadata:
+          type: object
+          example:
+            key1: value1
+          description: >-
+            You can search for videos with specific key value pairs using
+            metadata, when you tag a video in "key" : "value" pairs. Dynamic
+            Metadata allows you to define a key that allows any value pair. You
+            can have maximum of 255 characters and upto 10 entries are allowed.
+        maxResolution:
+          type: string
+          example: 1080p
+          default: 1080p
+          enum:
+            - 2160p
+            - 1440p
+            - 1080p
+            - 720p
+            - 480p
+            - 360p
+          description: >-
+            The maximum resolution tier determines the highest quality your
+            media will be available in.
+    SubtitleInput:
+      required:
+        - type
+        - url
+        - languageName
+        - languageCode
+      type: object
+      description: Generates subtitle files for audio/video files.
+      properties:
+        type:
+          type: string
+          example: subtitle
+          description: |
+            Defines the type of input.
+        url:
+          type: string
+          format: uri
+          description: The direct URL of the subtitle file.
+          example: >-
+            http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/thrust.vtt
+        languageName:
+          type: string
+          example: english
+          description: Name of the language in which the subtitles will be generated.
+        languageCode:
+          type: string
+          description: >
+            The BCP 47 language code representing the language of the generated
+            track.
+          example: en-US
+          enum:
+            - ar-SA
+            - bn-BD
+            - bn-IN
+            - ca-ES
+            - cs-CZ
+            - da-DK
+            - de-AT
+            - de-CH
+            - de-DE
+            - el-GR
+            - en-AU
+            - en-CA
+            - en-GB
+            - en-IE
+            - en-IN
+            - en-NZ
+            - en-US
+            - en-ZA
+            - es-AR
+            - es-CL
+            - es-CO
+            - es-ES
+            - es-MX
+            - es-US
+            - fi-FI
+            - fr-BE
+            - fr-CA
+            - fr-CH
+            - fr-FR
+            - he-IL
+            - hi-IN
+            - hr-HR
+            - hu-HU
+            - id-ID
+            - it-CH
+            - it-IT
+            - ja-JP
+            - ko-KR
+            - nl-BE
+            - nl-NL
+            - no-NO
+            - pl-PL
+            - pt-BR
+            - pt-PT
+            - ro-RO
+            - ru-RU
+            - sk-SK
+            - sv-SE
+            - ta-IN
+            - ta-LK
+            - th-TH
+            - tr-TR
+            - uk-UA
+            - bg-BG
+            - zh-CN
+            - zh-HK
+            - zh-TW
+    DirectUpload:
+      type: object
+      description: Displays the result of the request.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 5ta85f64-5717-4562-b3fc-2c963f66afa6
+          description: >-
+            When creating the upload, FastPix assigns a universally unique
+            identifier with a maximum length of 255 characters.
+        mediaId:
+          type: string
+          example: 7ya85f64-5717-4562-b3fc-2c963f66afa6
+          description: >-
+            When creating the media, FastPix assigns a universally unique
+            identifier with a maximum length of 255 characters.
+        status:
+          type: string
+          example: waiting
+          description: >-
+            Determines the media's status, which can be one of the possible
+            values.
+        url:
+          type: string
+          example:
+            url: >-
+              https://storage.fastpix.net/uploads/08256f2c-efca-4c4f-8f21-75e40d49f225/80911756-1ce3-485a-a3b4-6653ff0937a1?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=media-svc%2F20240111%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240111T123116Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=419ab443cdc1d4a22cf1b0f8875855590b346058e6d3859f7c1c9da3bb061f91
+          description: >-
+            The url hosts the media file for FastPix, which needs to be download
+            to use further.  It supports formats like MP3, MP4, MOV, MKV, or TS,
+            and includes text tracks for subtitles/CC (SRT file/VTT file). While
+            FastPix can handle various audio and video formats and codecs, using
+            standard inputs can help with optimal processing speed.
+        timeout:
+          type: number
+          example: 14400
+          default: 14400
+          description: >
+            The duration set for the validity of the upload URL. If the upload
+            isn't completed within this timeframe, it's marked as timed out.
+        corsOrigin:
+          type: string
+          example: '*'
+          description: >-
+            Upload media directly from a device using the url name or enter '*'
+            to allow all.
+        pushMediaSettings:
+          $ref: '#/components/schemas/DirectUploadResponse'
+    DirectUploadResponse:
+      properties:
+        playbackIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaybackId'
+        metadata:
+          type: object
+          example:
+            key1: value1
+          description: >-
+            You can search for videos with specific key value pairs using
+            metadata, when you tag a video in "key" : "value" pairs. Dynamic
+            Metadata allows you to define a key that allows any value pair. You
+            can have maximum of 255 characters and upto 10 entries are allowed.
+    BadRequest:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+          description: Demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Displays details about the reasons behind the request's failure.
+          properties:
+            code:
+              type: number
+              example: 400
+              description: Displays the error code indicating the type of the error.
+            message:
+              type: string
+              example: Bad Request
+              description: A descriptive message providing more details for the error.
+            description:
+              type: string
+              example: trial plan limits reached. Please upgrade plan to continue
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 400
+          message: trial plan limits reached. Please upgrade
+          description: trial plan limits reached. Please upgrade plan to continue
+    MediaNotFound:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Displays details about the reasons behind the request's failure.
+          properties:
+            code:
+              type: number
+              example: 404
+              description: Displays the error code indicating the type of the error.
+            message:
+              type: string
+              example: media workspace relation not found
+              description: A descriptive message providing more details for the error.
+            description:
+              type: string
+              example: >-
+                The requested resource (eg:mediaId) doesn't exist in the
+                workspace
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 404
+          message: media workspace relation not found
+          description: 'The requested resource (eg: mediaId) doesn''t exist in the workspace'
+    Forbidden:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Demonstrates whether the request is successful or not.
+        error:
+          type: object
+          description: Displays details about the reasons behind the request's failure.
+          properties:
+            code:
+              type: integer
+              example: 403
+              description: Displays the error code indicating the type of the error.
+            message:
+              type: string
+              example: forbidden
+              description: A descriptive message providing more details for the error.
+            description:
+              type: string
+              example: >-
+                The Access token does not have permissions to perform the
+                request. Check access token's permissions. Read more
+                https://docs.fastpix.io/docs/user-roles
+              description: |
+                A detailed explanation of the possible causes for the error.
+      example:
+        success: false
+        error:
+          code: 403
+          message: forbidden
+          description: >-
+            The Access token does not have permissions to perform the request.
+            Check access token's permissions. Read more
+            https://docs.fastpix.io/docs/user-roles
