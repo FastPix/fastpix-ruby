@@ -1,0 +1,31 @@
+name: Release RubyGem
+
+on:
+  push:
+    tags:
+      - 'v*'   # Only runs on version tags like v1.0.0
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'     # Or your project's Ruby version
+        bundler-cache: true
+
+    - name: Install dependencies
+      run: bundle install --jobs 4 --retry 3
+
+    - name: Build the gem
+      run: gem build *.gemspec
+
+    - name: Push to RubyGems
+      env:
+        RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+      run: gem push *.gem --api-key $RUBYGEMS_API_KEY
