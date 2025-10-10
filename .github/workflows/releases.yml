@@ -32,4 +32,5 @@ jobs:
         mkdir -p ~/.gem
         echo -e "---\n:rubygems_api_key: $RUBYGEMS_API_KEY" > ~/.gem/credentials
         chmod 0600 ~/.gem/credentials
-        gem push *.gem
+        # Push only the newly built gem (most recent by timestamp)
+        gem push $(ls -t fastpixapi-*.gem | head -1)
