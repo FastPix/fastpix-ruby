@@ -1,0 +1,9 @@
+# UpdateAPlaylistRequest
+
+
+## Fields
+
+| Field                                                                                     | Type                                                                                      | Required                                                                                  | Description                                                                               | Example                                                                                   |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `playlist_id`                                                                             | *::String*                                                                                | :heavy_check_mark:                                                                        | The unique id of the playlist you want to retrieve.                                       |                                                                                           |
+| `update_playlist_request`                                                                 | [Models::Components::UpdatePlaylistRequest](../../models/shared/updateplaylistrequest.md) | :heavy_check_mark:                                                                        | N/A                                                                                       | {<br/>"name": "updated name",<br/>"description": "updated description"<br/>}              |

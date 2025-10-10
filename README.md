@@ -1,238 +1,618 @@
-# FastPix Ruby SDK
+# Ruby SDK
 
-Developer-friendly & type-safe Ruby SDK for integrating with the FastPix Live Streaming API.
+A robust, type-safe Ruby SDK designed for seamless integration with the FastPix API platform.
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
----
 
+
+<!-- Start Summary [summary] -->
 ## Introduction
 
-The FastPix Ruby SDK simplifies integration with the FastPix platform. This SDK is designed for secure and efficient communication with the FastPix API, enabling easy management of media uploads, live streaming, and simulcasting.
-
-## Key Features
-
-- **Media API**
-  - Upload media files seamlessly from URLs or devices
-  - Manage media: list, fetch, update, and delete media assets
-  - Generate and manage playback IDs for media access
-- **Live API**
-  - Create, list, update, and delete live streams
-  - Generate playback IDs for live streams to control and manage access
-  - Simulcast to multiple platforms simultaneously
+The FastPix Ruby SDK simplifies integration with the FastPix platform. It provides a clean, Ruby interface for secure and efficient communication with the FastPix API, enabling easy management of media uploads, live streaming, on‑demand content, playlists, video analytics, and signing keys for secure access and token management. It is intended for use with Ruby 3.2 and above.
 
 ## Prerequisites
 
-- Ruby 2.7 or later
-- FastPix API credentials (Access Token and Secret Key)
+### Environment and Version Support
 
-## Getting Started with FastPix
+<table>
+<tr>
+<th>Requirement</th>
+<th>Version</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><strong>Ruby</strong></td>
+<td><code>3.2+</code></td>
+<td>Core runtime environment</td>
+</tr>
+<tr>
+<td><strong>Bundler</strong></td>
+<td><code>2.4+</code></td>
+<td>Dependency management for Ruby gems</td>
+</tr>
+<tr>
+<td><strong>Internet</strong></td>
+<td><code>Required</code></td>
+<td>API communication and authentication</td>
+</tr>
+</table>
+
+> **Pro Tip:** We recommend using Ruby 3.3+ for optimal performance and the latest language features.
+
+### Getting Started with FastPix
 
 To get started with the **FastPix Ruby SDK**, ensure you have the following:
 
-- The FastPix APIs are authenticated using an **Access Token** and a **Secret Key**. You must generate these credentials to use the SDK.
-- Follow the steps in the Authentication with Access Tokens guide to obtain your credentials.
+- The FastPix APIs are authenticated using a **Username** and a **Password**. You must generate these credentials to use the SDK.
 
----
+- Follow the steps in the [Authentication with Basic Auth](https://docs.fastpix.io/docs/basic-authentication) guide to obtain your credentials.
 
+### Environment Variables (Optional)
+
+Configure your FastPix credentials using environment variables for enhanced security and convenience:
+
+```bash
+# Set your FastPix credentials
+export FASTPIX_USERNAME="your_username_here"
+export FASTPIX_PASSWORD="your_password_here"
+
+# Or add to your .env file
+echo "FASTPIX_USERNAME=your_username_here" >> .env
+echo "FASTPIX_PASSWORD=your_password_here" >> .env
+```
+
+> **Security Note:** Never commit your credentials to version control. Use environment variables or secure credential management systems.
+
+<!-- Start Table of Contents [toc] -->
 ## Table of Contents
+<!-- $toc-max-depth=2 -->
+* [Fastpix_Ruby](#fastpixruby)
+  * [Setup](#setup)
+  * [Example Usage](#example-usage)
+  * [Available Resources and Operations](#available-resources-and-operations)
+  * [Retries](#retries)
+  * [Error Handling](#error-handling)
+  * [Server Selection](#server-selection)
+  * [Development](#development)
 
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Authentication](#authentication)
-- [Available Resources & Operations](#available-resources--operations)
-- [Error Handling](#error-handling)
-- [Server Selection](#server-selection)
-- [Development](#development)
-- [Contributing](#contributing)
 
----
+<!-- End Table of Contents [toc] -->
 
-## Installation
+<!-- Start Setup [setup] -->
+## Setup
 
-You can install the SDK using one of the following methods:
+### Installation
 
-### 1. From GitHub (recommended for unpublished gems)
-
-```bash
-gem install specific_install
-gem specific_install https://github.com/FastPix/fastpix-ruby.git
-```
-
-### 2. Using Bundler in your Gemfile
-
-```ruby
-gem 'fastpixapi', git: 'https://github.com/FastPix/fastpix-ruby.git'
-```
-
-### 3. Local development (if you have the code locally)
-
-```bash
-gem build fastpixapi.gemspec
-gem install ./fastpixapi-0.0.1.gem
-```
-
-### 4. (Optional) If published to RubyGems.org
-
-Once published, you can simply run:
+Install the FastPix Ruby SDK using RubyGems:
 
 ```bash
 gem install fastpixapi
 ```
 
----
+Or if you're using a bundler:
 
-## Quick Start
+```bash
+# Add to your Gemfile
+gem 'fastpixapi', '~> 1.0.0'
 
-Here's how to get started with the FastPix Ruby SDK:
+# Install dependencies
+bundle install
+```
+
+### Imports
+
+Import the necessary modules for your FastPix integration:
+
+```ruby
+# Basic imports
+require 'fastpixapi'
+
+# Access to models and components
+Models = ::FastpixApiSDK::Models
+```
+
+### Initialization
+
+Initialize the FastPix SDK with your credentials:
 
 ```ruby
 require 'fastpixapi'
 
-# Initialize the SDK with authentication
-sdk = ::FastpixApiSDK::SDK.new(
+Models = ::FastpixApiSDK::Models
+s = ::FastpixApiSDK::Fastpix.new(
   security: Models::Components::Security.new(
-    username: 'your-username',
-    password: 'your-password'
-  )
+    username: "your-access-token",
+    password: "your-secret-key",
+  ),
 )
-
-# Create a new live stream
-request = Models::Components::CreateLiveStreamRequest.new(
-  playback_settings: Models::Components::PlaybackSettings.new(),
-  input_media_settings: Models::Components::InputMediaSettings.new(
-    metadata: Models::Components::CreateLiveStreamRequestMetadata.new()
-  )
-)
-
-response = sdk.start_live_stream.create_new_stream(request)
-
-if !response.live_stream_response_dto.nil?
-  puts "Stream created! ID: #{response.live_stream_response_dto.stream_id}"
-end
 ```
 
----
 
-## Authentication
-
-The SDK uses HTTP Basic authentication. Set your credentials when initializing the SDK:
+Or using environment variables:
 
 ```ruby
-sdk = ::FastpixApiSDK::SDK.new(
+require 'fastpixapi'
+
+Models = ::FastpixApiSDK::Models
+s = ::FastpixApiSDK::Fastpix.new(
   security: Models::Components::Security.new(
-    username: 'your-username',
-    password: 'your-password'
-  )
+    username: ENV["FASTPIX_ACCESS_TOKEN"],
+    password: ENV["FASTPIX_SECRET_KEY"],
+  ),
 )
 ```
 
----
+<!-- End Setup [setup] -->
 
-## Available Resources & Operations
+<!-- Start Example Usage [example-usage] -->
+## Example Usage
 
-### [inputVideo()](docs/sdks/inputvideo/README.md)
-* [createMedia](docs/sdks/inputvideo/README.md#createmedia) - Create media from URL
-* [directUploadVideoMedia](docs/sdks/inputvideo/README.md#directuploadvideomedia) - Upload media from device
-
-### [manageLiveStream()](docs/sdks/managelivestream/README.md)
-* [getAllStreams](docs/sdks/managelivestream/README.md#getallstreams) - Get all live streams
-* [getLiveStreamById](docs/sdks/managelivestream/README.md#getlivestreambyid) - Get stream by ID
-* [deleteLiveStream](docs/sdks/managelivestream/README.md#deletelivestream) - Delete a stream
-* [updateLiveStream](docs/sdks/managelivestream/README.md#updatelivestream) - Update a stream
-
-### [manageVideos()](docs/sdks/managevideos/README.md)
-* [listMedia](docs/sdks/managevideos/README.md#listmedia) - Get list of all media
-* [getMedia](docs/sdks/managevideos/README.md#getmedia) - Get a media by ID
-* [updatedMedia](docs/sdks/managevideos/README.md#updatedmedia) - Update a media by ID
-* [deleteMedia](docs/sdks/managevideos/README.md#deletemedia) - Delete a media by ID
-* [retrieveMediaInputInfo](docs/sdks/managevideos/README.md#retrievemediainputinfo) - Get info of media inputs
-
-### [playback()](docs/sdks/playback/README.md)
-* [createPlaybackIdOfStream](docs/sdks/playback/README.md#createplaybackidofstream) - Create a playbackId
-* [deletePlaybackIdOfStream](docs/sdks/playback/README.md#deleteplaybackidofstream) - Delete a playbackId
-* [getLiveStreamPlaybackId](docs/sdks/playback/README.md#getlivestreamplaybackid) - Get stream's playbackId
-* [createMediaPlaybackId](docs/sdks/playback/README.md#createmediaplaybackid) - Create a playback ID
-* [deleteMediaPlaybackId](docs/sdks/playback/README.md#deletemediaplaybackid) - Delete a playback ID
-
-### [simulcastStream()](docs/sdks/simulcaststream/README.md)
-* [createSimulcastOfStream](docs/sdks/simulcaststream/README.md#createsimulcastofstream) - Create a simulcast
-* [deleteSimulcastOfStream](docs/sdks/simulcaststream/README.md#deletesimulcastofstream) - Delete a simulcast
-* [getSpecificSimulcastOfStream](docs/sdks/simulcaststream/README.md#getspecificsimulcastofstream) - Get a specific simulcast of a stream
-* [updateSpecificSimulcastOfStream](docs/sdks/simulcaststream/README.md#updatespecificsimulcastofstream) - Update a specific simulcast of a stream
-
-### [startLiveStream()](docs/sdks/startlivestream/README.md)
-* [createNewStream](docs/sdks/startlivestream/README.md#createnewstream) - Create a new stream
-
-#### Example: List All Live Streams
+### Example
 
 ```ruby
-streams = sdk.manage_live_stream.get_all_streams
-streams.each do |stream|
-  puts "Stream ID: #{stream.id}, Status: #{stream.status}"
+require 'fastpixapi'
+
+Models = ::FastpixApiSDK::Models
+s = ::FastpixApiSDK::Fastpix.new(
+      security: Models::Components::Security.new(
+        username: 'your-access-token',
+        password: 'your-secret-key',
+      ),
+    )
+
+req = Models::Components::CreateMediaRequest.new(
+  inputs: [
+    Models::Components::VideoInput.new(
+      type: 'video',
+      url: 'https://static.fastpix.io/sample.mp4',
+    ),
+  ],
+  metadata: {
+    "key1": 'value1',
+  },
+  access_policy: Models::Components::CreateMediaRequestAccessPolicy::PUBLIC,
+)
+
+res = s.input_video.create_media(request: req)
+
+unless res.create_media_success_response.nil?
+  # handle response
 end
+
+```
+<!-- End Example Usage [example-usage] -->
+
+
+<!-- Start Available Resources and Operations [operations] -->
+## Available Resources and Operations
+
+Comprehensive Ruby SDK for FastPix platform integration with full API coverage.
+
+### Media API
+
+Upload, manage, and transform video content with comprehensive media management capabilities.
+
+For detailed documentation, see [FastPix Video on Demand Overview](https://docs.fastpix.io/docs/video-on-demand-overview).
+
+#### Input Video
+- [Create from URL](docs/sdks/inputvideo/README.md#create_media) - Upload video content from external URL
+- [Upload from Device](docs/sdks/inputvideo/README.md#direct_upload_video_media) - Upload video files directly from device
+
+#### Manage Videos
+- [List All Media](docs/sdks/managevideos/README.md#list_media) - Retrieve complete list of all media files
+- [Get Media by ID](docs/sdks/managevideos/README.md#get_media) - Get detailed information for specific media
+- [Update Media](docs/sdks/managevideos/README.md#updated_media) - Modify media metadata and settings
+- [Delete Media](docs/sdks/managevideos/README.md#delete_media) - Remove media files from library
+- [Add Track](docs/sdks/managevideos/README.md#add_media_track) - Add audio or subtitle tracks to media
+- [Cancel Upload](docs/sdks/managevideos/README.md#cancel_upload) - Stop ongoing media upload process
+- [Update Track](docs/sdks/managevideos/README.md#update_media_track) - Modify existing audio or subtitle tracks
+- [Delete Track](docs/sdks/managevideos/README.md#delete_media_track) - Remove audio or subtitle tracks
+- [Generate Subtitles](docs/sdks/managevideos/README.md#generate_subtitle_track) - Create automatic subtitles for media
+- [Update Source Access](docs/sdks/managevideos/README.md#updated_source_access) - Control access permissions for media source
+- [Update MP4 Support](docs/sdks/managevideos/README.md#updated_mp4_support) - Configure MP4 download capabilities
+- [Get Input Info](docs/sdks/managevideos/README.md#retrieve_media_input_info) - Retrieve detailed input information
+- [List Uploads](docs/sdks/managevideos/README.md#list_uploads) - Get all available upload URLs
+- [Get Media Clips](docs/sdks/managevideos/README.md#get_media_clips) - Retrieve all video clips for media
+
+#### Playback
+- [Create Playback ID](docs/sdks/playback/README.md#create_media_playback_id) - Generate secure playback identifier
+- [Delete Playback ID](docs/sdks/playback/README.md#delete_media_playback_id) - Remove playback access
+- [Get Playback ID](docs/sdks/playback/README.md#get_playback_id) - Retrieve playback configuration details
+
+#### Playlist
+- [Create Playlist](docs/sdks/playlist/README.md#create_a_playlist) - Create new video playlist
+- [List Playlists](docs/sdks/playlist/README.md#get_all_playlists) - Get all available playlists
+- [Get Playlist](docs/sdks/playlist/README.md#get_playlist_by_id) - Retrieve specific playlist details
+- [Update Playlist](docs/sdks/playlist/README.md#update_a_playlist) - Modify playlist settings and metadata
+- [Delete Playlist](docs/sdks/playlist/README.md#delete_a_playlist) - Remove playlist from library
+- [Add Media](docs/sdks/playlist/README.md#add_media_to_playlist) - Add media items to playlist
+- [Reorder Media](docs/sdks/playlist/README.md#change_media_order_in_playlist) - Change order of media in playlist
+- [Remove Media](docs/sdks/playlist/README.md#delete_media_from_playlist) - Remove media from playlist
+
+#### Signing Keys
+- [Create Key](docs/sdks/signingkeys/README.md#create_signing_key) - Generate new signing key pair
+- [List Keys](docs/sdks/signingkeys/README.md#list_signing_keys) - Get all available signing keys
+- [Delete Key](docs/sdks/signingkeys/README.md#delete_signing_key) - Remove signing key from system
+- [Get Key](docs/sdks/signingkeys/README.md#get_signing_key_by_id) - Retrieve specific signing key details
+
+#### DRM Configurations
+- [List DRM Configs](docs/sdks/drmconfigurations/README.md#get_drm_configuration) - Get all DRM configuration options
+- [Get DRM Config](docs/sdks/drmconfigurations/README.md#get_drm_configuration_by_id) - Retrieve specific DRM configuration
+
+### Live API 
+
+Stream, manage, and transform live video content with real-time broadcasting capabilities.
+
+For detailed documentation, see [FastPix Live Stream Overview](https://docs.fastpix.io/docs/live-stream-overview).
+
+#### Start Live Stream
+- [Create Stream](docs/sdks/startlivestream/README.md#create_new_stream) - Initialize new live streaming session
+
+#### Manage Live Stream
+- [List Streams](docs/sdks/managelivestream/README.md#get_all_streams) - Retrieve all active live streams
+- [Get Viewer Count](docs/sdks/managelivestream/README.md#get_live_stream_viewer_count_by_id) - Get real-time viewer statistics
+- [Get Stream](docs/sdks/managelivestream/README.md#get_live_stream_by_id) - Retrieve detailed stream information
+- [Delete Stream](docs/sdks/managelivestream/README.md#delete_live_stream) - Terminate and remove live stream
+- [Update Stream](docs/sdks/managelivestream/README.md#update_live_stream) - Modify stream settings and configuration
+- [Enable Stream](docs/sdks/managelivestream/README.md#enable_live_stream) - Activate live streaming
+- [Disable Stream](docs/sdks/managelivestream/README.md#disable_live_stream) - Pause live streaming
+- [Complete Stream](docs/sdks/managelivestream/README.md#complete_live_stream) - Finalize and archive stream
+
+#### Live Playback
+- [Create Playback ID](docs/sdks/liveplayback/README.md#create_playback_id_of_stream) - Generate secure live playback access
+- [Delete Playback ID](docs/sdks/liveplayback/README.md#delete_playback_id_of_stream) - Revoke live playback access
+- [Get Playback ID](docs/sdks/liveplayback/README.md#get_live_stream_playback_id) - Retrieve live playback configuration
+
+#### Simulcast Stream
+- [Create Simulcast](docs/sdks/simulcaststream/README.md#create_simulcast_of_stream) - Set up multi-platform streaming
+- [Delete Simulcast](docs/sdks/simulcaststream/README.md#delete_simulcast_of_stream) - Remove simulcast configuration
+- [Get Simulcast](docs/sdks/simulcaststream/README.md#get_specific_simulcast_of_stream) - Retrieve simulcast settings
+- [Update Simulcast](docs/sdks/simulcaststream/README.md#update_specific_simulcast_of_stream) - Modify simulcast parameters
+
+### Video Data API 
+
+Monitor video performance and quality with comprehensive analytics and real-time metrics.
+
+For detailed documentation, see [FastPix Video Data Overview](https://docs.fastpix.io/docs/video-data-overview).
+
+#### Metrics
+- [List Breakdown Values](docs/sdks/metrics/README.md#list_breakdown_values) - Get detailed breakdown of metrics by dimension
+- [List Overall Values](docs/sdks/metrics/README.md#list_overall_values) - Get aggregated metric values across all content
+- [Get Timeseries Data](docs/sdks/metrics/README.md#get_timeseries_data) - Retrieve time-based metric trends and patterns
+- [List Comparison Values](docs/sdks/metrics/README.md#list_comparison_values) - Compare metrics across different time periods
+
+#### Views
+- [List Video Views](docs/sdks/views/README.md#list_video_views) - Get comprehensive list of video viewing sessions
+- [Get View Details](docs/sdks/views/README.md#get_video_view_details) - Retrieve detailed information about specific video views
+- [List Top Content](docs/sdks/views/README.md#list_by_top_content) - Find your most popular and engaging content
+- [Get Concurrent Viewers](docs/sdks/views/README.md#get_data_viewlist_current_views_get_timeseries_views) - Monitor real-time viewer counts over time
+- [Get Viewer Breakdown](docs/sdks/views/README.md#get_data_viewlist_current_views_filter) - Analyze viewers by device, location, and other dimensions
+
+#### Dimensions
+- [List Dimensions](docs/sdks/dimensions/README.md#list_dimensions) - Get available data dimensions for filtering and analysis
+- [List Filter Values](docs/sdks/dimensions/README.md#list_filter_values_for_dimension) - Get specific values for a particular dimension
+
+### In-Video AI Features
+
+Enhance video content with AI-powered features including moderation, summarization, and intelligent categorization.
+
+For detailed documentation, see [Video Moderation Guide](https://docs.fastpix.io/docs/using-nsfw-and-profanity-filter-for-video-moderation).
+
+- [Generate Summary](docs/sdks/invideoaifeatures/README.md#update_media_summary) - Create AI-generated video summaries
+- [Create Chapters](docs/sdks/invideoaifeatures/README.md#update_media_chapters) - Automatically generate video chapter markers
+- [Extract Entities](docs/sdks/invideoaifeatures/README.md#update_media_named_entities) - Identify and extract named entities from content
+- [Enable Moderation](docs/sdks/invideoaifeatures/README.md#update_media_moderation) - Activate content moderation and safety checks
+
+### Error Handling
+
+Handle and manage errors with comprehensive error handling capabilities and detailed error information for all API operations.
+
+- [List Errors](docs/sdks/errors/README.md#list_errors) - Retrieve comprehensive error logs and diagnostics
+
+<!-- End Available Resources and Operations [operations] -->
+
+<!-- Start Retries [retries] -->
+## Retries
+
+Some of the endpoints in this SDK support retries. If you use the SDK without any configuration, it will fall back to the default retry strategy provided by the API. However, the default retry strategy can be overridden on a per-operation basis, or across the entire SDK.
+
+To change the default retry strategy for a single API call, simply provide a `RetryConfig` object to the call:
+```ruby
+require 'fastpixapi'
+
+Models = ::FastpixApiSDK::Models
+s = ::FastpixApiSDK::Fastpix.new(
+      security: Models::Components::Security.new(
+        username: 'your-access-token',
+        password: 'your-secret-key',
+      ),
+    )
+
+req = Models::Components::CreateMediaRequest.new(
+  inputs: [
+    Models::Components::VideoInput.new(
+      type: 'video',
+      url: 'https://static.fastpix.io/sample.mp4',
+    ),
+  ],
+  metadata: {
+    "key1": 'value1',
+  },
+  access_policy: Models::Components::CreateMediaRequestAccessPolicy::PUBLIC,
+)
+
+res = s.input_video.create_media(request: req)
+
+unless res.create_media_success_response.nil?
+  # handle response
+end
+
 ```
 
----
+If you'd like to override the default retry strategy for all operations that support retries, you can use the `retry_config` optional parameter when initializing the SDK:
+```ruby
+require 'fastpixapi'
 
+Models = ::FastpixApiSDK::Models
+s = ::FastpixApiSDK::Fastpix.new(
+      retry_config: Utils::RetryConfig.new(
+        backoff: Utils::BackoffStrategy.new(
+          exponent: 1.1,
+          initial_interval: 1,
+          max_elapsed_time: 100,
+          max_interval: 50
+        ),
+        retry_connection_errors: false,
+        strategy: 'backoff'
+      ),
+      security: Models::Components::Security.new(
+        username: 'your-access-token',
+        password: 'your-secret-key',
+      ),
+    )
+
+req = Models::Components::CreateMediaRequest.new(
+  inputs: [
+    Models::Components::VideoInput.new(
+      type: 'video',
+      url: 'https://static.fastpix.io/sample.mp4',
+    ),
+  ],
+  metadata: {
+    "key1": 'value1',
+  },
+  access_policy: Models::Components::CreateMediaRequestAccessPolicy::PUBLIC,
+)
+
+res = s.input_video.create_media(request: req)
+
+unless res.create_media_success_response.nil?
+  # handle response
+end
+
+```
+<!-- End Retries [retries] -->
+
+<!-- Start Error Handling [errors] -->
 ## Error Handling
 
-All operations return a response object or raise an error. For example:
+Handling errors in this SDK should largely match your expectations. All operations return a response object or raise an error.
+
+By default an API error will raise a `Errors::APIError`, which has the following properties:
+
+| Property       | Type                                    | Description           |
+|----------------|-----------------------------------------|-----------------------|
+| `message`     | *string*                                 | The error message     |
+| `status_code`  | *int*                                   | The HTTP status code  |
+| `raw_response` | *Faraday::Response*                     | The raw HTTP response |
+| `body`        | *string*                                 | The response content  |
+
+When custom error responses are specified for an operation, the SDK may also throw their associated exception. You can refer to respective *Errors* tables in SDK docs for more details on possible exception types for each operation. For example, the `create_media` method throws the following exceptions:
+
+| Error Type                              | Status Code | Content Type     |
+| --------------------------------------- | ----------- | ---------------- |
+| Models::Errors::BadRequestError         | 400         | application/json |
+| Models::Errors::InvalidPermissionError  | 401         | application/json |
+| Models::Errors::ForbiddenError          | 403         | application/json |
+| Models::Errors::ValidationErrorResponse | 422         | application/json |
+| Errors::APIError                        | 4XX, 5XX    | \*/\*            |
+
+### Example
 
 ```ruby
+require 'fastpixapi'
+
+Models = ::FastpixApiSDK::Models
+s = ::FastpixApiSDK::Fastpix.new(
+      security: Models::Components::Security.new(
+        username: 'your-access-token',
+        password: 'your-secret-key',
+      ),
+    )
+
 begin
-  response = sdk.start_live_stream.create_new_stream(request)
-rescue Models::Errors::UnauthorizedError => e
-  puts "Unauthorized: #{e.message}"
+    req = Models::Components::CreateMediaRequest.new(
+      inputs: [
+        Models::Components::VideoInput.new(
+          type: 'video',
+          url: 'https://static.fastpix.io/sample.mp4',
+        ),
+      ],
+      metadata: {
+        "key1": 'value1',
+      },
+      access_policy: Models::Components::CreateMediaRequestAccessPolicy::PUBLIC,
+    )
+
+    res = s.input_video.create_media(request: req)
+
+    unless res.create_media_success_response.nil?
+      # handle response
+    end
+rescue Models::Errors::BadRequestError => e
+  # handle e.container data
+  raise e
 rescue Models::Errors::InvalidPermissionError => e
-  puts "Permission error: #{e.message}"
+  # handle e.container data
+  raise e
+rescue Models::Errors::ForbiddenError => e
+  # handle e.container data
+  raise e
 rescue Models::Errors::ValidationErrorResponse => e
-  puts "Validation error: #{e.message}"
+  # handle e.container data
+  raise e
 rescue Errors::APIError => e
-  puts "API error: #{e.message}"
+  # handle default exception
+  raise e
 end
+
 ```
+<!-- End Error Handling [errors] -->
 
----
-
+<!-- Start Server Selection [server] -->
 ## Server Selection
 
-You can override the default server URL when initializing the SDK:
+### Override Server URL Per-Client
 
+The default server can be overridden globally by passing a URL to the `server_url (String)` optional parameter when initializing the SDK client instance. For example:
 ```ruby
-sdk = ::FastpixApiSDK::SDK.new(
-  server_url: 'https://api.fastpix.io/v1/live',
-  security: Models::Components::Security.new(
-    username: 'your-username',
-    password: 'your-password'
-  )
+require 'fastpixapi'
+
+Models = ::FastpixApiSDK::Models
+s = ::FastpixApiSDK::Fastpix.new(
+      server_url: 'https://api.fastpix.io/v1/',
+      security: Models::Components::Security.new(
+        username: 'your-access-token',
+        password: 'your-secret-key',
+      ),
+    )
+
+req = Models::Components::CreateMediaRequest.new(
+  inputs: [
+    Models::Components::VideoInput.new(
+      type: 'video',
+      url: 'https://static.fastpix.io/sample.mp4',
+    ),
+  ],
+  metadata: {
+    "key1": 'value1',
+  },
+  access_policy: Models::Components::CreateMediaRequestAccessPolicy::PUBLIC,
 )
+
+res = s.input_video.create_media(request: req)
+
+unless res.create_media_success_response.nil?
+  # handle response
+end
+
 ```
+<!-- End Server Selection [server] -->
 
----
+<!-- Placeholder for Future fastpix SDK Sections -->
 
-## Development
+# Development
 
-### Maturity
+This Ruby SDK is programmatically generated from our API specifications. Any manual modifications to internal files will be overwritten during subsequent generation cycles. 
 
-This SDK is currently in beta, and breaking changes may occur between versions even without a major version update. To avoid unexpected issues, we recommend pinning your dependency to a specific version. This ensures consistent behavior unless you intentionally update to a newer release.
+We value community contributions and feedback. Feel free to submit pull requests or open issues with your suggestions, and we'll do our best to include them in future releases.
 
-## Documentation
+## Detailed Usage
 
-For a complete understanding of each API's functionality, including request and response details, parameter descriptions, and additional examples, please refer to the [FastPix API Reference](https://docs.fastpix.io/reference/signingkeys-overview).
+For comprehensive understanding of each API's functionality, including detailed request and response specifications, parameter descriptions, and additional examples, please refer to the [FastPix API Reference](https://docs.fastpix.io/reference/signingkeys-overview).
 
-The API reference provides comprehensive documentation for all available endpoints and features, ensuring developers can integrate and utilize FastPix APIs efficiently.
-
----
-
-## Contributing
-
-We welcome contributions from the community! If you're interested in contributing to the FastPix Ruby SDK, please follow these steps:
-
-1. Fork the repository
-2. Create a new branch for your feature or bug fix
-3. Make your changes and commit them
-4. Push your changes to your fork
-5. Create a pull request
+The API reference offers complete documentation for all available endpoints and features, enabling developers to integrate and leverage FastPix APIs effectively.
 
 
 
+<style>
+  :root {
+    --badge-gray-bg: #f3f4f6;
+    --badge-gray-border: #d1d5db;
+    --badge-gray-text: #374151;
+    --badge-blue-bg: #eff6ff;
+    --badge-blue-border: #3b82f6;
+    --badge-blue-text: #3b82f6;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --badge-gray-bg: #374151;
+      --badge-gray-border: #4b5563;
+      --badge-gray-text: #f3f4f6;
+      --badge-blue-bg: #1e3a8a;
+      --badge-blue-border: #3b82f6;
+      --badge-blue-text: #93c5fd;
+    }
+  }
+  
+  h1 {
+    border-bottom: none !important;
+    margin-bottom: 4px;
+    margin-top: 0;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  
+  .badge-text {
+    letter-spacing: 1px;
+    font-weight: 300;
+  }
+  
+  .badge-container {
+    display: inline-flex;
+    align-items: center;
+    background: var(--badge-gray-bg);
+    border: 1px solid var(--badge-gray-border);
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    text-decoration: none;
+    vertical-align: middle;
+  }
+
+  .badge-container.blue {
+    background: var(--badge-blue-bg);
+    border-color: var(--badge-blue-border);
+  }
+
+  .badge-icon-section {
+    padding: 4px 8px;
+    border-right: 1px solid var(--badge-gray-border);
+    display: flex;
+    align-items: center;
+  }
+
+  .badge-text-section {
+    padding: 4px 10px;
+    color: var(--badge-gray-text);
+    font-weight: 400;
+  }
+
+  .badge-container.blue .badge-text-section {
+    color: var(--badge-blue-text);
+  }
+  
+  .badge-link {
+    text-decoration: none;
+    margin-left: 8px;
+    display: inline-flex;
+    vertical-align: middle;
+  }
+
+  .badge-link:hover {
+    text-decoration: none;
+  }
+  
+  .badge-link:first-child {
+    margin-left: 0;
+  }
+  
+  .badge-icon-section svg {
+    color: var(--badge-gray-text);
+  }
+
+  .badge-container.blue .badge-icon-section svg {
+    color: var(--badge-blue-text);
+  }
+</style> 

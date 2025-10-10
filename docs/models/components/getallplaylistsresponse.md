@@ -1,0 +1,10 @@
+# GetAllPlaylistsResponse
+
+
+## Fields
+
+| Field                                                                             | Type                                                                              | Required                                                                          | Description                                                                       | Example                                                                           |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `success`                                                                         | *T.nilable(T::Boolean)*                                                           | :heavy_minus_sign:                                                                | N/A                                                                               | true                                                                              |
+| `data`                                                                            | T::Array<[Models::Components::PlaylistItem](../../models/shared/playlistitem.md)> | :heavy_minus_sign:                                                                | N/A                                                                               |                                                                                   |
+| `pagination`                                                                      | [T.nilable(Models::Components::Pagination)](../../models/shared/pagination.md)    | :heavy_minus_sign:                                                                | Pagination organizes content into pages for better readability and navigation.    |                                                                                   |

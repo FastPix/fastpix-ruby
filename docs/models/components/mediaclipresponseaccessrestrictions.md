@@ -1,0 +1,9 @@
+# MediaClipResponseAccessRestrictions
+
+
+## Fields
+
+| Field                                                                                                            | Type                                                                                                             | Required                                                                                                         | Description                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `domains`                                                                                                        | [T.nilable(Models::Components::MediaClipResponseDomains)](../../models/shared/mediaclipresponsedomains.md)       | :heavy_minus_sign:                                                                                               | N/A                                                                                                              |
+| `user_agents`                                                                                                    | [T.nilable(Models::Components::MediaClipResponseUserAgents)](../../models/shared/mediaclipresponseuseragents.md) | :heavy_minus_sign:                                                                                               | N/A                                                                                                              |

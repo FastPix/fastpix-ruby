@@ -2,23 +2,30 @@
 ```ruby
 require 'fastpixapi'
 
-s = ::FastpixApiSDK::SDK.new(
+Models = ::FastpixApiSDK::Models
+s = ::FastpixApiSDK::Fastpix.new(
       security: Models::Components::Security.new(
-        username: '',
-        password: '',
+        username: 'your-access-token',
+        password: 'your-secret-key',
       ),
     )
 
-req = Models::Components::CreateLiveStreamRequest.new(
-  playback_settings: Models::Components::PlaybackSettings.new(),
-  input_media_settings: Models::Components::InputMediaSettings.new(
-    metadata: Models::Components::CreateLiveStreamRequestMetadata.new(),
-  ),
+req = Models::Components::CreateMediaRequest.new(
+  inputs: [
+    Models::Components::VideoInput.new(
+      type: 'video',
+      url: 'https://static.fastpix.io/sample.mp4',
+    ),
+  ],
+  metadata: {
+    "key1": 'value1',
+  },
+  access_policy: Models::Components::CreateMediaRequestAccessPolicy::PUBLIC,
 )
 
-res = s.start_live_stream.create_new_stream(req)
+res = s.input_video.create_media(request: req)
 
-if ! res.live_stream_response_dto.nil?
+unless res.create_media_success_response.nil?
   # handle response
 end
 

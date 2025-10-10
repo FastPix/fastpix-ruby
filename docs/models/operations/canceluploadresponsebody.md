@@ -1,0 +1,11 @@
+# CancelUploadResponseBody
+
+Upload cancelled successfully
+
+
+## Fields
+
+| Field                                                                                            | Type                                                                                             | Required                                                                                         | Description                                                                                      | Example                                                                                          |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `success`                                                                                        | *T.nilable(T::Boolean)*                                                                          | :heavy_minus_sign:                                                                               | Demonstrates whether the request is successful or not.                                           | true                                                                                             |
+| `data`                                                                                           | [T.nilable(Models::Components::MediaCancelResponse)](../../models/shared/mediacancelresponse.md) | :heavy_minus_sign:                                                                               | Response returned when an upload is cancelled.                                                   |                                                                                                  |

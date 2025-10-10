@@ -2,10 +2,9 @@
 
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in fastpixapi.gemspec
+# Specify your gem's dependencies in openapi.gemspec
 gemspec
 
-group :test do
-  gem 'rspec', '~> 3.12'
-  gem 'webmock', '~> 3.19'
-end
+gem "minitest-reporters", "~> 1.7"
+
+gem "faraday-net_http", "~> 3.0"

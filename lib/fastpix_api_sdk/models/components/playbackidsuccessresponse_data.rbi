@@ -1,0 +1,15 @@
+# typed: true
+# frozen_string_literal: true
+
+
+class FastpixApiSDK::Models::Components::PlaybackIdSuccessResponseData
+  extend ::Crystalline::MetadataFields::ClassMethods
+end
+
+
+class FastpixApiSDK::Models::Components::PlaybackIdSuccessResponseData
+  def id(); end
+  def id=(str_); end
+  def access_policy(); end
+  def access_policy=(str_); end
+end

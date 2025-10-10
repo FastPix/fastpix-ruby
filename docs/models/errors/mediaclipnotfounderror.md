@@ -1,0 +1,10 @@
+# MediaClipNotFoundError
+
+
+## Fields
+
+| Field                                                                                                  | Type                                                                                                   | Required                                                                                               | Description                                                                                            |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `success`                                                                                              | *T.nilable(T::Boolean)*                                                                                | :heavy_minus_sign:                                                                                     | Demonstrates whether the request is successful or not.                                                 |
+| `error`                                                                                                | [T.nilable(Models::Components::MediaClipNotFoundError)](../../models/shared/mediaclipnotfounderror.md) | :heavy_minus_sign:                                                                                     | Displays details about the reasons behind the request's failure.                                       |
+| `raw_response`                                                                                         | [Faraday::Response](https://www.rubydoc.info/gems/faraday/Faraday/Response)                            | :heavy_minus_sign:                                                                                     | Raw HTTP response; suitable for custom response parsing                                                |
