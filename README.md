@@ -194,49 +194,49 @@ Upload, manage, and transform video content with comprehensive media management 
 For detailed documentation, see [FastPix Video on Demand Overview](https://docs.fastpix.io/docs/video-on-demand-overview).
 
 #### Input Video
-- [Create from URL](docs/sdks/inputvideo/README.md#create_media) - Upload video content from external URL
-- [Upload from Device](docs/sdks/inputvideo/README.md#direct_upload_video_media) - Upload video files directly from device
+- [Create from URL](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/inputvideo/README.md#create_media) - Upload video content from external URL
+- [Upload from Device](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/inputvideo/README.md#direct_upload_video_media) - Upload video files directly from device
 
 #### Manage Videos
-- [List All Media](docs/sdks/managevideos/README.md#list_media) - Retrieve complete list of all media files
-- [Get Media by ID](docs/sdks/managevideos/README.md#get_media) - Get detailed information for specific media
-- [Update Media](docs/sdks/managevideos/README.md#updated_media) - Modify media metadata and settings
-- [Delete Media](docs/sdks/managevideos/README.md#delete_media) - Remove media files from library
-- [Add Track](docs/sdks/managevideos/README.md#add_media_track) - Add audio or subtitle tracks to media
-- [Cancel Upload](docs/sdks/managevideos/README.md#cancel_upload) - Stop ongoing media upload process
-- [Update Track](docs/sdks/managevideos/README.md#update_media_track) - Modify existing audio or subtitle tracks
-- [Delete Track](docs/sdks/managevideos/README.md#delete_media_track) - Remove audio or subtitle tracks
-- [Generate Subtitles](docs/sdks/managevideos/README.md#generate_subtitle_track) - Create automatic subtitles for media
-- [Update Source Access](docs/sdks/managevideos/README.md#updated_source_access) - Control access permissions for media source
-- [Update MP4 Support](docs/sdks/managevideos/README.md#updated_mp4_support) - Configure MP4 download capabilities
-- [Get Input Info](docs/sdks/managevideos/README.md#retrieve_media_input_info) - Retrieve detailed input information
-- [List Uploads](docs/sdks/managevideos/README.md#list_uploads) - Get all available upload URLs
-- [Get Media Clips](docs/sdks/managevideos/README.md#get_media_clips) - Retrieve all video clips for media
+- [List All Media](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#list_media) - Retrieve complete list of all media files
+- [Get Media by ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#get_media) - Get detailed information for specific media
+- [Update Media](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#updated_media) - Modify media metadata and settings
+- [Delete Media](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#delete_media) - Remove media files from library
+- [Add Track](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#add_media_track) - Add audio or subtitle tracks to media
+- [Cancel Upload](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#cancel_upload) - Stop ongoing media upload process
+- [Update Track](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#update_media_track) - Modify existing audio or subtitle tracks
+- [Delete Track](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#delete_media_track) - Remove audio or subtitle tracks
+- [Generate Subtitles](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#generate_subtitle_track) - Create automatic subtitles for media
+- [Update Source Access](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#updated_source_access) - Control access permissions for media source
+- [Update MP4 Support](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#updated_mp4_support) - Configure MP4 download capabilities
+- [Get Input Info](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#retrieve_media_input_info) - Retrieve detailed input information
+- [List Uploads](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#list_uploads) - Get all available upload URLs
+- [Get Media Clips](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#get_media_clips) - Retrieve all video clips for media
 
 #### Playback
-- [Create Playback ID](docs/sdks/playback/README.md#create_media_playback_id) - Generate secure playback identifier
-- [Delete Playback ID](docs/sdks/playback/README.md#delete_media_playback_id) - Remove playback access
-- [Get Playback ID](docs/sdks/playback/README.md#get_playback_id) - Retrieve playback configuration details
+- [Create Playback ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playback/README.md#create_media_playback_id) - Generate secure playback identifier
+- [Delete Playback ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playback/README.md#delete_media_playback_id) - Remove playback access
+- [Get Playback ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playback/README.md#get_playback_id) - Retrieve playback configuration details
 
 #### Playlist
-- [Create Playlist](docs/sdks/playlist/README.md#create_a_playlist) - Create new video playlist
-- [List Playlists](docs/sdks/playlist/README.md#get_all_playlists) - Get all available playlists
-- [Get Playlist](docs/sdks/playlist/README.md#get_playlist_by_id) - Retrieve specific playlist details
-- [Update Playlist](docs/sdks/playlist/README.md#update_a_playlist) - Modify playlist settings and metadata
-- [Delete Playlist](docs/sdks/playlist/README.md#delete_a_playlist) - Remove playlist from library
-- [Add Media](docs/sdks/playlist/README.md#add_media_to_playlist) - Add media items to playlist
-- [Reorder Media](docs/sdks/playlist/README.md#change_media_order_in_playlist) - Change order of media in playlist
-- [Remove Media](docs/sdks/playlist/README.md#delete_media_from_playlist) - Remove media from playlist
+- [Create Playlist](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playlist/README.md#create_a_playlist) - Create new video playlist
+- [List Playlists](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playlist/README.md#get_all_playlists) - Get all available playlists
+- [Get Playlist](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playlist/README.md#get_playlist_by_id) - Retrieve specific playlist details
+- [Update Playlist](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playlist/README.md#update_a_playlist) - Modify playlist settings and metadata
+- [Delete Playlist](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playlist/README.md#delete_a_playlist) - Remove playlist from library
+- [Add Media](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playlist/README.md#add_media_to_playlist) - Add media items to playlist
+- [Reorder Media](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playlist/README.md#change_media_order_in_playlist) - Change order of media in playlist
+- [Remove Media](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/playlist/README.md#delete_media_from_playlist) - Remove media from playlist
 
 #### Signing Keys
-- [Create Key](docs/sdks/signingkeys/README.md#create_signing_key) - Generate new signing key pair
-- [List Keys](docs/sdks/signingkeys/README.md#list_signing_keys) - Get all available signing keys
-- [Delete Key](docs/sdks/signingkeys/README.md#delete_signing_key) - Remove signing key from system
-- [Get Key](docs/sdks/signingkeys/README.md#get_signing_key_by_id) - Retrieve specific signing key details
+- [Create Key](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/signingkeys/README.md#create_signing_key) - Generate new signing key pair
+- [List Keys](https://github.com/FastPix/fastpix-ruby/blob/main/https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/signingkeys/README.md#list_signing_keys) - Get all available signing keys
+- [Delete Key](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/signingkeys/README.md#delete_signing_key) - Remove signing key from system
+- [Get Key](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/signingkeys/README.md#get_signing_key_by_id) - Retrieve specific signing key details
 
 #### DRM Configurations
-- [List DRM Configs](docs/sdks/drmconfigurations/README.md#get_drm_configuration) - Get all DRM configuration options
-- [Get DRM Config](docs/sdks/drmconfigurations/README.md#get_drm_configuration_by_id) - Retrieve specific DRM configuration
+- [List DRM Configs](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/drmconfigurations/README.md#get_drm_configuration) - Get all DRM configuration options
+- [Get DRM Config](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/drmconfigurations/README.md#get_drm_configuration_by_id) - Retrieve specific DRM configuration
 
 ### Live API 
 
@@ -245,28 +245,28 @@ Stream, manage, and transform live video content with real-time broadcasting cap
 For detailed documentation, see [FastPix Live Stream Overview](https://docs.fastpix.io/docs/live-stream-overview).
 
 #### Start Live Stream
-- [Create Stream](docs/sdks/startlivestream/README.md#create_new_stream) - Initialize new live streaming session
+- [Create Stream](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/startlivestream/README.md#create_new_stream) - Initialize new live streaming session
 
 #### Manage Live Stream
-- [List Streams](docs/sdks/managelivestream/README.md#get_all_streams) - Retrieve all active live streams
-- [Get Viewer Count](docs/sdks/managelivestream/README.md#get_live_stream_viewer_count_by_id) - Get real-time viewer statistics
-- [Get Stream](docs/sdks/managelivestream/README.md#get_live_stream_by_id) - Retrieve detailed stream information
-- [Delete Stream](docs/sdks/managelivestream/README.md#delete_live_stream) - Terminate and remove live stream
-- [Update Stream](docs/sdks/managelivestream/README.md#update_live_stream) - Modify stream settings and configuration
-- [Enable Stream](docs/sdks/managelivestream/README.md#enable_live_stream) - Activate live streaming
-- [Disable Stream](docs/sdks/managelivestream/README.md#disable_live_stream) - Pause live streaming
-- [Complete Stream](docs/sdks/managelivestream/README.md#complete_live_stream) - Finalize and archive stream
+- [List Streams](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#get_all_streams) - Retrieve all active live streams
+- [Get Viewer Count](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#get_live_stream_viewer_count_by_id) - Get real-time viewer statistics
+- [Get Stream](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#get_live_stream_by_id) - Retrieve detailed stream information
+- [Delete Stream](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#delete_live_stream) - Terminate and remove live stream
+- [Update Stream](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#update_live_stream) - Modify stream settings and configuration
+- [Enable Stream](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#enable_live_stream) - Activate live streaming
+- [Disable Stream](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#disable_live_stream) - Pause live streaming
+- [Complete Stream](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/managevideos/README.md#complete_live_stream) - Finalize and archive stream
 
 #### Live Playback
-- [Create Playback ID](docs/sdks/liveplayback/README.md#create_playback_id_of_stream) - Generate secure live playback access
-- [Delete Playback ID](docs/sdks/liveplayback/README.md#delete_playback_id_of_stream) - Revoke live playback access
-- [Get Playback ID](docs/sdks/liveplayback/README.md#get_live_stream_playback_id) - Retrieve live playback configuration
+- [Create Playback ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/liveplayback/README.md#create_playback_id_of_stream) - Generate secure live playback access
+- [Delete Playback ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/liveplayback/README.md#delete_playback_id_of_stream) - Revoke live playback access
+- [Get Playback ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/liveplayback/README.md#get_live_stream_playback_id) - Retrieve live playback configuration
 
 #### Simulcast Stream
-- [Create Simulcast](docs/sdks/simulcaststream/README.md#create_simulcast_of_stream) - Set up multi-platform streaming
-- [Delete Simulcast](docs/sdks/simulcaststream/README.md#delete_simulcast_of_stream) - Remove simulcast configuration
-- [Get Simulcast](docs/sdks/simulcaststream/README.md#get_specific_simulcast_of_stream) - Retrieve simulcast settings
-- [Update Simulcast](docs/sdks/simulcaststream/README.md#update_specific_simulcast_of_stream) - Modify simulcast parameters
+- [Create Simulcast](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/simulcaststream#create_simulcast_of_stream) - Set up multi-platform streaming
+- [Delete Simulcast](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/simulcaststream#delete_simulcast_of_stream) - Remove simulcast configuration
+- [Get Simulcast](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/simulcaststream#get_specific_simulcast_of_stream) - Retrieve simulcast settings
+- [Update Simulcast](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/simulcaststream#update_specific_simulcast_of_stream) - Modify simulcast parameters
 
 ### Video Data API 
 
@@ -275,21 +275,21 @@ Monitor video performance and quality with comprehensive analytics and real-time
 For detailed documentation, see [FastPix Video Data Overview](https://docs.fastpix.io/docs/video-data-overview).
 
 #### Metrics
-- [List Breakdown Values](docs/sdks/metrics/README.md#list_breakdown_values) - Get detailed breakdown of metrics by dimension
-- [List Overall Values](docs/sdks/metrics/README.md#list_overall_values) - Get aggregated metric values across all content
-- [Get Timeseries Data](docs/sdks/metrics/README.md#get_timeseries_data) - Retrieve time-based metric trends and patterns
-- [List Comparison Values](docs/sdks/metrics/README.md#list_comparison_values) - Compare metrics across different time periods
+- [List Breakdown Values](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/metrics/README.md#list_breakdown_values) - Get detailed breakdown of metrics by dimension
+- [List Overall Values](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/metrics/README.md#list_overall_values) - Get aggregated metric values across all content
+- [Get Timeseries Data](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/metrics/README.md#get_timeseries_data) - Retrieve time-based metric trends and patterns
+- [List Comparison Values](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/metrics/README.md#list_comparison_values) - Compare metrics across different time periods
 
 #### Views
-- [List Video Views](docs/sdks/views/README.md#list_video_views) - Get comprehensive list of video viewing sessions
-- [Get View Details](docs/sdks/views/README.md#get_video_view_details) - Retrieve detailed information about specific video views
-- [List Top Content](docs/sdks/views/README.md#list_by_top_content) - Find your most popular and engaging content
-- [Get Concurrent Viewers](docs/sdks/views/README.md#get_data_viewlist_current_views_get_timeseries_views) - Monitor real-time viewer counts over time
-- [Get Viewer Breakdown](docs/sdks/views/README.md#get_data_viewlist_current_views_filter) - Analyze viewers by device, location, and other dimensions
+- [List Video Views](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/views/README.md#list_video_views#list_video_views) - Get comprehensive list of video viewing sessions
+- [Get View Details](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/views/README.md#list_video_views#get_video_view_details) - Retrieve detailed information about specific video views
+- [List Top Content](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/views/README.md#list_video_views#list_by_top_content) - Find your most popular and engaging content
+- [Get Concurrent Viewers](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/views/README.md#list_video_views#get_data_viewlist_current_views_get_timeseries_views) - Monitor real-time viewer counts over time
+- [Get Viewer Breakdown](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/views/README.md#list_video_views#get_data_viewlist_current_views_filter) - Analyze viewers by device, location, and other dimensions
 
 #### Dimensions
-- [List Dimensions](docs/sdks/dimensions/README.md#list_dimensions) - Get available data dimensions for filtering and analysis
-- [List Filter Values](docs/sdks/dimensions/README.md#list_filter_values_for_dimension) - Get specific values for a particular dimension
+- [List Dimensions](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/dimensions/README.md#list_dimensions) - Get available data dimensions for filtering and analysis
+- [List Filter Values](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/dimensions/README.md#list_filter_values_for_dimension) - Get specific values for a particular dimension
 
 ### In-Video AI Features
 
@@ -297,16 +297,16 @@ Enhance video content with AI-powered features including moderation, summarizati
 
 For detailed documentation, see [Video Moderation Guide](https://docs.fastpix.io/docs/using-nsfw-and-profanity-filter-for-video-moderation).
 
-- [Generate Summary](docs/sdks/invideoaifeatures/README.md#update_media_summary) - Create AI-generated video summaries
-- [Create Chapters](docs/sdks/invideoaifeatures/README.md#update_media_chapters) - Automatically generate video chapter markers
-- [Extract Entities](docs/sdks/invideoaifeatures/README.md#update_media_named_entities) - Identify and extract named entities from content
-- [Enable Moderation](docs/sdks/invideoaifeatures/README.md#update_media_moderation) - Activate content moderation and safety checks
+- [Generate Summary](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/dimensions/README.md#update_media_summary) - Create AI-generated video summaries
+- [Create Chapters](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/dimensions/README.md#update_media_chapters) - Automatically generate video chapter markers
+- [Extract Entities](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/dimensions/README.md#update_media_named_entities) - Identify and extract named entities from content
+- [Enable Moderation](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/dimensions/README.md#update_media_moderation) - Activate content moderation and safety checks
 
 ### Error Handling
 
 Handle and manage errors with comprehensive error handling capabilities and detailed error information for all API operations.
 
-- [List Errors](docs/sdks/errors/README.md#list_errors) - Retrieve comprehensive error logs and diagnostics
+- [List Errors](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/dimensions/README.md#list_errors) - Retrieve comprehensive error logs and diagnostics
 
 <!-- End Available Resources and Operations [operations] -->
 
