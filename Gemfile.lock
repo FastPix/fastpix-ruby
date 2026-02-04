@@ -140,10 +140,10 @@ PLATFORMS
 
 DEPENDENCIES
   fastpixapi!
-  irb (~> 1.0)
-  minitest (~> 5.27, >= 5.27.0)
+  irb
+  minitest (>= 5.27.0)
   minitest-focus (~> 1.4.1)
-  rake (~> 13.0)
+  rake
   rubocop (~> 1.73.2)
   rubocop-minitest (~> 0.37.1)
   sorbet (~> 0.6.12872)
