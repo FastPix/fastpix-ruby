@@ -19,6 +19,12 @@ jobs:
         ruby-version: '3.2'     # Or your project's Ruby version
         bundler-cache: true
 
+    - name: Update Gemfile.lock if needed
+      run: |
+        bundle config set --local frozen false
+        bundle install --jobs 4 --retry 3 || true
+        bundle config set --local frozen true
+
     - name: Install dependencies
       run: bundle install --jobs 4 --retry 3
 
