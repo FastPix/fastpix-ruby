@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    fastpixapi (0.0.1)
+    fastpixapi (1.1.0)
       base64 (>= 0.2.0, < 1.0)
       faraday
       faraday-multipart (~> 1.2.0)
