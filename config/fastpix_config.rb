@@ -9,11 +9,11 @@ module FastPix
     end
 
     def self.username
-      "2616eb1e-bd36-41cc-b4b6-273afef3b97a"
+      ENV['FASTPIX_USERNAME'] || 'YOUR_FASTPIX_USERNAME'
     end
 
     def self.password
-      "e0c95611-621e-4a95-a17a-118e4c55450b"
+      ENV['FASTPIX_PASSWORD'] || 'YOUR_FASTPIX_PASSWORD'
     end
   end
 end 

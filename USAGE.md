@@ -1,33 +1,33 @@
 <!-- Start SDK Example Usage [usage] -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
-      security: Models::Components::Security.new(
-        username: 'your-access-token',
-        password: 'your-secret-key',
-      ),
-    )
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
+  security: Models::Components::Security.new(
+    username: 'your-access-token',
+    password: 'your-secret-key'
+  )
+)
 
 req = Models::Components::CreateMediaRequest.new(
   inputs: [
-    Models::Components::VideoInput.new(
+    Models::Components::PullVideoInput.new(
       type: 'video',
-      url: 'https://static.fastpix.io/sample.mp4',
+      url: 'https://static.fastpix.io/fp-sample-video.mp4',
     ),
   ],
-  metadata: {
-    "key1": 'value1',
-  },
-  access_policy: Models::Components::CreateMediaRequestAccessPolicy::PUBLIC,
+  metadata: { "key1": 'value1' },
 )
 
-res = s.input_video.create_media(request: req)
-
-unless res.create_media_success_response.nil?
-  # handle response
+begin
+  res = s.input_video.create_media(request: req)
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s if defined?(res) && res&.raw_response
 end
-
 ```
 <!-- End SDK Example Usage [usage] -->

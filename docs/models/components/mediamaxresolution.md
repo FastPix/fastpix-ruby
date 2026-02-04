@@ -12,4 +12,3 @@ The maximum resolution specified by the user for the media.
 | `ONE_THOUSAND_AND_EIGHTYP`             | 1080p                                  |
 | `SEVEN_HUNDRED_AND_TWENTYP`            | 720p                                   |
 | `FOUR_HUNDRED_AND_EIGHTYP`             | 480p                                   |
-| `THREE_HUNDRED_AND_SIXTYP`             | 360p                                   |

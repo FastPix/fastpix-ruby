@@ -1,0 +1,37 @@
+# Generated code for FastPix API SDK.
+
+# typed: true
+# frozen_string_literal: true
+
+module FastpixClient
+  module Models
+    module Errors
+
+      class APIError < StandardError
+        include Crystalline::MetadataFields
+        extend T::Sig
+
+        
+        field :body, T.nilable(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('body') } }
+        field :raw_response, T.nilable(Faraday::Response), {}
+        field :status_code, T.nilable(::Integer), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('status_code') } }
+
+        
+        sig { params(status_code: ::Integer, body: ::String, raw_response: Faraday::Response).void }
+        def initialize(status_code:, body:, raw_response:)
+          @status_code = status_code
+          @body = body
+          @raw_response = raw_response
+        end
+
+        def ==(other)
+          return false unless other.is_a? self.class
+          return false unless @status_code == other.status_code
+          return false unless @body == other.body
+          return false unless @raw_response == other.raw_response
+          true
+        end
+      end
+    end
+  end
+end

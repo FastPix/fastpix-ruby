@@ -1,7 +1,8 @@
 # ManageLiveStream
-(*manage_live_stream*)
 
 ## Overview
+
+Operations for managing live streams
 
 ### Available Operations
 
@@ -10,6 +11,7 @@
 * [get_live_stream_by_id](#get_live_stream_by_id) - Get stream by ID
 * [delete_live_stream](#delete_live_stream) - Delete a stream
 * [update_live_stream](#update_live_stream) - Update a stream
+* [enable_live_stream](#enable_live_stream) - Enable a stream
 * [disable_live_stream](#disable_live_stream) - Disable a stream
 * [complete_live_stream](#complete_live_stream) - Complete a stream
 
@@ -26,10 +28,11 @@ Use the access token and secret key related to the workspace in the request head
 
 <!-- UsageSnippet language="ruby" operationID="get-all-streams" method="get" path="/live/streams" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
@@ -38,8 +41,12 @@ s = ::FastpixApiSDK::Fastpix.new(
 
 res = s.manage_live_stream.get_all_streams(limit: 20, offset: 1, order_by: Models::Operations::OrderBy::DESC)
 
-unless res.get_streams_response.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -58,12 +65,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 401                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## get_live_stream_viewer_count_by_id
 
@@ -81,29 +85,34 @@ Related guide: <a href="https://docs.fastpix.io/docs/manage-streams">Manage stre
 
 <!-- UsageSnippet language="ruby" operationID="get-live-stream-viewer-count-by-id" method="get" path="/live/streams/{streamId}/viewer-count" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_live_stream.get_live_stream_viewer_count_by_id(stream_id: '61a264dcc447b63da6fb79ef925cd76d')
+res = s.manage_live_stream.get_live_stream_viewer_count_by_id(stream_id: 'your-stream-id')
 
-unless res.views_count_response.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                           | Type                                                                                | Required                                                                            | Description                                                                         | Example                                                                             |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | 61a264dcc447b63da6fb79ef925cd76d                                                    |
+| Parameter                                                                            | Type                                                                                 | Required                                                                             | Description                                                                          | Example                                                                              |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `stream_id`                                                                          | *::String*                                                                           | :heavy_check_mark:                                                                   | After creating a new live stream, FastPix assigns a unique identifier to the stream. | your-stream-id                                                     |
 
 ### Response
 
@@ -111,13 +120,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 401                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::LiveNotFoundError       | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## get_live_stream_by_id
 
@@ -133,20 +138,25 @@ Related guide: <a href="https://docs.fastpix.io/docs/manage-streams">Manage stre
 
 <!-- UsageSnippet language="ruby" operationID="get-live-stream-by-id" method="get" path="/live/streams/{streamId}" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_live_stream.get_live_stream_by_id(stream_id: '61a264dcc447b63da6fb79ef925cd76d')
+res = s.manage_live_stream.get_live_stream_by_id(stream_id: 'your-stream-id')
 
-unless res.livestreamget_response.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -155,7 +165,7 @@ end
 
 | Parameter                                                                           | Type                                                                                | Required                                                                            | Description                                                                         | Example                                                                             |
 | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | 61a264dcc447b63da6fb79ef925cd76d                                                    |
+| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | your-stream-id                                                    |
 
 ### Response
 
@@ -163,19 +173,15 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 401                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::NotFoundError           | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## delete_live_stream
 
-Permanently removes a specified live stream from the workspace. If the stream is still active, the encoder will be disconnected, and the ingestion will stop. This action cannot be undone, and any future playback attempts will fail. 
+Permanently deletes a specified live stream from the workspace. If the stream is active, the encoder is disconnected and ingestion stops immediately. This action is irreversible, and any future playback attempts fail as a result.
 
-  By providing the `streamId`, the API will terminate any active connections to the stream and remove it from the list of available live streams. You can further look for <a href="https://docs.fastpix.io/docs/live-events#videolive_streamdeleted">video.live_stream.deleted</a> webhook to notify your system about the status. 
+  Provide the `streamId` in the request to terminate active connections and remove the stream from the workspace. You can further look for <a href="https://docs.fastpix.io/docs/live-events#videolive_streamdeleted">video.live_stream.deleted</a> webhook to notify your system about the status.
 
   #### Example
 
@@ -188,20 +194,25 @@ Permanently removes a specified live stream from the workspace. If the stream is
 
 <!-- UsageSnippet language="ruby" operationID="delete-live-stream" method="delete" path="/live/streams/{streamId}" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_live_stream.delete_live_stream(stream_id: '8717422d89288ad5958d4a86e9afe2a2')
+res = s.manage_live_stream.delete_live_stream(stream_id: 'your-stream-id')
 
-unless res.live_stream_delete_response.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -210,7 +221,7 @@ end
 
 | Parameter                                                                           | Type                                                                                | Required                                                                            | Description                                                                         | Example                                                                             |
 | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | 8717422d89288ad5958d4a86e9afe2a2                                                    |
+| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | your-stream-id                                                    |
 
 ### Response
 
@@ -218,24 +229,20 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 401                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::LiveNotFoundError       | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## update_live_stream
 
-This endpoint allows you to modify the parameters of an existing live stream, such as its `metadata` (title, description) or the `reconnectWindow`. It’s useful for making changes to a stream that has already been created but not yet ended. Once the live stream is disabled, you cannot update a stream. 
+This endpoint allows you to modify the parameters of an existing live stream, such as its `metadata` (title, description) or the `reconnectWindow`. It’s useful for making changes to a stream that has already been created but not yet ended. After the live stream is disabled, you cannot update a stream. 
 
 
-  The updated stream parameters and the `streamId` needs to be shared in the request, and FastPix will return the updated stream details. Once updated, <a href="https://docs.fastpix.io/docs/live-events#videolive_streamupdated">video.live_stream.updated</a> webhook event notifies your system. 
+  The updated stream parameters and the `streamId` needs to be shared in the request, and FastPix returns the updated stream details. After the update, <a href="https://docs.fastpix.io/docs/live-events#videolive_streamupdated">video.live_stream.updated</a> webhook event notifies your system.
 
  #### Example
 
- A host realizes they need to extend the reconnect window for their live stream in case they lose connection temporarily during the event. Or suppose during a multi-day online conference, the event organizers need to update the stream title to reflect the next day's session while keeping the same stream ID for continuity. 
+ A host realizes they need to extend the reconnect window for their live stream in case they lose connection temporarily during the event. Or suppose during a multi-day online conference, the event organizers need to update the stream title to reflect the next day"s session while keeping the same stream ID for continuity. 
 
 
 
@@ -245,25 +252,30 @@ This endpoint allows you to modify the parameters of an existing live stream, su
 
 <!-- UsageSnippet language="ruby" operationID="update-live-stream" method="patch" path="/live/streams/{streamId}" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_live_stream.update_live_stream(stream_id: '91a264dcc447b63da6fb79ef925cd76d', patch_live_stream_request: Models::Components::PatchLiveStreamRequest.new(
+res = s.manage_live_stream.update_live_stream(stream_id: 'your-stream-id', body: Models::Components::PatchLiveStreamRequest.new(
   metadata: {
     "livestream_name": 'Gaming_stream',
   },
   reconnect_window: 100,
 ))
 
-unless res.patch_response_dto.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -272,8 +284,8 @@ end
 
 | Parameter                                                                                   | Type                                                                                        | Required                                                                                    | Description                                                                                 | Example                                                                                     |
 | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `stream_id`                                                                                 | *::String*                                                                                  | :heavy_check_mark:                                                                          | Upon creating a new live stream, FastPix assigns a unique identifier to the stream.         | 91a264dcc447b63da6fb79ef925cd76d                                                            |
-| `patch_live_stream_request`                                                                 | [Models::Components::PatchLiveStreamRequest](../../models/shared/patchlivestreamrequest.md) | :heavy_check_mark:                                                                          | N/A                                                                                         | {<br/>"metadata": {<br/>"livestream_name": "Gaming_stream"<br/>},<br/>"reconnectWindow": 100<br/>} |
+| `stream_id`                                                                                 | *::String*                                                                                  | :heavy_check_mark:                                                                          | After creating a new live stream, FastPix assigns a unique identifier to the stream.        | your-stream-id                                                            |
+| `body`                                                                                      | [Models::Components::PatchLiveStreamRequest](../../models/shared/patchlivestreamrequest.md) | :heavy_check_mark:                                                                          | N/A                                                                                         | {<br/>"metadata": {<br/>"livestream_name": "Gaming_stream"<br/>},<br/>"reconnectWindow": 100<br/>} |
 
 ### Response
 
@@ -281,17 +293,70 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 401                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::LiveNotFoundError       | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
+
+## enable_live_stream
+
+This endpoint allows you to enable a livestream by transitioning its status from `disabled` to `idle`. After it is enabled, the stream becomes available and ready to accept an incoming broadcast from a streaming tool.
+
+Streams on the trial plan cannot be re-enabled if they are in the `disabled` state.
+
+The `livestreamId` must be provided in the path, and the stream must not already be in an enabled state (`idle`, `preparing`, or `active`).
+
+#### Example
+
+A creator disables a livestream to pause it temporarily. Later, they decide to continue the session. By calling this endpoint with the stream's ID, they can re-enable and restart the same livestream.
+
+Related guide <a href="https://docs.fastpix.io/docs/manage-streams">Manage streams</a>
+
+### Example Usage
+
+<!-- UsageSnippet language="ruby" operationID="enable-live-stream" method="put" path="/live/streams/{streamId}/live-enable" -->
+```ruby
+require 'json'
+require 'fastpixapi'
+
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
+      security: Models::Components::Security.new(
+        username: 'your-access-token',
+        password: 'your-secret-key',
+      ),
+    )
+
+res = s.manage_live_stream.enable_live_stream(stream_id: 'your-stream-id')
+
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
+end
+
+```
+
+### Parameters
+
+| Parameter                                                                           | Type                                                                                | Required                                                                            | Description                                                                         | Example                                                                             |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | your-stream-id                                                    |
+
+### Response
+
+**[T.nilable(Models::Operations::EnableLiveStreamResponse)](../../models/operations/enablelivestreamresponse.md)**
+
+### Errors
+
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## disable_live_stream
 
-This endpoint disables a livestream by setting its status to `disabled`. Use this to stop a livestream when it's no longer needed or should be taken offline intentionally.
+This endpoint disables a livestream by setting its status to `disabled`. Use this to stop a livestream when it's no longer needed or must be taken offline intentionally.
 
 A disabled stream can later be re-enabled using the enable endpoint — however, if you're on a trial plan, re-enabling is not allowed once the stream is disabled.
 
@@ -305,29 +370,34 @@ Related guide <a href="https://docs.fastpix.io/docs/manage-streams">Manage strea
 
 <!-- UsageSnippet language="ruby" operationID="disable-live-stream" method="put" path="/live/streams/{streamId}/live-disable" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_live_stream.disable_live_stream(stream_id: '91a264dcc447b63da6fb79ef925cd76d')
+res = s.manage_live_stream.disable_live_stream(stream_id: 'your-stream-id')
 
-unless res.live_stream_delete_response.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                           | Type                                                                                | Required                                                                            | Description                                                                         | Example                                                                             |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | 91a264dcc447b63da6fb79ef925cd76d                                                    |
+| Parameter                                                                            | Type                                                                                 | Required                                                                             | Description                                                                          | Example                                                                              |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `stream_id`                                                                          | *::String*                                                                           | :heavy_check_mark:                                                                   | After creating a new live stream, FastPix assigns a unique identifier to the stream. | your-stream-id                                                     |
 
 ### Response
 
@@ -335,14 +405,9 @@ end
 
 ### Errors
 
-| Error Type                                 | Status Code                                | Content Type                               |
-| ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| Models::Errors::StreamAlreadyDisabledError | 400                                        | application/json                           |
-| Models::Errors::UnauthorizedError          | 401                                        | application/json                           |
-| Models::Errors::InvalidPermissionError     | 403                                        | application/json                           |
-| Models::Errors::LiveNotFoundError          | 404                                        | application/json                           |
-| Models::Errors::ValidationErrorResponse    | 422                                        | application/json                           |
-| Errors::APIError                           | 4XX, 5XX                                   | \*/\*                                      |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## complete_live_stream
 
@@ -362,20 +427,25 @@ Related guide <a href="https://docs.fastpix.io/docs/manage-streams">Manage strea
 
 <!-- UsageSnippet language="ruby" operationID="complete-live-stream" method="put" path="/live/streams/{streamId}/finish" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_live_stream.complete_live_stream(stream_id: '91a264dcc447b63da6fb79ef925cd76d')
+res = s.manage_live_stream.complete_live_stream(stream_id: 'your-stream-id')
 
-unless res.live_stream_delete_response.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -384,7 +454,7 @@ end
 
 | Parameter                                                                           | Type                                                                                | Required                                                                            | Description                                                                         | Example                                                                             |
 | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | 91a264dcc447b63da6fb79ef925cd76d                                                    |
+| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | your-stream-id                                                    |
 
 ### Response
 
@@ -392,10 +462,6 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 400, 401                                | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::NotFoundError           | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |

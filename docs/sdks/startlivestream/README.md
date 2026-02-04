@@ -1,7 +1,8 @@
 # StartLiveStream
-(*start_live_stream*)
 
 ## Overview
+
+Operations for starting live streams
 
 ### Available Operations
 
@@ -9,16 +10,17 @@
 
 ## create_new_stream
 
-Allows you to initiate a new <a href="https://docs.fastpix.io/docs/get-started-with-live-streaming">RTMPS</a> or <a href="https://docs.fastpix.io/docs/using-srt-to-live-stream">SRT</a> live stream on FastPix. Upon creating a stream, FastPix generates a unique `streamKey` and `srtSecret`, which can be used with any broadcasting software (like OBS) to connect to FastPix's RTMPS or SRT servers.
+Creates a new <a href="https://docs.fastpix.io/docs/get-started-with-live-streaming">RTMPS</a> or <a href="https://docs.fastpix.io/docs/using-srt-to-live-stream">SRT</a> live stream in FastPix. When you create a stream, FastPix generates a unique `streamKey` and `srtSecret` that you can use with broadcasting software such as OBS to connect to FastPix RTMPS or SRT servers. Use SRT for live streaming in unstable network conditions, as it provides error correction and encryption for a more reliable and secure broadcast.
+
 Leverage SRT for live streaming in environments with unstable networks, taking advantage of its error correction and encryption features for a resilient and secure broadcast. 
 
 <h4>How it works</h4> 
 
-1. Send a a `POST` request to this endpoint. You can configure the stream settings, including `metadata` (such as stream name and description), `reconnectWindow` (in case of disconnection), and privacy options (`public` or `private`). 
+1. Send a `POST` request to this endpoint. You can configure the stream settings, including `metadata` (such as stream name and description), `reconnectWindow` (in case of disconnection), and privacy options (`public` or `private`). 
 
 2. FastPix returns the stream details for both RTMPS and SRT configurations. These keys and IDs from the stream details are essential for connecting the broadcasting software to FastPix’s servers and transmitting the live stream to viewers.
 
-3. Once the live stream is created, we’ll shoot a `POST` message to the address you give us with the webhook event <a href="https://docs.fastpix.io/docs/live-events#videolive_streamcreated">video.live_stream.created</a>.
+3. After the live stream is created, FastPix sends a `POST` request to your specified webhook endpoint with the event <a href="https://docs.fastpix.io/docs/live-events#videolive_streamcreated">video.live_stream.created</a>.
 
 
 **Example:**
@@ -33,10 +35,11 @@ Related guide: <a href="https://docs.fastpix.io/docs/how-to-livestream">How to l
 
 <!-- UsageSnippet language="ruby" operationID="create-new-stream" method="post" path="/live/streams" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
@@ -44,22 +47,22 @@ s = ::FastpixApiSDK::Fastpix.new(
     )
 
 req = Models::Components::CreateLiveStreamRequest.new(
-  playback_settings: Models::Components::PlaybackSettings.new(
-    access_policy: Models::Components::BasicAccessPolicy::PUBLIC,
-  ),
+  playback_settings: Models::Components::PlaybackSettings.new(),
   input_media_settings: Models::Components::InputMediaSettings.new(
-    media_policy: Models::Components::BasicAccessPolicy::PUBLIC,
     metadata: {
       "livestream_name": 'fastpix_livestream',
     },
-    enable_dvr_mode: true,
   ),
 )
 
 res = s.start_live_stream.create_new_stream(request: req)
 
-unless res.live_stream_response_dto.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -76,9 +79,6 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 401                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |

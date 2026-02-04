@@ -1,0 +1,76 @@
+# Generated code for FastPix API SDK.
+
+# typed: true
+# frozen_string_literal: true
+
+
+module FastpixClient
+  module Models
+    module Components
+
+      class PlaylistByIdResponseDataSmart
+        extend T::Sig
+        include Crystalline::MetadataFields
+
+        # type of the playlist, when it was created
+        field :type, Models::Components::PlaylistByIdResponseDataSmartType, { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('type'), required: true, 'decoder': Utils.enum_from_string(Models::Components::PlaylistByIdResponseDataSmartType, false) } }
+        # Determines the insertion order of media into playlist.
+        field :play_order, Models::Components::PlaylistOrder, { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('playOrder'), required: true, 'decoder': Utils.enum_from_string(Models::Components::PlaylistOrder, false) } }
+        # Required when the playlist type is `smart`. Media created between `startDate` and `endDate` of `createdDate` is added. Optionally, you can include media based on `updatedDate`.
+        field :metadata, Models::Components::PlaylistByIdResponseMetadata, { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('metadata'), required: true } }
+        # The unique id of the playlist
+        field :id, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('id') } }
+        # The name of the playlist set by the user
+        field :name, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('name') } }
+        # Unique string value assigned by user to the playlist.
+        field :reference_id, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('referenceId') } }
+        # Description of the playlist set by the user.
+        field :description, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('description') } }
+
+        field :media_list, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::PlaylistByIdResponseMediaListItem)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mediaList') } }
+        # The unique id of the workspace in which the playlist is present.
+        field :workspace_id, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('workspaceId') } }
+        # Timestamp of playlist creation.
+        field :created_at, Crystalline::Nilable.new(::DateTime), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('createdAt'), 'decoder': Utils.datetime_from_iso_format(true) } }
+        # Playlist's most recent update timestamp.
+        field :updated_at, Crystalline::Nilable.new(::DateTime), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('updatedAt'), 'decoder': Utils.datetime_from_iso_format(true) } }
+        # No. of media present in the playlist
+        field :media_count, Crystalline::Nilable.new(::Integer), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mediaCount') } }
+
+        sig { params(type: Models::Components::PlaylistByIdResponseDataSmartType, play_order: Models::Components::PlaylistOrder, metadata: Models::Components::PlaylistByIdResponseMetadata, id: T.nilable(::String), name: T.nilable(::String), reference_id: T.nilable(::String), description: T.nilable(::String), media_list: T.nilable(T::Array[Models::Components::PlaylistByIdResponseMediaListItem]), workspace_id: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), media_count: T.nilable(::Integer)).void }
+        def initialize(type:, play_order:, metadata:, id: nil, name: nil, reference_id: nil, description: nil, media_list: nil, workspace_id: nil, created_at: nil, updated_at: nil, media_count: nil)
+          @type = type
+          @play_order = play_order
+          @metadata = metadata
+          @id = id
+          @name = name
+          @reference_id = reference_id
+          @description = description
+          @media_list = media_list
+          @workspace_id = workspace_id
+          @created_at = created_at
+          @updated_at = updated_at
+          @media_count = media_count
+        end
+
+        sig { params(other: T.untyped).returns(T::Boolean) }
+        def ==(other)
+          return false unless other.is_a? self.class
+          return false unless @type == other.type
+          return false unless @play_order == other.play_order
+          return false unless @metadata == other.metadata
+          return false unless @id == other.id
+          return false unless @name == other.name
+          return false unless @reference_id == other.reference_id
+          return false unless @description == other.description
+          return false unless @media_list == other.media_list
+          return false unless @workspace_id == other.workspace_id
+          return false unless @created_at == other.created_at
+          return false unless @updated_at == other.updated_at
+          return false unless @media_count == other.media_count
+          true
+        end
+      end
+    end
+  end
+end

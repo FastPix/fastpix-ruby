@@ -1,3 +1,4 @@
+# Generated code for FastPix API SDK.
 
 # typed: false
 # frozen_string_literal: true

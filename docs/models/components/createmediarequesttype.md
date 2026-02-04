@@ -1,6 +1,6 @@
 # CreateMediaRequestType
 
-Defines the type of input. Possible values include video, audio, av.
+Defines the type of input. Possible values include video, audio, or av.
 
 
 

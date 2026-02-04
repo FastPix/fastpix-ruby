@@ -1,6 +1,13 @@
 # typed: true
 # frozen_string_literal: true
 
+# Patch OpenSSL before loading any other gems
+begin
+  require_relative 'lib/openssl_patch'
+rescue LoadError
+  # Ignore if file doesn't exist
+end
+
 require 'bundler/gem_tasks'
 require 'minitest/test_task'
 require 'rubocop/rake_task'

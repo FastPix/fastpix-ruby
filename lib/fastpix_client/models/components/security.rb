@@ -1,0 +1,36 @@
+# Generated code for FastPix API SDK.
+
+# typed: true
+# frozen_string_literal: true
+
+
+module FastpixClient
+  module Models
+    module Components
+
+      class Security
+        extend T::Sig
+        include Crystalline::MetadataFields
+
+
+        field :username, ::String, { 'security': { 'scheme': true, 'type': 'http', 'sub_type': 'basic', 'field_name': 'username' } }
+
+        field :password, ::String, { 'security': { 'scheme': true, 'type': 'http', 'sub_type': 'basic', 'field_name': 'password' } }
+
+        sig { params(username: ::String, password: ::String).void }
+        def initialize(username:, password:)
+          @username = username
+          @password = password
+        end
+
+        sig { params(other: T.untyped).returns(T::Boolean) }
+        def ==(other)
+          return false unless other.is_a? self.class
+          return false unless @username == other.username
+          return false unless @password == other.password
+          true
+        end
+      end
+    end
+  end
+end

@@ -11,11 +11,11 @@ module TestConfig
   end
 
   def self.username
-    load['server']['username']
+    ENV['FASTPIX_USERNAME'] || load['server']['username']
   end
 
   def self.password
-    load['server']['password']
+    ENV['FASTPIX_PASSWORD'] || load['server']['password']
   end
 
   def self.timeout

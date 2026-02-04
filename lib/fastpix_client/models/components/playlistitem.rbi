@@ -1,0 +1,23 @@
+# typed: true
+# frozen_string_literal: true
+
+
+class FastpixClient::Models::Components::PlaylistItem
+  extend ::Crystalline::MetadataFields::ClassMethods
+end
+
+
+class FastpixClient::Models::Components::PlaylistItem
+  def id(); end
+  def id=(str_); end
+  def name(); end
+  def name=(str_); end
+  def type(); end
+  def type=(str_); end
+  def reference_id(); end
+  def reference_id=(str_); end
+  def created_at(); end
+  def created_at=(str_); end
+  def media_count(); end
+  def media_count=(str_); end
+end

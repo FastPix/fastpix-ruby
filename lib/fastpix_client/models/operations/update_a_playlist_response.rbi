@@ -1,0 +1,21 @@
+# typed: true
+# frozen_string_literal: true
+
+
+class FastpixClient::Models::Operations::UpdateAPlaylistResponse
+  extend ::Crystalline::MetadataFields::ClassMethods
+end
+
+
+class FastpixClient::Models::Operations::UpdateAPlaylistResponse
+  def content_type(); end
+  def content_type=(str_); end
+  def status_code(); end
+  def status_code=(str_); end
+  def raw_response(); end
+  def raw_response=(str_); end
+  def playlist_created_response(); end
+  def playlist_created_response=(str_); end
+  def default_error(); end
+  def default_error=(str_); end
+end
