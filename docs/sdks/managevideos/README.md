@@ -1,7 +1,8 @@
 # ManageVideos
-(*manage_videos*)
 
 ## Overview
+
+Operations for managing video media
 
 ### Available Operations
 
@@ -15,6 +16,7 @@
 * [update_media_track](#update_media_track) - Update audio / subtitle track
 * [delete_media_track](#delete_media_track) - Delete audio / subtitle track
 * [generate_subtitle_track](#generate_subtitle_track) - Generate track subtitle
+* [get_media_summary](#get_media_summary) - Get the summary of a video
 * [updated_source_access](#updated_source_access) - Update the source access of a media by ID
 * [updated_mp4_support](#updated_mp4_support) - Update the mp4Support of a media by ID
 * [retrieve_media_input_info](#retrieve_media_input_info) - Get info of media inputs
@@ -33,17 +35,18 @@ Use the access token and secret key related to the workspace in the request head
 
 
 #### Example
-You're managing a video platform and need to check all the uploaded media in your library to ensure no outdated or low-quality content is being served. Using this endpoint, you can retrieve a complete list of media, allowing you to filter, sort, or update items as needed.
+If you manage a video platform and need to review all uploaded media in your library to ensure that outdated or low-quality content isn’t being served, you can use this endpoint to retrieve a complete list of media. You can then filter, sort, or update items as needed.
 
 
 ### Example Usage
 
 <!-- UsageSnippet language="ruby" operationID="list-media" method="get" path="/on-demand" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
@@ -52,8 +55,12 @@ s = ::FastpixApiSDK::Fastpix.new(
 
 res = s.manage_videos.list_media(limit: 20, offset: 1, order_by: Models::Components::SortOrder::DESC)
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -72,18 +79,23 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## list_live_clips
 
 Retrieves a list of all media clips generated from a specific livestream. Each media entry includes metadata such as the clip media IDs, and other relevant details. A media clip is a segmented portion of an original media file (source live stream). Clips are often created for various purposes such as previews, highlights, or customized edits.
 #### How it works
-To use this endpoint, provide the `livestreamId` as a parameter. The API then returns a paginated list of clipped media items created from that livestream. Pagination ensures optimal performance and usability when dealing with a large number of media files, making it easier to organize and manage content in bulk.
+1. Provide the livestreamId as a parameter when calling this endpoint.
+
+2. The API returns a paginated list of media clips created from the specified livestream.
+
+3. Pagination helps maintain performance and usability when handling large sets of media files, making it easier to organize and manage content in bulk.
+
+#### Use case
+Suppose you’re hosting a live gaming event and want to showcase key moments from the stream — such as top plays or final match highlights. You can use this endpoint to fetch all clips generated from that livestream, display them in your dashboard, or use them for post-event editing and sharing.
+
 
 Related guide: <a href="https://docs.fastpix.io/docs/instant-live-clipping">Instant live clipping</a>
 
@@ -92,20 +104,25 @@ Related guide: <a href="https://docs.fastpix.io/docs/instant-live-clipping">Inst
 
 <!-- UsageSnippet language="ruby" operationID="list-live-clips" method="get" path="/on-demand/{livestreamId}/live-clips" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.list_live_clips(livestream_id: 'b6f71268143f70c798a7851a0a92dcbf', limit: 20, offset: 1, order_by: Models::Components::SortOrder::DESC)
+res = s.manage_videos.list_live_clips(livestream_id: 'your-livestream-id', limit: 20, offset: 1, order_by: Models::Components::SortOrder::DESC)
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -114,7 +131,7 @@ end
 
 | Parameter                                                                                 | Type                                                                                      | Required                                                                                  | Description                                                                               | Example                                                                                   |
 | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `livestream_id`                                                                           | *::String*                                                                                | :heavy_check_mark:                                                                        | The stream Id is unique identifier assigned to the live stream.                           | b6f71268143f70c798a7851a0a92dcbf                                                          |
+| `livestream_id`                                                                           | *::String*                                                                                | :heavy_check_mark:                                                                        | The stream Id is unique identifier assigned to the live stream.                           | your-livestream-id                                                          |
 | `limit`                                                                                   | *T.nilable(::Integer)*                                                                    | :heavy_minus_sign:                                                                        | Limit specifies the maximum number of items to display per page.                          | 20                                                                                        |
 | `offset`                                                                                  | *T.nilable(::Integer)*                                                                    | :heavy_minus_sign:                                                                        | Offset determines the starting point for data retrieval within a paginated list.          | 1                                                                                         |
 | `order_by`                                                                                | [T.nilable(Models::Components::SortOrder)](../../models/shared/sortorder.md)              | :heavy_minus_sign:                                                                        | The values in the list can be arranged in two ways: DESC (Descending) or ASC (Ascending). | desc                                                                                      |
@@ -125,12 +142,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## get_media
 
@@ -138,52 +152,53 @@ By calling this endpoint, you can retrieve detailed information about a specific
 
 
 
-#### How it works 
+#### How it works
 
+1. Send a GET request to this endpoint. Use the `<mediaId>` you received after uploading the media file.
 
-
-1. Make a GET request to this endpoint, using the `<mediaId>` received after uploading the media file. 
-
-
-2. Receive a response that includes details about the media: 
-
-* `status` Indicates whether the media is still `preparing` or has transitioned to `ready`.  
-
-* The `playbackId` is a unique identifier that allows you to stream the media once it is `ready`. You can construct the stream URL in this format: `https://stream.fastpix.io/<playbackId>.m3u8`
-
+2. The response includes details about the media:
+   - **status** – Indicates whether the media is still *Processing* or has transitioned to *Ready*.
+   - **playbackId** – A unique identifier that allows you to stream the media once it is *Ready*.  
+     You can construct the stream URL as follows:  
+     `https://stream.fastpix.io/<playbackId>.m3u8`
 
 #### Example
 
-Suppose your platform provides users with an interface where they can manage their uploaded content. A user requests detailed information about a specific video to see if it has been fully processed and is available for playback. Using the media ID, you can fetch the information from FastPix and display it in the user's dashboard.
+If your platform provides users with a dashboard to manage uploaded content, a user might want to check whether a video has finished processing and is ready for playback. You can use the media ID to retrieve the information from FastPix and display it in the user’s dashboard.
 
 
 ### Example Usage
 
 <!-- UsageSnippet language="ruby" operationID="get-media" method="get" path="/on-demand/{mediaId}" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.get_media(media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6')
+res = s.manage_videos.get_media(media_id: 'your-media-id')
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                              | Type                                                                                                   | Required                                                                                               | Description                                                                                            | Example                                                                                                |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `media_id`                                                                                             | *::String*                                                                                             | :heavy_check_mark:                                                                                     | The Media Id is assigned a universal unique identifier, which can contain a maximum of 255 characters. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                   |
+| Parameter                                                                                 | Type                                                                                      | Required                                                                                  | Description                                                                               | Example                                                                                   |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `media_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | The unique identifier assigned to the media when created. The value must be a valid UUID. | your-media-id                                                      |
 
 ### Response
 
@@ -191,13 +206,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::MediaNotFoundError      | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## updated_media
 
@@ -206,50 +217,56 @@ This endpoint allows you to update specific parameters of an existing media file
 
 #### How it works
 
-1. Make a PATCH request to this endpoint, replacing `<mediaId>` with the unique ID (`uploadId` or `id`) of the media received after uploading to FastPix. 
+1. Make a PATCH request to this endpoint. Replace `<mediaId>` with the unique ID (`uploadId` or `id`) of the media you received after uploading to FastPix
 
-2. Include the updated parameters in the request body. 
+2. Include the updated parameters in the request body.
 
-3. Receive a response containing the updated media data, confirming the changes made. 
+3. The response returns the updated media data, confirming the changes. 
 
-Once you have made the update request, you can also look for the webhook event <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> to notify your system about update status. 
+4. Monitor the <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> webhook event to track the update status in your system.
 
 #### Example
-Imagine a scenario where a user uploads a video and later realizes they need to change the title, add a new description or tags. You can use this endpoint to update the media metadata without having to re-upload the entire video.
+If a user uploads a video and later needs to change the title, add a new description, or update tags, you can use this endpoint to update the media metadata without re-uploading the entire video.
 
 
 ### Example Usage
 
 <!-- UsageSnippet language="ruby" operationID="updated-media" method="patch" path="/on-demand/{mediaId}" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.updated_media(media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6', request_body: Models::Operations::UpdatedMediaRequestBody.new(
+res = s.manage_videos.updated_media(media_id: 'your-media-id', body: Models::Operations::UpdatedMediaRequestBody.new(
   metadata: {
-    "metadata": '{"user":"fastpix_admin"}',
+    "user": 'fastpix_admin',
   },
+  title: 'test title',
 ))
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                                         | Type                                                                                                              | Required                                                                                                          | Description                                                                                                       | Example                                                                                                           |
-| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `media_id`                                                                                                        | *::String*                                                                                                        | :heavy_check_mark:                                                                                                | When creating the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                              |
-| `request_body`                                                                                                    | [Models::Operations::UpdatedMediaRequestBody](../../models/operations/updatedmediarequestbody.md)                 | :heavy_check_mark:                                                                                                | N/A                                                                                                               |                                                                                                                   |
+| Parameter                                                                                         | Type                                                                                              | Required                                                                                          | Description                                                                                       | Example                                                                                           |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `media_id`                                                                                        | *::String*                                                                                        | :heavy_check_mark:                                                                                | The unique identifier assigned to the media when created. The value must be a valid UUID.         | your-media-id                                                              |
+| `body`                                                                                            | [Models::Operations::UpdatedMediaRequestBody](../../models/operations/updatedmediarequestbody.md) | :heavy_check_mark:                                                                                | N/A                                                                                               |                                                                                                   |
 
 ### Response
 
@@ -257,13 +274,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::MediaNotFoundError      | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## delete_media
 
@@ -273,11 +286,11 @@ This endpoint allows you to permanently delete a a specific video or audio media
 #### How it works
 
 
-1. Make a DELETE request to this endpoint, replacing `<mediaId>` with the `uploadId` or the `id` of the media you want to delete. 
+1. Send a DELETE request to this endpoint. Replace `<mediaId>` with the `uploadId` or the `id` of the media you want to delete. 
 
-2. Since this action is irreversible, ensure that you no longer need the media before proceeding. Once deleted, the media cannot be retrieved or played back. 
+2. This action is irreversible. Make sure you no longer need the media before proceeding. Once deleted, the media can’t be retrieved or played back. 
 
-3. Webhook event to look for: <a href="https://docs.fastpix.io/docs/media-events#videomediadeleted">video.media.deleted</a>
+3. Monitor the following webhook event: <a href="https://docs.fastpix.io/docs/media-events#videomediadeleted">video.media.deleted</a>
 
 #### Example
 A user on a video-sharing platform decides to remove an old video from their profile, or suppose you're running a content moderation system, and one of the videos uploaded by a user violates your platform's policies. Using this endpoint, the media is permanently deleted from your library, ensuring it's no longer accessible or viewable by other users.
@@ -287,29 +300,34 @@ A user on a video-sharing platform decides to remove an old video from their pro
 
 <!-- UsageSnippet language="ruby" operationID="delete-media" method="delete" path="/on-demand/{mediaId}" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.delete_media(media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6')
+res = s.manage_videos.delete_media(media_id: 'your-media-id')
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                                         | Type                                                                                                              | Required                                                                                                          | Description                                                                                                       | Example                                                                                                           |
-| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `media_id`                                                                                                        | *::String*                                                                                                        | :heavy_check_mark:                                                                                                | When creating the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                              |
+| Parameter                                                                                 | Type                                                                                      | Required                                                                                  | Description                                                                               | Example                                                                                   |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `media_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | The unique identifier assigned to the media when created. The value must be a valid UUID. | your-media-id                                                      |
 
 ### Response
 
@@ -317,13 +335,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::MediaNotFoundError      | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## add_media_track
 
@@ -341,11 +355,11 @@ This endpoint allows you to add an audio or subtitle track to an existing media 
 
 #### Webhook events
 
-1. After successfully adding a track, your system will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackcreated">video.media.track.created</a>.
+1. After successfully adding a track, your system must receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackcreated">video.media.track.created</a>.
 
-2. Once the track is processed and ready, you will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackready">video.media.track.ready</a>.
+2. Once the track is processed and ready, you must receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackready">video.media.track.ready</a>.
 
-3. Finally, an update event <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> will notify your system about the media's updated status.
+3. Finally, an update event <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> must notify your system about the media's updated status.
 
 
 #### Example
@@ -358,37 +372,37 @@ Related guides: <a href="https://docs.fastpix.io/docs/manage-subtitle-tracks">Ad
 
 <!-- UsageSnippet language="ruby" operationID="Add-media-track" method="post" path="/on-demand/{mediaId}/tracks" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.add_media_track(media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6', request_body: Models::Operations::AddMediaTrackRequestBody.new(
-  tracks: Models::Components::AddTrackRequest.new(
-    url: 'https://static.fastpix.io/music-1.mp3',
-    type: Models::Components::AddTrackRequestType::AUDIO,
-    language_code: 'it',
-    language_name: 'Italian',
-  ),
+res = s.manage_videos.add_media_track(media_id: 'your-media-id', body: Models::Operations::AddMediaTrackRequestBody.new(
+  tracks: Models::Components::AddTrackRequest.new(),
 ))
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                                         | Type                                                                                                              | Required                                                                                                          | Description                                                                                                       | Example                                                                                                           |
-| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `media_id`                                                                                                        | *::String*                                                                                                        | :heavy_check_mark:                                                                                                | When creating the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                              |
-| `request_body`                                                                                                    | [Models::Operations::AddMediaTrackRequestBody](../../models/operations/addmediatrackrequestbody.md)               | :heavy_check_mark:                                                                                                | N/A                                                                                                               |                                                                                                                   |
+| Parameter                                                                                           | Type                                                                                                | Required                                                                                            | Description                                                                                         | Example                                                                                             |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `media_id`                                                                                          | *::String*                                                                                          | :heavy_check_mark:                                                                                  | The unique identifier assigned to the media when created. The value must be a valid UUID.           | your-media-id                                                                |
+| `body`                                                                                              | [Models::Operations::AddMediaTrackRequestBody](../../models/operations/addmediatrackrequestbody.md) | :heavy_check_mark:                                                                                  | N/A                                                                                                 |                                                                                                     |
 
 ### Response
 
@@ -396,27 +410,22 @@ end
 
 ### Errors
 
-| Error Type                                 | Status Code                                | Content Type                               |
-| ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| Models::Errors::TrackDuplicateRequestError | 400                                        | application/json                           |
-| Models::Errors::InvalidPermissionError     | 401                                        | application/json                           |
-| Models::Errors::ForbiddenError             | 403                                        | application/json                           |
-| Models::Errors::MediaNotFoundError         | 404                                        | application/json                           |
-| Models::Errors::ValidationErrorResponse    | 422                                        | application/json                           |
-| Errors::APIError                           | 4XX, 5XX                                   | \*/\*                                      |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## cancel_upload
 
-This endpoint allows you to cancel ongoing upload by its `uploadId`. Once cancelled, the upload will be marked as cancelled. Use this if a user aborts an upload or if you want to programmatically stop an in-progress upload.
+This endpoint allows you to cancel ongoing upload by its `uploadId`. Once cancelled, the upload is marked as cancelled. Use this if a user aborts an upload or if you want to programmatically stop an in-progress upload.
 
 #### How it works
 
 1. Make a PUT request to this endpoint, replacing `{uploadId}` with the unique upload ID received after starting the upload.
-2. The response will confirm the cancellation and provide the status of the upload.
+2. The response confirms the cancellation and provide the status of the upload.
 
 #### Webhook Events
 
-Once the upload is cancelled, you will receive the webhook event <a href="https://docs.fastpix.io/docs/media-events#videomediauploadcancelled-event">video.media.upload.cancelled</a>.
+Once the upload is cancelled, you must receive the webhook event <a href="https://docs.fastpix.io/docs/media-events#videomediauploadcancelled">video.media.upload.cancelled</a>.
 
 #### Example
 
@@ -427,20 +436,25 @@ Suppose a user starts uploading a large video file but decides to cancel before 
 
 <!-- UsageSnippet language="ruby" operationID="cancel-upload" method="put" path="/on-demand/upload/{uploadId}/cancel" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.cancel_upload(upload_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6')
+res = s.manage_videos.cancel_upload(upload_id: 'your-upload-id')
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -449,7 +463,7 @@ end
 
 | Parameter                                                                                                          | Type                                                                                                               | Required                                                                                                           | Description                                                                                                        | Example                                                                                                            |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `upload_id`                                                                                                        | *::String*                                                                                                         | :heavy_check_mark:                                                                                                 | When uploading the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                               |
+| `upload_id`                                                                                                        | *::String*                                                                                                         | :heavy_check_mark:                                                                                                 | When uploading the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters. | your-upload-id                                                                               |
 
 ### Response
 
@@ -457,14 +471,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::BadRequestError         | 400                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::MediaNotFoundError      | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## update_media_track
 
@@ -481,13 +490,13 @@ This endpoint allows you to update an existing audio or subtitle track associate
 
 #### Webhook Events
 
-After updating a track, your system will receive webhook notifications:
+After updating a track, your system must receive webhook notifications:
 
-1. After successfully updating a track, your system will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackupdated">video.media.track.updated</a>.
+1. After successfully updating a track, your system must receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackupdated">video.media.track.updated</a>.
 
-2. Once the new track is processed and ready, you will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackready">video.media.track.ready</a>.
+2. Once the new track is processed and ready, you must receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackready">video.media.track.ready</a>.
 
-3. Once the media file is updated with the new track details, a <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> event will be triggered.
+3. Once the media file is updated with the new track details, a <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> event must be triggered.
 
 
 #### Example
@@ -495,7 +504,7 @@ Suppose you previously added a French subtitle track to a video but now need to 
 
   - The original track file has errors and needs correction.
   - You want to improve subtitle translations or replace an audio track with a better-quality version.
-  
+
 Related guides: <a href="https://docs.fastpix.io/docs/manage-subtitle-tracks">Add own subtitle tracks</a>, <a href="https://docs.fastpix.io/docs/manage-audio-tracks">Add own audio tracks</a>
 
 
@@ -503,35 +512,38 @@ Related guides: <a href="https://docs.fastpix.io/docs/manage-subtitle-tracks">Ad
 
 <!-- UsageSnippet language="ruby" operationID="update-media-track" method="patch" path="/on-demand/{mediaId}/tracks/{trackId}" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.update_media_track(track_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6', media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6', update_track_request: Models::Components::UpdateTrackRequest.new(
-  url: 'http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/thrust.vtt',
-  language_code: 'fr',
+res = s.manage_videos.update_media_track(track_id: 'your-track-id', media_id: 'your-media-id', body: Models::Components::UpdateTrackRequest.new(
   language_name: 'french',
 ))
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                                         | Type                                                                                                              | Required                                                                                                          | Description                                                                                                       | Example                                                                                                           |
-| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `track_id`                                                                                                        | *::String*                                                                                                        | :heavy_check_mark:                                                                                                | When creating the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                              |
-| `media_id`                                                                                                        | *::String*                                                                                                        | :heavy_check_mark:                                                                                                | When creating the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                              |
-| `update_track_request`                                                                                            | [Models::Components::UpdateTrackRequest](../../models/shared/updatetrackrequest.md)                               | :heavy_check_mark:                                                                                                | N/A                                                                                                               |                                                                                                                   |
+| Parameter                                                                                 | Type                                                                                      | Required                                                                                  | Description                                                                               | Example                                                                                   |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `track_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | The unique identifier assigned to the track. The value must be a valid UUID. | your-track-id                                                      |
+| `media_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | The unique identifier assigned to the media when created. The value must be a valid UUID. | your-media-id                                                      |
+| `body`                                                                                    | [Models::Components::UpdateTrackRequest](../../models/shared/updatetrackrequest.md)       | :heavy_check_mark:                                                                        | N/A                                                                                       |                                                                                           |
 
 ### Response
 
@@ -539,18 +551,13 @@ end
 
 ### Errors
 
-| Error Type                                 | Status Code                                | Content Type                               |
-| ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| Models::Errors::TrackDuplicateRequestError | 400                                        | application/json                           |
-| Models::Errors::InvalidPermissionError     | 401                                        | application/json                           |
-| Models::Errors::ForbiddenError             | 403                                        | application/json                           |
-| Models::Errors::MediaNotFoundError         | 404                                        | application/json                           |
-| Models::Errors::ValidationErrorResponse    | 422                                        | application/json                           |
-| Errors::APIError                           | 4XX, 5XX                                   | \*/\*                                      |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## delete_media_track
 
-This endpoint allows you to delete an existing audio or subtitle track from a media file. Once deleted, the track will no longer be available for playback.
+This endpoint allows you to delete an existing audio or subtitle track from a media file. Once deleted, the track must no longer be available for playback.
 
 
 #### How it works
@@ -558,13 +565,13 @@ This endpoint allows you to delete an existing audio or subtitle track from a me
 
 1. Send a DELETE request to this endpoint, replacing `{mediaId}` with the media ID, and `{trackId}` with the ID of the track you want to remove.
 
-2. The track will be deleted from the media file, and you will receive a confirmation response.
+2. The track gets deleted from the media file, and you must receive a confirmation response.
 
 #### Webhook events
 
-1. After successfully deleting a track, your system will receive the webhook event **video.media.track.deleted**.
+1. After successfully deleting a track, your system must receive the webhook event **video.media.track.deleted**.
 
-2. Once the media file is updated to reflect the track removal, a <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> event will be triggered.
+2. Once the media file is updated to reflect the track removal, a <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> event must be triggered.
 
 
 #### Example
@@ -572,8 +579,8 @@ Suppose you uploaded an audio track in Italian for a video but later realize it'
 
   - A track was mistakenly added and needs to be removed.
   - The content owner requests the removal of a specific subtitle or audio track.
-  - A new version of the track will be uploaded to replace the existing one.
-  
+  - A new version of the track gets uploaded to replace the existing one.
+
 Related guides: <a href="https://docs.fastpix.io/docs/manage-subtitle-tracks">Add own subtitle tracks</a>, <a href="https://docs.fastpix.io/docs/manage-audio-tracks">Add own audio tracks</a>
 
 
@@ -581,30 +588,35 @@ Related guides: <a href="https://docs.fastpix.io/docs/manage-subtitle-tracks">Ad
 
 <!-- UsageSnippet language="ruby" operationID="delete-media-track" method="delete" path="/on-demand/{mediaId}/tracks/{trackId}" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.delete_media_track(media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6', track_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6')
+res = s.manage_videos.delete_media_track(media_id: 'your-media-id', track_id: 'your-track-id')
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                                         | Type                                                                                                              | Required                                                                                                          | Description                                                                                                       | Example                                                                                                           |
-| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `media_id`                                                                                                        | *::String*                                                                                                        | :heavy_check_mark:                                                                                                | When creating the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                              |
-| `track_id`                                                                                                        | *::String*                                                                                                        | :heavy_check_mark:                                                                                                | When creating the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                              |
+| Parameter                                                                                 | Type                                                                                      | Required                                                                                  | Description                                                                               | Example                                                                                   |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `media_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | The unique identifier assigned to the media when created. The value must be a valid UUID. | your-media-id                                                      |
+| `track_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | The unique identifier assigned to the track. The value must be a valid UUID. | your-track-id                                                      |
 
 ### Response
 
@@ -612,13 +624,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::MediaNotFoundError      | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## generate_subtitle_track
 
@@ -630,13 +638,13 @@ This endpoint allows you to generate subtitles for an existing audio track in a 
 
 2. Provide the necessary details in the request body, including the languageName and languageCode.
 
-3. Receive a response containing a unique subtitle track ID and its details.
+3. You receive a response containing a unique subtitle track ID and its details.
 
 #### Webhook Events
 
-1. Once the subtitle track is generated and ready, you will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediasubtitlegeneratedready">video.media.subtitle.generated.ready</a>.
+1. After the subtitle track is generated and ready, you receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediasubtitlegeneratedready">video.media.subtitle.generated.ready</a>.
 
-2. Finally, an update event <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> will notify your system about the media's updated status.
+2. Finally the <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> event notifies your system about the media’s updated status.
 
 </br> Related guide: <a href="https://docs.fastpix.io/docs/add-auto-generated-subtitles-to-videos">Add auto-generated subtitles</a>
 
@@ -645,33 +653,38 @@ This endpoint allows you to generate subtitles for an existing audio track in a 
 
 <!-- UsageSnippet language="ruby" operationID="Generate-subtitle-track" method="post" path="/on-demand/{mediaId}/tracks/{trackId}/generate-subtitles" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.generate_subtitle_track(media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6', track_id: 'd46f5df9-1a8f-4f0a-b56e-9f5b5d5b9e21', track_subtitles_generate_request: Models::Components::TrackSubtitlesGenerateRequest.new(
+res = s.manage_videos.generate_subtitle_track(media_id: 'your-media-id', track_id: 'your-track-id', body: Models::Components::TrackSubtitlesGenerateRequest.new(
   language_name: 'Italian',
 ))
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                                      | Type                                                                                                           | Required                                                                                                       | Description                                                                                                    | Example                                                                                                        |
-| -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `media_id`                                                                                                     | *::String*                                                                                                     | :heavy_check_mark:                                                                                             | A universally unique identifier (UUID) assigned to the media by FastPix.                                       | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                           |
-| `track_id`                                                                                                     | *::String*                                                                                                     | :heavy_check_mark:                                                                                             | A universally unique identifier (UUID) assigned to the specific track for which subtitles should be generated. | d46f5df9-1a8f-4f0a-b56e-9f5b5d5b9e21                                                                           |
-| `track_subtitles_generate_request`                                                                             | [Models::Components::TrackSubtitlesGenerateRequest](../../models/shared/tracksubtitlesgeneraterequest.md)      | :heavy_check_mark:                                                                                             | N/A                                                                                                            |                                                                                                                |
+| Parameter                                                                                                    | Type                                                                                                         | Required                                                                                                     | Description                                                                                                  | Example                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `media_id`                                                                                                   | *::String*                                                                                                   | :heavy_check_mark:                                                                                           | The unique identifier assigned to the media when created. The value must be a valid UUID.                    | your-media-id                                                                         |
+| `track_id`                                                                                                   | *::String*                                                                                                   | :heavy_check_mark:                                                                                           | A universally unique identifier (UUID) assigned to the specific track for which subtitles must be generated. | your-track-id                                                                         |
+| `body`                                                                                                       | [Models::Components::TrackSubtitlesGenerateRequest](../../models/shared/tracksubtitlesgeneraterequest.md)    | :heavy_check_mark:                                                                                           | N/A                                                                                                          |                                                                                                              |
 
 ### Response
 
@@ -679,14 +692,68 @@ end
 
 ### Errors
 
-| Error Type                                 | Status Code                                | Content Type                               |
-| ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| Models::Errors::TrackDuplicateRequestError | 400                                        | application/json                           |
-| Models::Errors::InvalidPermissionError     | 401                                        | application/json                           |
-| Models::Errors::ForbiddenError             | 403                                        | application/json                           |
-| Models::Errors::MediaNotFoundError         | 404                                        | application/json                           |
-| Models::Errors::ValidationErrorResponse    | 422                                        | application/json                           |
-| Errors::APIError                           | 4XX, 5XX                                   | \*/\*                                      |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
+
+## get_media_summary
+
+This endpoint returns the generated summary of a video.  
+
+The summary is created using the **InVideo Summary** feature, which processes the video content and produces a textual summary.  
+
+To use this endpoint, you must first generate the video summary using the Generate Video Summary endpoint. This endpoint can return the summary only after that process is complete. 
+
+Typical use cases include:  
+- Providing viewers with a quick preview of the video's main content.  
+- Enabling search or recommendation systems to surface summarized insights.  
+- Supporting accessibility and content discovery without requiring users to watch the full video.  
+
+If the summary has not been generated or the feature is disabled for the requested media, the endpoint returns an error indicating that the summary is unavailable. 
+
+
+### Example Usage
+
+<!-- UsageSnippet language="ruby" operationID="get-media-summary" method="get" path="/on-demand/{mediaId}/summary" -->
+```ruby
+require 'json'
+require 'fastpixapi'
+
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
+      security: Models::Components::Security.new(
+        username: 'your-access-token',
+        password: 'your-secret-key',
+      ),
+    )
+
+res = s.manage_videos.get_media_summary(media_id: 'your-media-id')
+
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
+end
+
+```
+
+### Parameters
+
+| Parameter                                                                                 | Type                                                                                      | Required                                                                                  | Description                                                                               | Example                                                                                   |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `media_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | The unique identifier assigned to the media when created. The value must be a valid UUID. | your-media-id                                                      |
+
+### Response
+
+**[T.nilable(Models::Operations::GetMediaSummaryResponse)](../../models/operations/getmediasummaryresponse.md)**
+
+### Errors
+
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## updated_source_access
 
@@ -698,7 +765,7 @@ This endpoint allows you to update the `sourceAccess` setting of an existing med
 
 2. Include the updated `sourceAccess` parameter in the request body.
 
-3. Receive a response confirming the update to the media's source access status.
+3. You receive a response confirming the update to the media’s source access status.
 4. Webhook events: <a href="https://docs.fastpix.io/docs/transform-media-events#videomediasourceready">video.media.source.ready</a>, <a href="https://docs.fastpix.io/docs/transform-media-events#videomediasourcedeleted">video.media.source.deleted</a>
 
 
@@ -706,32 +773,37 @@ This endpoint allows you to update the `sourceAccess` setting of an existing med
 
 <!-- UsageSnippet language="ruby" operationID="updated-source-access" method="patch" path="/on-demand/{mediaId}/source-access" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.updated_source_access(media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6', request_body: Models::Operations::UpdatedSourceAccessRequestBody.new(
+res = s.manage_videos.updated_source_access(media_id: 'your-media-id', body: Models::Operations::UpdatedSourceAccessRequestBody.new(
   source_access: true,
 ))
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                                          | Type                                                                                                               | Required                                                                                                           | Description                                                                                                        | Example                                                                                                            |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `media_id`                                                                                                         | *::String*                                                                                                         | :heavy_check_mark:                                                                                                 | When creating the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters.<br/> | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                               |
-| `request_body`                                                                                                     | [Models::Operations::UpdatedSourceAccessRequestBody](../../models/operations/updatedsourceaccessrequestbody.md)    | :heavy_check_mark:                                                                                                 | N/A                                                                                                                | {<br/>"sourceAccess": true<br/>}                                                                                   |
+| Parameter                                                                                                       | Type                                                                                                            | Required                                                                                                        | Description                                                                                                     | Example                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `media_id`                                                                                                      | *::String*                                                                                                      | :heavy_check_mark:                                                                                              | The unique identifier assigned to the media when created. The value must be a valid UUID.<br/>                  | your-media-id                                                                            |
+| `body`                                                                                                          | [Models::Operations::UpdatedSourceAccessRequestBody](../../models/operations/updatedsourceaccessrequestbody.md) | :heavy_check_mark:                                                                                              | N/A                                                                                                             | {<br/>"sourceAccess": true<br/>}                                                                                |
 
 ### Response
 
@@ -739,13 +811,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::MediaNotFoundError      | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## updated_mp4_support
 
@@ -757,26 +825,24 @@ This endpoint allows you to update the `mp4Support` setting of an existing media
 
 2. Provide the desired `mp4Support` value in the request body.
 
-3. Receive a response confirming the update, including the media's updated MP4 support status.
+3. You receive a response confirming the update, including the media’s updated MP4 support status.
 
 #### MP4 Support Options
 
 - `none` – MP4 support is disabled for this media.
 
-- `capped_4k` – The media will have mp4 renditions up to 4K resolution.
+- `capped_4k` – Generates MP4 renditions up to 4K resolution.
 
-- `audioOnly` – The media will generate an m4a file containing only the audio track.
+- `audioOnly` – Generates an M4A file that contains only the audio track.
 
-- `audioOnly,capped_4k` – The media will have both an audio-only m4a file and mp4 renditions up to 4K resolution.
+- `audioOnly,capped_4k` – Generates both an audio-only M4A file and MP4 renditions up to 4K resolution.
 
 #### Webhook events
 
 - <a href="https://docs.fastpix.io/docs/transform-media-events#videomediamp4supportready">video.media.mp4Support.ready</a> – Triggered when the MP4 support setting is successfully updated.
 
 #### Example
-Suppose you have a video uploaded to the FastPix platform, and you want to allow users to download the video in MP4 format. By setting "mp4Support": "capped_4k", the system will generate an MP4 rendition of the video up to 4K resolution, making it available for download via the stream URL(`https://stream.fastpix.io/{playbackId}/{capped-4k.mp4 | audio.m4a}`).
-If you want users to stream only the audio from the media file, you can set "mp4Support": "audioOnly". This will provide an audio-only stream URL that allows users to listen to the media without video.
-By setting "mp4Support": "audioOnly,capped_4k", both options will be enabled. Users will be able to download the MP4 video and also stream just the audio version of the media.
+Suppose you have a video uploaded to the FastPix platform, and you want to allow users to download the video in MP4 format. By setting "mp4Support": "capped_4k", the system generates an MP4 rendition of the video up to 4K resolution, making it available for download through the stream URL(`https://stream.fastpix.io/{playbackId}/{capped-4k.mp4 | audio.m4a}`). If you want users to stream only the audio from the media file, you can set "mp4Support": "audioOnly". This provides an audio-only stream URL that allows users to listen to the media without video. By setting "mp4Support": "audioOnly,capped_4k", both options are enabled. Users can download the MP4 video and also stream just the audio version of the media. 
 
 
 Related guide: <a href="https://docs.fastpix.io/docs/mp4-support-for-offline-viewing">Use MP4 support for offline viewing</a>
@@ -786,32 +852,35 @@ Related guide: <a href="https://docs.fastpix.io/docs/mp4-support-for-offline-vie
 
 <!-- UsageSnippet language="ruby" operationID="updated-mp4Support" method="patch" path="/on-demand/{mediaId}/update-mp4Support" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.updated_mp4_support(media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6', request_body: Models::Operations::UpdatedMp4SupportRequestBody.new(
-  mp4_support: Models::Operations::UpdatedMp4SupportMp4Support::CAPPED_4K,
-))
+res = s.manage_videos.updated_mp4_support(media_id: 'your-media-id', body: Models::Operations::UpdatedMp4SupportRequestBody.new())
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                                          | Type                                                                                                               | Required                                                                                                           | Description                                                                                                        | Example                                                                                                            |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `media_id`                                                                                                         | *::String*                                                                                                         | :heavy_check_mark:                                                                                                 | When creating the media, FastPix assigns a universally unique identifier with a maximum length of 255 characters.<br/> | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                                               |
-| `request_body`                                                                                                     | [Models::Operations::UpdatedMp4SupportRequestBody](../../models/operations/updatedmp4supportrequestbody.md)        | :heavy_check_mark:                                                                                                 | N/A                                                                                                                | {<br/>"mp4Support": "capped_4k"<br/>}                                                                              |
+| Parameter                                                                                                   | Type                                                                                                        | Required                                                                                                    | Description                                                                                                 | Example                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `media_id`                                                                                                  | *::String*                                                                                                  | :heavy_check_mark:                                                                                          | The unique identifier assigned to the media when created. The value must be a valid UUID.<br/>              | your-media-id                                                                        |
+| `body`                                                                                                      | [Models::Operations::UpdatedMp4SupportRequestBody](../../models/operations/updatedmp4supportrequestbody.md) | :heavy_check_mark:                                                                                          | N/A                                                                                                         | {<br/>"mp4Support": "capped_4k"<br/>}                                                                       |
 
 ### Response
 
@@ -819,18 +888,13 @@ end
 
 ### Errors
 
-| Error Type                               | Status Code                              | Content Type                             |
-| ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
-| Models::Errors::DuplicateMp4SupportError | 400                                      | application/json                         |
-| Models::Errors::InvalidPermissionError   | 401                                      | application/json                         |
-| Models::Errors::ForbiddenError           | 403                                      | application/json                         |
-| Models::Errors::MediaNotFoundError       | 404                                      | application/json                         |
-| Models::Errors::ValidationErrorResponse  | 422                                      | application/json                         |
-| Errors::APIError                         | 4XX, 5XX                                 | \*/\*                                    |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## retrieve_media_input_info
 
-Allows you to retrieve detailed information about the media inputs associated with a specific media item. You can use this endpoint to verify the media file's input URL, track creation status, and container format. The `mediaId` (either `uploadId` or `id`) must be provided to fetch the information. 
+This endpoint lets you retrieve detailed information about the media inputs associated with a specific media item. You can use it to verify the media file’s input URL, track its creation status, and check its container format. You must provide the mediaId (either the uploadId or the id) to fetch this information.
 
 
 #### How it works
@@ -839,9 +903,9 @@ Upon making a `GET` request with the mediaId, FastPix returns a response with:
 
 * The public storage input `url` of the uploaded media file. 
 
-* Information about the `tracks` associated with the media, including both video and audio tracks, indicating whether they have been successfully created. 
+* Information about the media’s video and audio tracks, including whether they were successfully created.
 
-* The format of the uploaded media file container (e.g., MP4, MKV). 
+* The container format of the uploaded media file (for example, MP4, MKV).
 
 This endpoint is particularly useful for ensuring that all necessary tracks (video and audio) have been correctly associated with the media during the upload or media creation process.
 
@@ -850,20 +914,25 @@ This endpoint is particularly useful for ensuring that all necessary tracks (vid
 
 <!-- UsageSnippet language="ruby" operationID="retrieveMediaInputInfo" method="get" path="/on-demand/{mediaId}/input-info" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.retrieve_media_input_info(media_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6')
+res = s.manage_videos.retrieve_media_input_info(media_id: 'your-media-id')
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -872,7 +941,7 @@ end
 
 | Parameter                                                                                 | Type                                                                                      | Required                                                                                  | Description                                                                               | Example                                                                                   |
 | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `media_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | Pass the list of the input objects used to create the media, along with applied settings. | 4fa85f64-5717-4562-b3fc-2c963f66afa6                                                      |
+| `media_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | Pass the list of the input objects used to create the media, along with applied settings. | your-media-id                                                      |
 
 ### Response
 
@@ -880,13 +949,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::MediaNotFoundError      | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## list_uploads
 
@@ -905,17 +970,18 @@ An unused upload URL is a signed URL that gets generated when an user initiates 
 
 #### Example
 
-A video management team for a media organization regularly uploads content to their system but often forgets to delete or utilize unused uploads. These unused uploads, which have signed URLs that expire after 24 hours, need to be managed efficiently. By using this API, they can retrieve metadata for all unused uploads, identify expired signed URLs, and decide whether to regenerate URLs, reuse the uploads, or delete them.
+A video management team at a media organization regularly uploads content but often forgets to delete or use unused uploads. These unused uploads have signed URLs that expire after 24 hours and need to be managed efficiently. By using this API, the team can retrieve metadata for all unused uploads, identify expired signed URLs, and decide whether to regenerate URLs, reuse the uploads, or delete them.
 
 
 ### Example Usage
 
 <!-- UsageSnippet language="ruby" operationID="list-uploads" method="get" path="/on-demand/uploads" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
@@ -924,8 +990,12 @@ s = ::FastpixApiSDK::Fastpix.new(
 
 res = s.manage_videos.list_uploads(limit: 20, offset: 1, order_by: Models::Components::SortOrder::DESC)
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -944,23 +1014,20 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## get_media_clips
 
-This endpoint retrieves a list of all media clips associated with a given source media ID. It helps in organizing and managing media's efficiently by providing metadata, including clip media IDs and other relevant details.
+This endpoint retrieves a list of all media clips associated with a given source media ID. It helps you organize and manage media efficiently by providing metadata such as clip media IDs and other relevant details.
 
 A media clip is a segmented portion of an original media file (source media). Clips are often created for various purposes such as previews, highlights, or customized edits. This API allows you to fetch all such clips linked to a specific source media, making it easier to track and manage clips.
 
 
 #### How it works
 
-- The endpoint returns metadata for all media clips associated with the given `sourceMediaId`.
+- The endpoint returns metadata for all media clips associated with the given `mediaId`.
 - Results are paginated to efficiently handle large datasets.
 - Each entry includes detailed metadata such as media `id`, `duration`, and `status`.
 - Helps in organizing clips effectively by providing structured information.
@@ -968,41 +1035,46 @@ A media clip is a segmented portion of an original media file (source media). Cl
 
 #### Example
 
-Imagine you're managing a video editing platform where users upload full-length videos and create short clips for social media sharing. To keep track of all clips linked to a particular video, you call this API with the sourceMediaId. The response provides a list of all associated clips, allowing you to manage, edit, or repurpose them as needed.
+Imagine you’re managing a video editing platform where users upload full-length videos and create short clips for social media sharing. To keep track of all clips linked to a particular video, you call this API with the sourceMediaId. The response provides a list of all associated clips, allowing you to manage, edit, or repurpose them as needed.
 
 Related guide: <a href="https://docs.fastpix.io/docs/create-clips-from-existing-media">Create clips from existing media</a>
 
 
 ### Example Usage
 
-<!-- UsageSnippet language="ruby" operationID="get-media-clips" method="get" path="/on-demand/{sourceMediaId}/media-clips" -->
+<!-- UsageSnippet language="ruby" operationID="get-media-clips" method="get" path="/on-demand/{mediaId}/media-clips" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.manage_videos.get_media_clips(source_media_id: 'fc733e3f-2fba-4c3d-9388-2511dc50d15f', offset: 5, limit: 20, order_by: Models::Components::SortOrder::DESC)
+res = s.manage_videos.get_media_clips(media_id: 'your-media-id', offset: 5, limit: 20, order_by: Models::Components::SortOrder::DESC)
 
-unless res.media_clip_response.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
 
 ### Parameters
 
-| Parameter                                                                                | Type                                                                                     | Required                                                                                 | Description                                                                              | Example                                                                                  |
-| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `source_media_id`                                                                        | *::String*                                                                               | :heavy_check_mark:                                                                       | The unique identifier of the source media.                                               | fc733e3f-2fba-4c3d-9388-2511dc50d15f                                                     |
-| `offset`                                                                                 | *T.nilable(::Integer)*                                                                   | :heavy_minus_sign:                                                                       | Offset determines the starting point for data retrieval within a paginated list.         | 5                                                                                        |
-| `limit`                                                                                  | *T.nilable(::Integer)*                                                                   | :heavy_minus_sign:                                                                       | The number of media clips to retrieve per request.                                       | 20                                                                                       |
-| `order_by`                                                                               | [T.nilable(Models::Components::SortOrder)](../../models/shared/sortorder.md)             | :heavy_minus_sign:                                                                       | The values in the list can be arranged in two ways DESC (Descending) or ASC (Ascending). | desc                                                                                     |
+| Parameter                                                                                 | Type                                                                                      | Required                                                                                  | Description                                                                               | Example                                                                                   |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `media_id`                                                                                | *::String*                                                                                | :heavy_check_mark:                                                                        | The unique identifier assigned to the media when created. The value must be a valid UUID. | your-media-id                                                      |
+| `offset`                                                                                  | *T.nilable(::Integer)*                                                                    | :heavy_minus_sign:                                                                        | Offset determines the starting point for data retrieval within a paginated list.          | 5                                                                                         |
+| `limit`                                                                                   | *T.nilable(::Integer)*                                                                    | :heavy_minus_sign:                                                                        | The number of media clips to retrieve per request.                                        | 20                                                                                        |
+| `order_by`                                                                                | [T.nilable(Models::Components::SortOrder)](../../models/shared/sortorder.md)              | :heavy_minus_sign:                                                                        | The values in the list can be arranged in two ways DESC (Descending) or ASC (Ascending).  | desc                                                                                      |
 
 ### Response
 
@@ -1010,10 +1082,6 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::MediaClipNotFoundError  | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |

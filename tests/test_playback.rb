@@ -6,8 +6,8 @@ require_relative 'test_helper'
 class TestPlayback < Minitest::Test
   def initialize(test_name = nil)
     super(test_name)
-    @username = self.class.class_variable_defined?(:@@username) ? self.class.class_variable_get(:@@username) : "453c6ab2-491a-470e-9d4e-78546bfbc818"
-    @password = self.class.class_variable_defined?(:@@password) ? self.class.class_variable_get(:@@password) : "ff6983d7-6b70-4f21-ba45-f1fa9954f344"
+    @username = self.class.class_variable_defined?(:@@username) ? self.class.class_variable_get(:@@username) : ENV['FASTPIX_USERNAME'] || 'YOUR_FASTPIX_USERNAME'
+    @password = self.class.class_variable_defined?(:@@password) ? self.class.class_variable_get(:@@password) : ENV['FASTPIX_PASSWORD'] || 'YOUR_FASTPIX_PASSWORD'
     @sdk = FastpixTestHelper.create_sdk(@username, @password)
     @models = ::FastpixApiSDK::Models
     @test_media_id = nil

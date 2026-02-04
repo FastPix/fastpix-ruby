@@ -1,9 +1,0 @@
-# SuccessResponse
-
-
-## Fields
-
-| Field                                                                                           | Type                                                                                            | Required                                                                                        | Description                                                                                     |
-| ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `success`                                                                                       | *T::Boolean*                                                                                    | :heavy_check_mark:                                                                              | Demonstrates whether the request is successful or not.                                          |
-| `data`                                                                                          | T::Array<[Models::Components::SuccessResponseData](../../models/shared/successresponsedata.md)> | :heavy_check_mark:                                                                              | Array of response data                                                                          |

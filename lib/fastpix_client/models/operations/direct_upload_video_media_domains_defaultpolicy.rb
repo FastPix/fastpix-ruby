@@ -1,0 +1,24 @@
+# Generated code for FastPix API SDK.
+
+# typed: true
+# frozen_string_literal: true
+
+
+module FastpixClient
+  module Models
+    module Operations
+      # DirectUploadVideoMediaDomainsDefaultPolicy - Specifies the default access policy for domains. 
+      # If set to `allow`, all domains are allowed access unless otherwise specified in the `deny` list. 
+      # If set to `deny`, all domains are denied access unless otherwise specified in the `allow` list.
+      # 
+      class DirectUploadVideoMediaDomainsDefaultPolicy < T::Enum
+
+
+        enums do
+          ALLOW = new('allow')
+          DENY = new('deny')
+        end
+      end
+    end
+  end
+end

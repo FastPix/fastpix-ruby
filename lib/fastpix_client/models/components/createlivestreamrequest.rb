@@ -1,0 +1,36 @@
+# Generated code for FastPix API SDK.
+
+# typed: true
+# frozen_string_literal: true
+
+
+module FastpixClient
+  module Models
+    module Components
+
+      class CreateLiveStreamRequest
+        extend T::Sig
+        include Crystalline::MetadataFields
+
+        # Displays the result of the playback settings.
+        field :playback_settings, Models::Components::PlaybackSettings, { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('playbackSettings'), required: true } }
+        # Contains configuration details for input media settings.
+        field :input_media_settings, Models::Components::InputMediaSettings, { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('inputMediaSettings'), required: true } }
+
+        sig { params(playback_settings: Models::Components::PlaybackSettings, input_media_settings: Models::Components::InputMediaSettings).void }
+        def initialize(playback_settings:, input_media_settings:)
+          @playback_settings = playback_settings
+          @input_media_settings = input_media_settings
+        end
+
+        sig { params(other: T.untyped).returns(T::Boolean) }
+        def ==(other)
+          return false unless other.is_a? self.class
+          return false unless @playback_settings == other.playback_settings
+          return false unless @input_media_settings == other.input_media_settings
+          true
+        end
+      end
+    end
+  end
+end

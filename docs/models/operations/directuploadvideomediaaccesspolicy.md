@@ -1,6 +1,6 @@
 # DirectUploadVideoMediaAccessPolicy
 
-Determines if access to the streamed content is kept private or available to all.
+Determines if access to the streamed content is kept private, drm or available to all.
 
 
 ## Values
@@ -9,3 +9,4 @@ Determines if access to the streamed content is kept private or available to all
 | --------- | --------- |
 | `PUBLIC`  | public    |
 | `PRIVATE` | private   |
+| `DRM`     | drm       |

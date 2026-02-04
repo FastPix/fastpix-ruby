@@ -1,7 +1,8 @@
 # DRMConfigurations
-(*drm_configurations*)
 
 ## Overview
+
+Operations for DRM configuration management
 
 ### Available Operations
 
@@ -28,10 +29,11 @@ Related guide: <a href="https://docs.fastpix.io/docs/secure-playback-with-drm">M
 
 <!-- UsageSnippet language="ruby" operationID="getDrmConfiguration" method="get" path="/on-demand/drm-configurations" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
@@ -40,8 +42,12 @@ s = ::FastpixApiSDK::Fastpix.new(
 
 res = s.drm_configurations.get_drm_configuration(offset: 1, limit: 10)
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -59,13 +65,9 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::BadRequestError         | 400                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
 
 ## get_drm_configuration_by_id
 
@@ -74,7 +76,7 @@ This endpoint retrieves a DRM configuration ID. It is used to fetch the DRM-rela
 
 **How it works:**
 1. Make a GET request to this endpoint, replacing `{drmConfigurationId}` with the UUID of the DRM configuration.  
-2. The response will contain the associated DRM configuration ID.
+2. The response contains the associated DRM configuration ID.
 
 Related guide: <a href="https://docs.fastpix.io/docs/secure-playback-with-drm">Manage DRM configuration</a>
 
@@ -83,20 +85,25 @@ Related guide: <a href="https://docs.fastpix.io/docs/secure-playback-with-drm">M
 
 <!-- UsageSnippet language="ruby" operationID="getDrmConfigurationById" method="get" path="/on-demand/drm-configurations/{drmConfigurationId}" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.drm_configurations.get_drm_configuration_by_id(drm_configuration_id: '4fa85f64-5717-4562-b3fc-2c963f66afa6')
+res = s.drm_configurations.get_drm_configuration_by_id(drm_configuration_id: 'your-drm-configuration-id')
 
-unless res.object.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -105,7 +112,7 @@ end
 
 | Parameter                                       | Type                                            | Required                                        | Description                                     | Example                                         |
 | ----------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- |
-| `drm_configuration_id`                          | *::String*                                      | :heavy_check_mark:                              | The unique identifier of the DRM configuration. | 4fa85f64-5717-4562-b3fc-2c963f66afa6            |
+| `drm_configuration_id`                          | *::String*                                      | :heavy_check_mark:                              | The unique identifier of the DRM configuration. | your-drm-configuration-id            |
 
 ### Response
 
@@ -113,11 +120,6 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::BadRequestError         | 400                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 401                                     | application/json                        |
-| Models::Errors::ForbiddenError          | 403                                     | application/json                        |
-| Models::Errors::MediaNotFoundError      | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |

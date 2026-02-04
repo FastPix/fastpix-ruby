@@ -1,0 +1,36 @@
+# Generated code for FastPix API SDK.
+
+# typed: true
+# frozen_string_literal: true
+
+
+module FastpixClient
+  module Models
+    module Components
+
+      class CreateMediaResponseInput
+        extend T::Sig
+        include Crystalline::MetadataFields
+
+        # The type of input media. Commonly set to `video`.
+        field :type, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('type') } }
+        # The publicly accessible URL of the input video file.
+        field :url, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('url') } }
+
+        sig { params(type: T.nilable(::String), url: T.nilable(::String)).void }
+        def initialize(type: nil, url: nil)
+          @type = type
+          @url = url
+        end
+
+        sig { params(other: T.untyped).returns(T::Boolean) }
+        def ==(other)
+          return false unless other.is_a? self.class
+          return false unless @type == other.type
+          return false unless @url == other.url
+          true
+        end
+      end
+    end
+  end
+end

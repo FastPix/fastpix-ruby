@@ -5,4 +5,4 @@
 
 | Field              | Type               | Required           | Description        |
 | ------------------ | ------------------ | ------------------ | ------------------ |
-| `view_id`          | *::String*         | :heavy_check_mark: | Pass View id       |
+| `view_id`          | *::String*         | :heavy_check_mark: | Pass View Id       |

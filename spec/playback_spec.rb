@@ -1,5 +1,5 @@
 require 'spec_helper'
-           b require 'fastpixapi'
+require 'fastpixapi'
 require_relative '../config/fastpix_config'
 
 RSpec.describe FastpixApiSDK::Playback do

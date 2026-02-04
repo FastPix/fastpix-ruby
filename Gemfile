@@ -2,9 +2,12 @@
 
 source 'https://rubygems.org'
 
+# Patch OpenSSL before loading any gems
+begin
+  require_relative 'lib/openssl_patch'
+rescue LoadError
+  # Ignore if file doesn't exist yet
+end
+
 # Specify your gem's dependencies in openapi.gemspec
 gemspec
-
-gem "minitest-reporters", "~> 1.7"
-
-gem "faraday-net_http", "~> 3.0"

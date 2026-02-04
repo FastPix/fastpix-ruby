@@ -1,7 +1,8 @@
 # LivePlayback
-(*live_playback*)
 
 ## Overview
+
+Operations for live stream playback management
 
 ### Available Operations
 
@@ -23,122 +24,25 @@ Generates a new playback ID for the live stream, allowing viewers to access the 
 
 <!-- UsageSnippet language="ruby" operationID="create-playbackId-of-stream" method="post" path="/live/streams/{streamId}/playback-ids" -->
 ```ruby
+require 'json'
 require 'fastpixapi'
 
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
       security: Models::Components::Security.new(
         username: 'your-access-token',
         password: 'your-secret-key',
       ),
     )
 
-res = s.live_playback.create_playback_id_of_stream(stream_id: '8717422d89288ad5958d4a86e9afe2a2', playback_id_request: Models::Components::PlaybackIdRequest.new(
-  access_policy: Models::Components::BasicAccessPolicy::PUBLIC,
-))
+res = s.live_playback.create_playback_id_of_stream(stream_id: 'your-stream-id', body: Models::Components::PlaybackIdRequest.new())
 
-unless res.playback_id_success_response.nil?
-  # handle response
-end
-
-```
-
-### Parameters
-
-| Parameter                                                                           | Type                                                                                | Required                                                                            | Description                                                                         | Example                                                                             |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | 8717422d89288ad5958d4a86e9afe2a2                                                    |
-| `playback_id_request`                                                               | [Models::Components::PlaybackIdRequest](../../models/shared/playbackidrequest.md)   | :heavy_check_mark:                                                                  | N/A                                                                                 | {<br/>"accessPolicy": "public"<br/>}                                                |
-
-### Response
-
-**[T.nilable(Models::Operations::CreatePlaybackIdOfStreamResponse)](../../models/operations/createplaybackidofstreamresponse.md)**
-
-### Errors
-
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 401                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::LiveNotFoundError       | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
-
-## delete_playback_id_of_stream
-
-Deletes a previously created playback ID for a live stream. This will prevent any new viewers from accessing the stream through the playback ID, though current viewers will be able to continue watching for a limited time before being disconnected. By providing the `playbackId`, FastPix deletes the ID and ensures new playback requests will fail. 
-
-#### Example
-A streaming service wants to prevent new users from joining a live stream that is nearing its end. The host can delete the playback ID to ensure no one can join the stream or replay it once it ends.
-
-### Example Usage
-
-<!-- UsageSnippet language="ruby" operationID="delete-playbackId-of-stream" method="delete" path="/live/streams/{streamId}/playback-ids" -->
-```ruby
-require 'fastpixapi'
-
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
-      security: Models::Components::Security.new(
-        username: 'your-access-token',
-        password: 'your-secret-key',
-      ),
-    )
-
-res = s.live_playback.delete_playback_id_of_stream(stream_id: '8717422d89288ad5958d4a86e9afe2a2', playback_id: '88b7ac0f-2504-4dd5-b7b4-d84ab4fee1bd')
-
-unless res.live_stream_delete_response.nil?
-  # handle response
-end
-
-```
-
-### Parameters
-
-| Parameter                                                                           | Type                                                                                | Required                                                                            | Description                                                                         | Example                                                                             |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | 8717422d89288ad5958d4a86e9afe2a2                                                    |
-| `playback_id`                                                                       | *::String*                                                                          | :heavy_check_mark:                                                                  | Unique identifier for the playbackId                                                | 88b7ac0f-2504-4dd5-b7b4-d84ab4fee1bd                                                |
-
-### Response
-
-**[T.nilable(Models::Operations::DeletePlaybackIdOfStreamResponse)](../../models/operations/deleteplaybackidofstreamresponse.md)**
-
-### Errors
-
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 401                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::NotFoundErrorPlaybackId | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
-
-## get_live_stream_playback_id
-
-Retrieves details about a previously created playback ID. If you provide the distinct `playbackId` that was given back to you in the previous stream or <a href="https://docs.fastpix.io/reference/create-playbackid-of-stream">create playbackId</a> request, FastPix will provide the relevant playback details such as the access policy. 
-
-#### Example
-A developer needs to confirm the access policy of the playback ID to ensure whether the stream is public or private for viewers.
-
-### Example Usage
-
-<!-- UsageSnippet language="ruby" operationID="get-live-stream-playback-id" method="get" path="/live/streams/{streamId}/playback-ids/{playbackId}" -->
-```ruby
-require 'fastpixapi'
-
-Models = ::FastpixApiSDK::Models
-s = ::FastpixApiSDK::Fastpix.new(
-      security: Models::Components::Security.new(
-        username: 'your-access-token',
-        password: 'your-secret-key',
-      ),
-    )
-
-res = s.live_playback.get_live_stream_playback_id(stream_id: '61a264dcc447b63da6fb79ef925cd76d', playback_id: '61a264dcc447b63da6fb79ef925cd76d')
-
-unless res.playback_id_success_response.nil?
-  # handle response
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
 end
 
 ```
@@ -147,8 +51,110 @@ end
 
 | Parameter                                                                            | Type                                                                                 | Required                                                                             | Description                                                                          | Example                                                                              |
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| `stream_id`                                                                          | *::String*                                                                           | :heavy_check_mark:                                                                   | Upon creating a new live stream, FastPix assigns a unique identifier to the stream.  | 61a264dcc447b63da6fb79ef925cd76d                                                     |
-| `playback_id`                                                                        | *::String*                                                                           | :heavy_check_mark:                                                                   | Upon creating a new playbackId, FastPix assigns a unique identifier to the playback. | 61a264dcc447b63da6fb79ef925cd76d                                                     |
+| `stream_id`                                                                          | *::String*                                                                           | :heavy_check_mark:                                                                   | After creating a new live stream, FastPix assigns a unique identifier to the stream. | your-stream-id                                                     |
+| `body`                                                                               | [Models::Components::PlaybackIdRequest](../../models/shared/playbackidrequest.md)    | :heavy_check_mark:                                                                   | N/A                                                                                  | {<br/>"accessPolicy": "public"<br/>}                                                 |
+
+### Response
+
+**[T.nilable(Models::Operations::CreatePlaybackIdOfStreamResponse)](../../models/operations/createplaybackidofstreamresponse.md)**
+
+### Errors
+
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
+
+## delete_playback_id_of_stream
+
+Deletes a previously created playback ID for a live stream.This prevents new viewers from accessing the stream using the playback ID, while current viewers can continue watching for a short period before the connection ends. FastPix deletes the ID and ensures the new playback request fails.
+
+#### Example
+A streaming service wants to prevent new users from joining a live stream that is nearing its end. The host can delete the playback ID to ensure no one can join the stream or replay it once it ends.
+
+### Example Usage
+
+<!-- UsageSnippet language="ruby" operationID="delete-playbackId-of-stream" method="delete" path="/live/streams/{streamId}/playback-ids" -->
+```ruby
+require 'json'
+require 'fastpixapi'
+
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
+      security: Models::Components::Security.new(
+        username: 'your-access-token',
+        password: 'your-secret-key',
+      ),
+    )
+
+res = s.live_playback.delete_playback_id_of_stream(stream_id: 'your-stream-id', playback_id: 'your-playback-id')
+
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
+end
+
+```
+
+### Parameters
+
+| Parameter                                                                           | Type                                                                                | Required                                                                            | Description                                                                         | Example                                                                             |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `stream_id`                                                                         | *::String*                                                                          | :heavy_check_mark:                                                                  | Upon creating a new live stream, FastPix assigns a unique identifier to the stream. | your-stream-id                                                    |
+| `playback_id`                                                                       | *::String*                                                                          | :heavy_check_mark:                                                                  | Unique identifier for the playbackId                                                | your-playback-id                                                |
+
+### Response
+
+**[T.nilable(Models::Operations::DeletePlaybackIdOfStreamResponse)](../../models/operations/deleteplaybackidofstreamresponse.md)**
+
+### Errors
+
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |
+
+## get_live_stream_playback_id
+
+Retrieves details for an existing playback ID. When you provide the playbackId returned from a previous stream or playback creation request, FastPix returns the associated playback information, including the access policy.
+
+#### Example
+A developer needs to confirm the access policy of the playback ID to ensure whether the stream is public or private for viewers.
+
+### Example Usage
+
+<!-- UsageSnippet language="ruby" operationID="get-live-stream-playback-id" method="get" path="/live/streams/{streamId}/playback-ids/{playbackId}" -->
+```ruby
+require 'json'
+require 'fastpixapi'
+
+Models = ::FastpixClient::Models
+s = ::FastpixClient::Fastpixapi.new(
+      security: Models::Components::Security.new(
+        username: 'your-access-token',
+        password: 'your-secret-key',
+      ),
+    )
+
+res = s.live_playback.get_live_stream_playback_id(stream_id: 'your-stream-id', playback_id: 'your-playback-id')
+
+begin
+  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+rescue FastpixClient::Models::Errors::APIError => e
+  puts JSON.pretty_generate(JSON.parse(e.body))
+rescue StandardError
+  puts res.raw_response.body.to_s
+end
+
+```
+
+### Parameters
+
+| Parameter                                                                             | Type                                                                                  | Required                                                                              | Description                                                                           | Example                                                                               |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `stream_id`                                                                           | *::String*                                                                            | :heavy_check_mark:                                                                    | After creating a new live stream, FastPix assigns a unique identifier to the stream.  | your-stream-id                                                      |
+| `playback_id`                                                                         | *::String*                                                                            | :heavy_check_mark:                                                                    | After creating a new playbackId, FastPix assigns a unique identifier to the playback. | your-playback-id                                                      |
 
 ### Response
 
@@ -156,10 +162,6 @@ end
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Models::Errors::UnauthorizedError       | 401                                     | application/json                        |
-| Models::Errors::InvalidPermissionError  | 403                                     | application/json                        |
-| Models::Errors::NotFoundErrorPlaybackId | 404                                     | application/json                        |
-| Models::Errors::ValidationErrorResponse | 422                                     | application/json                        |
-| Errors::APIError                        | 4XX, 5XX                                | \*/\*                                   |
+| Error Type       | Status Code      | Content Type     |
+| ---------------- | ---------------- | ---------------- |
+| Errors::APIError | 4XX, 5XX         | \*/\*            |

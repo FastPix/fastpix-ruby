@@ -1,3 +1,4 @@
+# Generated code for FastPix API SDK.
 
 # typed: false
 # frozen_string_literal: true
@@ -61,20 +62,6 @@ module Crystalline
         end
       end
 
-      def from_json(json_obj)
-        case json_obj
-        when String
-          begin
-            d = JSON.parse(json_obj)
-          rescue JSON::ParserError
-            d = json_obj
-          end
-        else
-          d = json_obj
-        end
-        from_json(d)
-      end
-
       def from_dict(d)
         to_build = {}
 
@@ -110,9 +97,16 @@ module Crystalline
             to_build[key] = unmarshalled_hash
           elsif Crystalline::Utils.union? field_type
             discriminator = field.metadata.fetch(:discriminator, nil)
+            discriminator_mapping = field.metadata.fetch(:discriminator_mapping, nil)
             if !discriminator.nil?
-              type_to_deserialize = value.fetch(discriminator)
-              type_to_deserialize = Crystalline::Utils.get_union_types(field_type).find { |t| t.name.split('::').last == type_to_deserialize }
+              discriminator_value = value.fetch(discriminator)
+              if !discriminator_mapping.nil?
+                # Use explicit mapping from discriminator value to type
+                type_to_deserialize = discriminator_mapping[discriminator_value]
+              else
+                # Fallback: try to match discriminator value against type name
+                type_to_deserialize = Crystalline::Utils.get_union_types(field_type).find { |t| t.name.split('::').last == discriminator_value }
+              end
               to_build[key] = Crystalline.unmarshal_json(value, type_to_deserialize)
             else
               union_types = Crystalline::Utils.get_union_types(field_type)

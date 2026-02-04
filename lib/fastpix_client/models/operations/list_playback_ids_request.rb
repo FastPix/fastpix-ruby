@@ -1,0 +1,32 @@
+# Generated code for FastPix API SDK.
+
+# typed: true
+# frozen_string_literal: true
+
+
+module FastpixClient
+  module Models
+    module Operations
+
+      class ListPlaybackIdsRequest
+        extend T::Sig
+        include Crystalline::MetadataFields
+
+
+        field :media_id, ::String, { 'path_param': { 'field_name': 'mediaId', 'style': 'simple', 'explode': false } }
+
+        sig { params(media_id: ::String).void }
+        def initialize(media_id:)
+          @media_id = media_id
+        end
+
+        sig { params(other: T.untyped).returns(T::Boolean) }
+        def ==(other)
+          return false unless other.is_a? self.class
+          return false unless @media_id == other.media_id
+          true
+        end
+      end
+    end
+  end
+end

@@ -1,3 +1,4 @@
+# Generated code for FastPix API SDK.
 
 # typed: false
 # frozen_string_literal: true
@@ -40,38 +41,43 @@ module Crystalline
   end
 
   module Enum
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
+
     def initialize(val)
-      puts methods
-      if instance_methods(false).include?(:initialize)
+      if self.class.instance_methods(false).include?(:initialize)
         super(val)
       else
         @val = val
       end
     end
 
-    def self.enums(&blk)
-      @mapping = {}
+    module ClassMethods
+      def enums(&blk)
+        @mapping = {}
 
-      yield
-      constants(false).each do |const_name|
-        instance = const_get(const_name, false)
-        unless instance.is_a? self
-          raise 'Enum constants must be instances of the Enum class (e.g. `Foo = new`)'
+        yield
+        constants(false).each do |const_name|
+          instance = const_get(const_name, false)
+          unless instance.is_a? self
+            raise 'Enum constants must be instances of the Enum class (e.g. `Foo = new`)'
+          end
+          @mapping[instance.serialize] = instance
         end
-        @mapping[instance.serialize] = instance
+      end
+
+      def deserialize(val)
+        if @mapping.include? val
+          @mapping[val]
+        else
+          raise "Invalid value for enum: #{val}"
+        end
       end
     end
 
     def serialize
       @val
-    end
-
-    def deserialize(val)
-      if @mapping.include? val
-        @mapping[val]
-      else
-        raise "Invalid value for enum: #{val}"
-      end
     end
   end
 end

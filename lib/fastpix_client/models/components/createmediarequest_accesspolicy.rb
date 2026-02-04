@@ -1,0 +1,23 @@
+# Generated code for FastPix API SDK.
+
+# typed: true
+# frozen_string_literal: true
+
+
+module FastpixClient
+  module Models
+    module Components
+      # CreateMediaRequestAccessPolicy - Determines whether access to the streamed content is kept private or available to all.
+      # 
+      class CreateMediaRequestAccessPolicy < T::Enum
+
+
+        enums do
+          PUBLIC = new('public')
+          PRIVATE = new('private')
+          DRM = new('drm')
+        end
+      end
+    end
+  end
+end
