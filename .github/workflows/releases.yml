@@ -16,17 +16,15 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.2'     # Or your project's Ruby version
-        bundler-cache: true
-
-    - name: Update Gemfile.lock if needed
-      run: |
-        bundle config set --local frozen false
-        bundle install --jobs 4 --retry 3 || true
-        bundle config set --local frozen true
+        ruby-version: '3.2'
+        bundler-cache: false  # Disabled to allow lockfile updates
 
     - name: Install dependencies
       run: bundle install --jobs 4 --retry 3
+
+    - name: Show updated Gemfile.lock (for debugging)
+      if: failure()
+      run: cat Gemfile.lock
 
     - name: Build the gem
       run: gem build *.gemspec
