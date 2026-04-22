@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "faraday-multipart".freeze
-  s.version = "1.1.0"
+  s.version = "1.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "bug_tracker_uri" => "https://github.com/lostisland/faraday-multipart/issues", "changelog_uri" => "https://github.com/lostisland/faraday-multipart/blob/v1.1.0/CHANGELOG.md", "documentation_uri" => "http://www.rubydoc.info/gems/faraday-multipart/1.1.0", "homepage_uri" => "https://github.com/lostisland/faraday-multipart", "source_code_uri" => "https://github.com/lostisland/faraday-multipart", "wiki_uri" => "https://github.com/lostisland/faraday-multipart/wiki" } if s.respond_to? :metadata=

@@ -91,9 +91,9 @@ module FastpixClient
       end
       @language = 'ruby'
       @openapi_doc_version = '1.0.0'
-      @sdk_version = '1.1.0'
+      @sdk_version = '1.1.1'
       @gen_version = '2.801.0'
-      @user_agent = 'fastpixapi-ruby 1.1.0'
+      @user_agent = 'fastpixapi-ruby 1.1.1'
     end
 
     sig { returns([String, T::Hash[Symbol, String]]) }

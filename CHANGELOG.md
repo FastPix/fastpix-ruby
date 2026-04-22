@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1]
+
+### Fixed
+- Fixed `Event` model JSON key mappings (`pt`, `e`, `vt`, `d`) that were incorrectly mapped, causing all event fields to deserialize as `nil`
+- Fixed `eventDetails` sub-keys for `requestFailed` events (`txt`, `c`, `err`, `t`, `u`) and `variantChanged` events (`br`, `h`, `w`, `cd`) not being expanded to meaningful names
+
+### Improved
+- `get_video_view_details` response now serializes with full, human-readable field names instead of abbreviated wire-format keys
+- `events` array is now positioned at the end of the `data` object for better readability
+- `success` field is now the first key in the response envelope
+- All `null` fields are now included in the serialized output for completeness
+
 ## [1.1.0]
 
 ### Fixed
