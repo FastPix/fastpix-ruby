@@ -30,6 +30,13 @@ module FastpixClient
           return false unless @data == other.data
           true
         end
+
+        def to_dict
+          {
+            'success' => @success,
+            'data'    => @data&.to_dict
+          }
+        end
       end
     end
   end

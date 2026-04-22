@@ -637,6 +637,33 @@ module FastpixClient
           return false unless @watch_time == other.watch_time
           true
         end
+
+        def to_dict
+          result = {}
+          fields.sort_by(&:name).each do |field|
+            next if field.name == :events
+
+            format_json_meta = field.metadata[:format_json]
+            key = if !format_json_meta.nil? && format_json_meta.include?(:letter_case)
+              format_json_meta[:letter_case].call
+            else
+              field.name.to_s
+            end
+
+            f = send(field.name)
+            if f.nil?
+              result[key] = nil
+            elsif f.is_a?(Array)
+              result[key] = f.map { |o| marshal_single(o) }
+            elsif f.is_a?(Hash)
+              result[key] = f.transform_values { |v| marshal_single(v) }
+            else
+              result[key] = marshal_single(f)
+            end
+          end
+          result['events'] = @events&.map(&:to_dict)
+          result
+        end
       end
     end
   end
