@@ -20,7 +20,7 @@ module FastpixClient
         field :raw_response, ::Faraday::Response
         # successfully fetched signing key
         field :get_public_pem_using_signing_key_id_response_dto, Crystalline::Nilable.new(Models::Components::GetPublicPemUsingSigningKeyIdResponseDTO)
-        # See the range of possible <a href="https://docs.fastpix.io/reference/error-codes">error</a> responses and their status codes.
+        # See the range of possible <a href="https://fastpix.com/docs/error-codes">error</a> responses and their status codes.
         field :default_error, Crystalline::Nilable.new(Models::Components::DefaultError)
 
         sig { params(content_type: ::String, status_code: ::Integer, raw_response: ::Faraday::Response, get_public_pem_using_signing_key_id_response_dto: T.nilable(Models::Components::GetPublicPemUsingSigningKeyIdResponseDTO), default_error: T.nilable(Models::Components::DefaultError)).void }

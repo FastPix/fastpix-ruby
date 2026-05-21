@@ -55,6 +55,7 @@ module FastpixClient
       autoload :DateRange, 'fastpix_client/models/components/daterange.rb'
       autoload :DefaultError, 'fastpix_client/models/components/default_error.rb'
       autoload :DeleteSigningKeyResponse, 'fastpix_client/models/components/deletesigningkeyresponse.rb'
+      autoload :DeleteSigningKeyResponseData, 'fastpix_client/models/components/deletesigningkeyresponsedata.rb'
       autoload :DirectUpload, 'fastpix_client/models/components/directupload.rb'
       autoload :DirectUploadResponse, 'fastpix_client/models/components/directuploadresponse.rb'
       autoload :DirectUploadResponseMediaQuality, 'fastpix_client/models/components/directuploadresponse_mediaquality.rb'

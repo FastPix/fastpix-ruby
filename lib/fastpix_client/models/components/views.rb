@@ -240,7 +240,7 @@ module FastpixClient
         # Player Software Version indicates the version number of the player software installed.
         # 
         field :player_software_version, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('playerSoftwareVersion') } }
-        # Specifies the domain or source from which the player was loaded or embedded (for example, stream.fastpix.io or a customer’s custom domain). This helps identify the playback origin and differentiate between various deployment environments.
+        # Specifies the domain or source from which the player was loaded or embedded (for example, stream.fastpix.com or a customer’s custom domain). This helps identify the playback origin and differentiate between various deployment environments.
         # 
         field :player_source_domain, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('playerSourceDomain') } }
         # Player Source Height denotes the vertical dimension, measured in pixels, of the source video content being transmitted to the player.

@@ -43,7 +43,7 @@ module FastpixClient
         field :url, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('url') } }
 
         sig { params(start_time: T.nilable(::Integer), end_time: T.nilable(::Integer), intro_url: T.nilable(::String), outro_url: T.nilable(::String), expunge_segments: T.nilable(T::Array[::String]), segments: T.nilable(T::Array[T.any(Models::Components::PullVideoInputSegment1, Models::Components::PullVideoInputSegment2)]), type: T.nilable(::String), url: T.nilable(::String)).void }
-        def initialize(start_time: nil, end_time: nil, intro_url: nil, outro_url: nil, expunge_segments: nil, segments: nil, type: 'video', url: 'https://static.fastpix.io/fp-sample-video.mp4')
+        def initialize(start_time: nil, end_time: nil, intro_url: nil, outro_url: nil, expunge_segments: nil, segments: nil, type: 'video', url: 'https://static.fastpix.com/fp-sample-video.mp4')
           @start_time = start_time
           @end_time = end_time
           @intro_url = intro_url

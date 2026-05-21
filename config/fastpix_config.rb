@@ -1,11 +1,11 @@
 module FastPix
   module Config
     def self.server_url
-      "https://api.fastpix.io/v1"
+      "https://api.fastpix.com/v1"
     end
 
     def self.live_stream_url
-      "https://api.fastpix.io/v1/live"
+      "https://api.fastpix.com/v1/live"
     end
 
     def self.username

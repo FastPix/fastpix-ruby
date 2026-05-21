@@ -53,7 +53,7 @@ module FastpixClient
       # **Example:**  
       # A media service provider may retrieve DRM configuration for a workspace to create DRM content.
       # 
-      # Related guide: <a href="https://docs.fastpix.io/docs/secure-playback-with-drm">Manage DRM configuration</a>
+      # Related guide: <a href="https://fastpix.com/docs/video-security/set-up-drm-encryption">Manage DRM configuration</a>
       # 
       request = Models::Operations::GetDrmConfigurationRequest.new(
         offset: offset,
@@ -189,7 +189,7 @@ module FastpixClient
       # 1. Make a GET request to this endpoint, replacing `{drmConfigurationId}` with the UUID of the DRM configuration.  
       # 2. The response contains the associated DRM configuration ID.
       # 
-      # Related guide: <a href="https://docs.fastpix.io/docs/secure-playback-with-drm">Manage DRM configuration</a>
+      # Related guide: <a href="https://fastpix.com/docs/video-security/set-up-drm-encryption">Manage DRM configuration</a>
       # 
       request = Models::Operations::GetDrmConfigurationByIdRequest.new(
         drm_configuration_id: drm_configuration_id

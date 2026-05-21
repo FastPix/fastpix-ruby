@@ -27,7 +27,7 @@ RSpec.describe FastpixApiSDK::InputVideo do
           inputs: [
             FastpixApiSDK::Models::Components::VideoInput.new(
               type: 'video',
-              url: 'https://static.fastpix.io/sample.mp4'
+              url: 'https://static.fastpix.com/sample.mp4'
             )
           ],
           metadata: FastpixApiSDK::Models::Components::CreateMediaRequestMetadata.new,

@@ -15,7 +15,7 @@ module FastpixClient
         # Configuration settings for uploading and processing media on the FastPix platform.  
         # These settings define how the uploaded video is handled, including access control, resolution, DRM, and optional metadata.  
         # For a complete explanation of how media uploads and processing work, refer to the  
-        # <a href="https://docs.fastpix.io/docs/video-on-demand-overview" target="_blank">FastPix Video on Demand Overview</a>.
+        # <a href="https://fastpix.com/docs/get-started/overview" target="_blank">FastPix Video on Demand Overview</a>.
         # 
         field :push_media_settings, Crystalline::Nilable.new(Models::Operations::PushMediaSettings), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('pushMediaSettings') } }
         # Upload media directly from a device using the URL name or enter "*" to allow all.

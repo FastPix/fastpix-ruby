@@ -16,7 +16,7 @@ module FastpixClient
   # Contains the list of servers available to the SDK
   SERVERS = T.let(
     [
-      'https://api.fastpix.io/v1/', # 1 - FastPix Video APIs
+      'https://api.fastpix.com/v1/', # 1 - FastPix Video APIs
     ].freeze,
     T::Array[String]
   )
@@ -91,9 +91,9 @@ module FastpixClient
       end
       @language = 'ruby'
       @openapi_doc_version = '1.0.0'
-      @sdk_version = '1.1.1'
+      @sdk_version = '1.1.2'
       @gen_version = '2.801.0'
-      @user_agent = 'fastpixapi-ruby 1.1.1'
+      @user_agent = 'fastpixapi-ruby 1.1.2'
     end
 
     sig { returns([String, T::Hash[Symbol, String]]) }

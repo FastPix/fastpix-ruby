@@ -1,5 +1,5 @@
 server:
-  url: "https://api.fastpix.io/v1/live"
+  url: "https://api.fastpix.com/v1/live"
   username: "YOUR_FASTPIX_USERNAME"  # Set via FASTPIX_USERNAME env or replace with your credentials
   password: "YOUR_FASTPIX_PASSWORD"  # Set via FASTPIX_PASSWORD env or replace with your credentials
   timeout: 30                     # Request timeout in seconds

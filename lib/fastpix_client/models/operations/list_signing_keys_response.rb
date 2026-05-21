@@ -20,7 +20,7 @@ module FastpixClient
         field :raw_response, ::Faraday::Response
         # successfully fetched all signing keys
         field :get_all_signing_keys_response, Crystalline::Nilable.new(Models::Components::GetAllSigningKeysResponse)
-        # See the range of possible <a href="https://docs.fastpix.io/reference/error-codes">error</a> responses and their status codes.
+        # See the range of possible <a href="https://fastpix.com/docs/error-codes">error</a> responses and their status codes.
         field :default_error, Crystalline::Nilable.new(Models::Components::DefaultError)
 
         sig { params(content_type: ::String, status_code: ::Integer, raw_response: ::Faraday::Response, get_all_signing_keys_response: T.nilable(Models::Components::GetAllSigningKeysResponse), default_error: T.nilable(Models::Components::DefaultError)).void }
