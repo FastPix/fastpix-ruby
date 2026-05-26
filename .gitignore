@@ -1,0 +1,9 @@
+# Built gem artifacts
+*.gem
+
+# Generated outputs from the SDK validators (tests/validate_*_endpoints.rb)
+tests/artifacts/
+tests/artifacts-non-get/
+tests/GET_ENDPOINTS_OPENAPI_RESPONSE_VALIDATION_REPORT.md
+tests/GET_ENDPOINTS_OPENAPI_RESPONSE_FIX_SUGGESTIONS.md
+tests/NON_GET_ENDPOINTS_VALIDATION_REPORT.md

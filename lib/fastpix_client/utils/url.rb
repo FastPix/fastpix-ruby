@@ -74,6 +74,11 @@ module FastpixClient
             end
             path = path.sub("{#{param_metadata.fetch(:field_name, f.name)}}", pp_vals.join(','))
           else
+            if param.class.respond_to?(:enums)
+              param = T.cast(param, T::Enum).serialize
+            elsif param.is_a? DateTime
+              param = param.strftime('%Y-%m-%dT%H:%M:%S.%NZ')
+            end
             path = path.sub("{#{param_metadata.fetch(:field_name, f.name)}}", param.to_s)
           end
         end

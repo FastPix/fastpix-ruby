@@ -20,7 +20,7 @@ module FastpixClient
         field :raw_response, ::Faraday::Response
         # Playlist updated successfully
         field :playlist_created_response, Crystalline::Nilable.new(Models::Components::PlaylistCreatedResponse)
-        # See the range of possible <a href="https://docs.fastpix.io/reference/error-codes">error</a> responses and their status codes.
+        # See the range of possible <a href="https://fastpix.com/docs/error-codes">error</a> responses and their status codes.
         field :default_error, Crystalline::Nilable.new(Models::Components::DefaultError)
 
         sig { params(content_type: ::String, status_code: ::Integer, raw_response: ::Faraday::Response, playlist_created_response: T.nilable(Models::Components::PlaylistCreatedResponse), default_error: T.nilable(Models::Components::DefaultError)).void }

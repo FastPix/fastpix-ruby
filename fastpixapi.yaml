@@ -1,7 +1,7 @@
 openapi: 3.0.0
 servers:
   - description: FastPix Video APIs
-    url: https://api.fastpix.io/v1/
+    url: https://api.fastpix.com/v1/
 x-speakeasy-retries:
   strategy: backoff
   backoff:
@@ -98,7 +98,7 @@ info:
   version: 1.0.0
   title: FASTPIX API'S
   contact:
-    email: support@fastpix.io
+    email: support@fastpix.com
 tags:
   - name: on-demand
     description: On-demand APIs
@@ -158,14 +158,14 @@ paths:
 
         3. Receive a response containing the unique id for the newly created media item. 
 
-        4. Use the id in subsequent API calls, such as checking the status of the media with the <a href="https://docs.fastpix.io/reference/get-media">Get Media by ID</a> endpoint to determine when the media is ready for playback. 
+        4. Use the id in subsequent API calls, such as checking the status of the media with the <a href="https://fastpix.com/docs/video-on-demand-api/manage-videos/get-media">Get Media by ID</a> endpoint to determine when the media is ready for playback. 
 
-        FastPix uses webhooks to tell your application about things that happen in the background, outside of the API regular request flow. For instance, once the media file is created (but not yet processed or encoded), we'll shoot a `POST` message to the address you give us with the webhook event <a href="https://docs.fastpix.io/docs/media-events#videomediacreated">video.media.created</a>. 
+        FastPix uses webhooks to tell your application about things that happen in the background, outside of the API regular request flow. For instance, once the media file is created (but not yet processed or encoded), we'll shoot a `POST` message to the address you give us with the webhook event <a href="https://fastpix.com/docs/vod-events/media-events#videomediacreated">video.media.created</a>. 
 
 
-        Once processing is done you can look for the events <a href="https://docs.fastpix.io/docs/media-events#/videomediaready">video.media.ready<a/> and <a href="https://docs.fastpix.io/docs/media-events#videomediafailed">video.media.failed</a> to see the status of your new media file.
+        Once processing is done you can look for the events <a href="https://fastpix.com/docs/vod-events/media-events#/videomediaready">video.media.ready<a/> and <a href="https://fastpix.com/docs/vod-events/media-events#videomediafailed">video.media.failed</a> to see the status of your new media file.
 
-        Related guide: <a href="https://docs.fastpix.io/docs/upload-videos-from-url">Upload videos from URL</a>
+        Related guide: <a href="https://fastpix.com/docs/upload-videos/upload-videos-from-a-url">Upload videos from URL</a>
       operationId: create-media
       requestBody:
         required: true
@@ -176,7 +176,7 @@ paths:
             example:
               inputs:
                 - type: video
-                  url: https://static.fastpix.io/sample.mp4
+                  url: https://static.fastpix.com/sample.mp4
               metadata:
                 key1: value1
               accessPolicy: public
@@ -303,7 +303,7 @@ paths:
                 example:
                   success: true
                   data:
-                    - thumbnail: https://images.fastpix.io/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
+                    - thumbnail: https://images.fastpix.com/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
                       id: cfeec1a3-6cbd-40df-a425-2ed7f8f72ced
                       workspaceId: 6dc2b4e0-0615-42fd-a580-1f4aad932dfe
                       metadata:
@@ -373,7 +373,7 @@ paths:
         #### How it works
         To use this endpoint, provide the `livestreamId` as a parameter. The API then returns a paginated list of clipped media items created from that livestream. Pagination ensures optimal performance and usability when dealing with a large number of media files, making it easier to organize and manage content in bulk.
 
-        Related guide: <a href="https://docs.fastpix.io/docs/instant-live-clipping">Instant live clipping</a>
+        Related guide: <a href="https://fastpix.com/docs/edit-and-transform-live-stream/clip-moments-from-a-live-stream">Instant live clipping</a>
       operationId: list-live-clips
       parameters:
         - in: path
@@ -429,7 +429,7 @@ paths:
                 example:
                   success: true
                   data:
-                    - thumbnail: https://images.fastpix.io/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
+                    - thumbnail: https://images.fastpix.com/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
                       id: cfeec1a3-6cbd-40df-a425-2ed7f8f72ced
                       workspaceId: 6dc2b4e0-0615-42fd-a580-1f4aad932dfe
                       metadata:
@@ -510,7 +510,7 @@ paths:
 
         * `status` Indicates whether the media is still `preparing` or has transitioned to `ready`.  
 
-        * The `playbackId` is a unique identifier that allows you to stream the media once it is `ready`. You can construct the stream URL in this format: `https://stream.fastpix.io/<playbackId>.m3u8`
+        * The `playbackId` is a unique identifier that allows you to stream the media once it is `ready`. You can construct the stream URL in this format: `https://stream.fastpix.com/<playbackId>.m3u8`
 
 
         #### Example
@@ -543,7 +543,7 @@ paths:
                 example:
                   success: true
                   data:
-                    thumbnail: https://images.fastpix.io/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
+                    thumbnail: https://images.fastpix.com/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
                     id: cfeec1a3-6cbd-40df-a425-2ed7f8f72ced
                     workspaceId: 6dc2b4e0-0615-42fd-a580-1f4aad932dfe
                     metadata:
@@ -620,7 +620,7 @@ paths:
 
         3. Receive a response containing the updated media data, confirming the changes made. 
 
-        Once you have made the update request, you can also look for the webhook event <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> to notify your system about update status. 
+        Once you have made the update request, you can also look for the webhook event <a href="https://fastpix.com/docs/vod-events/media-events#videomediaupdated">video.media.updated</a> to notify your system about update status. 
 
         #### Example
         Imagine a scenario where a user uploads a video and later realizes they need to change the title, add a new description or tags. You can use this endpoint to update the media metadata without having to re-upload the entire video.
@@ -667,7 +667,7 @@ paths:
                 example:
                   success: true
                   data:
-                    thumbnail: https://images.fastpix.io/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
+                    thumbnail: https://images.fastpix.com/837f028b-dcaf-4c23-b368-3748641f74ac/thumbnail.png
                     id: cfeec1a3-6cbd-40df-a425-2ed7f8f72ced
                     workspaceId: 6dc2b4e0-0615-42fd-a580-1f4aad932dfe
                     metadata:
@@ -744,7 +744,7 @@ paths:
 
         2. Since this action is irreversible, ensure that you no longer need the media before proceeding. Once deleted, the media cannot be retrieved or played back. 
 
-        3. Webhook event to look for: <a href="https://docs.fastpix.io/docs/media-events#videomediadeleted">video.media.deleted</a>
+        3. Webhook event to look for: <a href="https://fastpix.com/docs/vod-events/media-events#videomediadeleted">video.media.deleted</a>
 
         #### Example
         A user on a video-sharing platform decides to remove an old video from their profile, or suppose you're running a content moderation system, and one of the videos uploaded by a user violates your platform's policies. Using this endpoint, the media is permanently deleted from your library, ensuring it's no longer accessible or viewable by other users.
@@ -817,17 +817,17 @@ paths:
 
         #### Webhook events
 
-        1. After successfully adding a track, your system will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackcreated">video.media.track.created</a>.
+        1. After successfully adding a track, your system will receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediatrackcreated">video.media.track.created</a>.
 
-        2. Once the track is processed and ready, you will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackready">video.media.track.ready</a>.
+        2. Once the track is processed and ready, you will receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediatrackready">video.media.track.ready</a>.
 
-        3. Finally, an update event <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> will notify your system about the media's updated status.
+        3. Finally, an update event <a href="https://fastpix.com/docs/vod-events/media-events#videomediaupdated">video.media.updated</a> will notify your system about the media's updated status.
 
 
         #### Example
-        Suppose you have a video uploaded to the FastPix platform, and you want to add an Italian audio track to it. By calling this API, you can attach an external audio file (https://static.fastpix.io/music-1.mp3) to the media file. Similarly, if you need to add subtitles in different languages, you can specify type: `subtitle` with the corresponding subtitle `url`, `languageCode` and `languageName`.
+        Suppose you have a video uploaded to the FastPix platform, and you want to add an Italian audio track to it. By calling this API, you can attach an external audio file (https://static.fastpix.com/music-1.mp3) to the media file. Similarly, if you need to add subtitles in different languages, you can specify type: `subtitle` with the corresponding subtitle `url`, `languageCode` and `languageName`.
 
-        Related guides: <a href="https://docs.fastpix.io/docs/manage-subtitle-tracks">Add own subtitle tracks</a>, <a href="https://docs.fastpix.io/docs/manage-audio-tracks">Add own audio tracks</a>
+        Related guides: <a href="https://fastpix.com/docs/manage-audio-and-subtitle-tracks/add-subtitles-to-a-video">Add own subtitle tracks</a>, <a href="https://fastpix.com/docs/manage-audio-and-subtitle-tracks/add-audio-to-a-video">Add own audio tracks</a>
       operationId: Add-media-track
       parameters:
         - in: path
@@ -849,7 +849,7 @@ paths:
                   $ref: "#/components/schemas/AddTrackRequest"
             example:
               tracks:
-                url: https://static.fastpix.io/music-1.mp3
+                url: https://static.fastpix.com/music-1.mp3
                 type: audio
                 languageCode: it
                 languageName: Italian
@@ -872,7 +872,7 @@ paths:
                   data:
                     id: ace60fc7-e876-4fc6-b9d9-c33fa242f84b
                     type: audio
-                    url: https://static.fastpix.io/music-1.mp3
+                    url: https://static.fastpix.com/music-1.mp3
                     languageCode: it
                     languageName: Italian
         "400":
@@ -923,7 +923,7 @@ paths:
 
         #### Webhook Events
 
-        Once the upload is cancelled, you will receive the webhook event <a href="https://docs.fastpix.io/docs/media-events#videomediauploadcancelled-event">video.media.upload.cancelled</a>.
+        Once the upload is cancelled, you will receive the webhook event <a href="https://fastpix.com/docs/vod-events/media-events#videomediauploadcancelled-event">video.media.upload.cancelled</a>.
 
         #### Example
 
@@ -1017,11 +1017,11 @@ paths:
 
         After updating a track, your system will receive webhook notifications:
 
-        1. After successfully updating a track, your system will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackupdated">video.media.track.updated</a>.
+        1. After successfully updating a track, your system will receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediatrackupdated">video.media.track.updated</a>.
 
-        2. Once the new track is processed and ready, you will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediatrackready">video.media.track.ready</a>.
+        2. Once the new track is processed and ready, you will receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediatrackready">video.media.track.ready</a>.
 
-        3. Once the media file is updated with the new track details, a <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> event will be triggered.
+        3. Once the media file is updated with the new track details, a <a href="https://fastpix.com/docs/vod-events/media-events#videomediaupdated">video.media.updated</a> event will be triggered.
 
 
         #### Example
@@ -1030,7 +1030,7 @@ paths:
           - The original track file has errors and needs correction.
           - You want to improve subtitle translations or replace an audio track with a better-quality version.
           
-        Related guides: <a href="https://docs.fastpix.io/docs/manage-subtitle-tracks">Add own subtitle tracks</a>, <a href="https://docs.fastpix.io/docs/manage-audio-tracks">Add own audio tracks</a>
+        Related guides: <a href="https://fastpix.com/docs/manage-audio-and-subtitle-tracks/add-subtitles-to-a-video">Add own subtitle tracks</a>, <a href="https://fastpix.com/docs/manage-audio-and-subtitle-tracks/add-audio-to-a-video">Add own audio tracks</a>
       operationId: update-media-track
       parameters:
         - in: path
@@ -1133,7 +1133,7 @@ paths:
 
         1. After successfully deleting a track, your system will receive the webhook event **video.media.track.deleted**.
 
-        2. Once the media file is updated to reflect the track removal, a <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> event will be triggered.
+        2. Once the media file is updated to reflect the track removal, a <a href="https://fastpix.com/docs/vod-events/media-events#videomediaupdated">video.media.updated</a> event will be triggered.
 
 
         #### Example
@@ -1143,7 +1143,7 @@ paths:
           - The content owner requests the removal of a specific subtitle or audio track.
           - A new version of the track will be uploaded to replace the existing one.
           
-        Related guides: <a href="https://docs.fastpix.io/docs/manage-subtitle-tracks">Add own subtitle tracks</a>, <a href="https://docs.fastpix.io/docs/manage-audio-tracks">Add own audio tracks</a>
+        Related guides: <a href="https://fastpix.com/docs/manage-audio-and-subtitle-tracks/add-subtitles-to-a-video">Add own subtitle tracks</a>, <a href="https://fastpix.com/docs/manage-audio-and-subtitle-tracks/add-audio-to-a-video">Add own audio tracks</a>
       parameters:
         - in: path
           name: mediaId
@@ -1219,11 +1219,11 @@ paths:
 
         #### Webhook Events
 
-        1. Once the subtitle track is generated and ready, you will receive the webhook event <a href="https://docs.fastpix.io/docs/transform-media-events#videomediasubtitlegeneratedready">video.media.subtitle.generated.ready</a>.
+        1. Once the subtitle track is generated and ready, you will receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediasubtitlegeneratedready">video.media.subtitle.generated.ready</a>.
 
-        2. Finally, an update event <a href="https://docs.fastpix.io/docs/media-events#videomediaupdated">video.media.updated</a> will notify your system about the media's updated status.
+        2. Finally, an update event <a href="https://fastpix.com/docs/vod-events/media-events#videomediaupdated">video.media.updated</a> will notify your system about the media's updated status.
 
-        </br> Related guide: <a href="https://docs.fastpix.io/docs/add-auto-generated-subtitles-to-videos">Add auto-generated subtitles</a>
+        </br> Related guide: <a href="https://fastpix.com/docs/manage-audio-and-subtitle-tracks/generate-subtitles-automatically">Add auto-generated subtitles</a>
       operationId: Generate-subtitle-track
       parameters:
         - in: path
@@ -1318,7 +1318,7 @@ paths:
         3. Include the `summaryLength` parameter, specify the desired length of the summary in words (e.g., 120 words), this determines how concise or detailed the summary will be. If no specific summary length is provided, the default length will be 100 words. 
         4. The response will include the updated media data and confirmation of the changes applied.
 
-        You can use the <a href="https://docs.fastpix.io/docs/ai-events#videomediaaisummaryready">video.mediaAI.summary.ready</a> webhook event to track and notify about the summary generation.
+        You can use the <a href="https://fastpix.com/docs/ai-events/in-video-ai-events#videomediaaisummaryready">video.mediaAI.summary.ready</a> webhook event to track and notify about the summary generation.
 
 
 
@@ -1326,7 +1326,7 @@ paths:
 
         **Use case**: This is particularly useful when a user uploads a video and later chooses to generate a summary without needing to re-upload the video.
 
-        Related guide: <a href="https://docs.fastpix.io/docs/generate-video-summary">Video summary</a>
+        Related guide: <a href="https://fastpix.com/docs/video-intelligence/generate-a-video-summary">Video summary</a>
       operationId: update-media-summary
       parameters:
         - in: path
@@ -1422,11 +1422,11 @@ paths:
         2. Include the `chapters` parameter in the request body to enable.
         3. The response will contain the updated media data, confirming the changes made.
 
-        You can use the <a href="https://docs.fastpix.io/docs/ai-events#videomediaaichaptersready">video.mediaAI.chapters.ready</a> webhook event to track and notify about the chapters generation.
+        You can use the <a href="https://fastpix.com/docs/ai-events/in-video-ai-events#videomediaaichaptersready">video.mediaAI.chapters.ready</a> webhook event to track and notify about the chapters generation.
 
         **Use case:** This is particularly useful when a user uploads a video and later decides to enable chapters without re-uploading the entire video.
 
-        Related guide: <a href="https://docs.fastpix.io/reference/update-media-chapters">Video chapters</a>
+        Related guide: <a href="https://fastpix.com/docs/video-intelligence/generate-video-chapters">Video chapters</a>
       operationId: update-media-chapters
       parameters:
         - in: path
@@ -1517,11 +1517,11 @@ paths:
         2. Include the `namedEntities` parameter in the request body to enable.
         3. Receive a response containing the updated media data, confirming the changes made.
 
-        You can use the <a href="https://docs.fastpix.io/docs/ai-events#videomediaainamedentitiesready">video.mediaAI.named-entities.ready</a> webhook event to track and notify about the named entities extraction.
+        You can use the <a href="https://fastpix.com/docs/ai-events/in-video-ai-events#videomediaainamedentitiesready">video.mediaAI.named-entities.ready</a> webhook event to track and notify about the named entities extraction.
 
         **Use case:** If a user uploads a video and later decides to enable named entity extraction without re-uploading the entire video.
 
-        Related guide: <a href="https://docs.fastpix.io/docs/generate-named-entities">Named entities</a>
+        Related guide: <a href="https://fastpix.com/docs/video-intelligence/extract-named-entities-from-a-video">Named entities</a>
       operationId: update-media-named-entities
       parameters:
         - in: path
@@ -1607,11 +1607,11 @@ paths:
         2. Include the `moderation` object and provide the requried `type` parameter in the request body to specify the media type (e.g., video/audio/av).
         4. The response will contain the updated media data, confirming the changes made.
 
-        You can use the <a href="https://docs.fastpix.io/docs/ai-events#videomediaaimoderationready">video.mediaAI.moderation.ready</a> webhook event to track and notify about the detected moderation results.
+        You can use the <a href="https://fastpix.com/docs/ai-events/in-video-ai-events#videomediaaimoderationready">video.mediaAI.moderation.ready</a> webhook event to track and notify about the detected moderation results.
 
         **Use case:** This is particularly useful when a user uploads a video and later decides to enable moderation detection without the need to re-upload it.
 
-        Related guide: <a href="https://docs.fastpix.io/docs/using-nsfw-and-profanity-filter-for-video-moderation">Moderate NSFW & Profanity</a>
+        Related guide: <a href="https://fastpix.com/docs/video-intelligence/detect-nsfw-content-and-profanity">Moderate NSFW & Profanity</a>
       operationId: update-media-moderation
       parameters:
         - in: path
@@ -1700,7 +1700,7 @@ paths:
         2. Include the updated `sourceAccess` parameter in the request body.
 
         3. Receive a response confirming the update to the media's source access status.
-        4. Webhook events: <a href="https://docs.fastpix.io/docs/transform-media-events#videomediasourceready">video.media.source.ready</a>, <a href="https://docs.fastpix.io/docs/transform-media-events#videomediasourcedeleted">video.media.source.deleted</a>
+        4. Webhook events: <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediasourceready">video.media.source.ready</a>, <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediasourcedeleted">video.media.source.deleted</a>
       operationId: updated-source-access
       parameters:
         - in: path
@@ -1829,15 +1829,15 @@ paths:
 
         #### Webhook events
 
-        - <a href="https://docs.fastpix.io/docs/transform-media-events#videomediamp4supportready">video.media.mp4Support.ready</a> – Triggered when the MP4 support setting is successfully updated.
+        - <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediamp4supportready">video.media.mp4Support.ready</a> – Triggered when the MP4 support setting is successfully updated.
 
         #### Example
-        Suppose you have a video uploaded to the FastPix platform, and you want to allow users to download the video in MP4 format. By setting "mp4Support": "capped_4k", the system will generate an MP4 rendition of the video up to 4K resolution, making it available for download via the stream URL(`https://stream.fastpix.io/{playbackId}/{capped-4k.mp4 | audio.m4a}`).
+        Suppose you have a video uploaded to the FastPix platform, and you want to allow users to download the video in MP4 format. By setting "mp4Support": "capped_4k", the system will generate an MP4 rendition of the video up to 4K resolution, making it available for download via the stream URL(`https://stream.fastpix.com/{playbackId}/{capped-4k.mp4 | audio.m4a}`).
         If you want users to stream only the audio from the media file, you can set "mp4Support": "audioOnly". This will provide an audio-only stream URL that allows users to listen to the media without video.
         By setting "mp4Support": "audioOnly,capped_4k", both options will be enabled. Users will be able to download the MP4 video and also stream just the audio version of the media.
 
 
-        Related guide: <a href="https://docs.fastpix.io/docs/mp4-support-for-offline-viewing">Use MP4 support for offline viewing</a>
+        Related guide: <a href="https://fastpix.com/docs/playback-and-delivery/enable-mp4-support-for-offline-viewing">Use MP4 support for offline viewing</a>
       operationId: updated-mp4Support
       parameters:
         - in: path
@@ -2003,7 +2003,7 @@ paths:
                           properties:
                             url:
                               type: string
-                              example: https://static.fastpix.io/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4
+                              example: https://static.fastpix.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4
                               description: The url hosts the media file for FastPix, which needs to be download to use further.  It supports formats like MP3, MP4, MOV, MKV, or TS, and includes text tracks for subtitles/CC (SRT file/VTT file). While FastPix can handle various audio and video formats and codecs, using standard inputs can help with optimal processing speed.
                         file:
                           type: object
@@ -2022,7 +2022,7 @@ paths:
                   success: true
                   data:
                     configuration:
-                      url: https://static.fastpix.io/sample.mp4
+                      url: https://static.fastpix.com/sample.mp4
                     file:
                       containerFormat: mp4
                       tracks:
@@ -2067,7 +2067,7 @@ paths:
         - Playback
       summary: Create a playback ID
       description: |
-        You can create a new playback ID for a specific media asset. If you have already retrieved an existing `playbackId` using the <a href="https://docs.fastpix.io/reference/get-media">Get Media by ID</a> endpoint for a media asset, you can use this endpoint to generate a new playback ID with a specified access policy. 
+        You can create a new playback ID for a specific media asset. If you have already retrieved an existing `playbackId` using the <a href="https://fastpix.com/docs/video-on-demand-api/manage-videos/get-media">Get Media by ID</a> endpoint for a media asset, you can use this endpoint to generate a new playback ID with a specified access policy. 
 
 
 
@@ -2278,7 +2278,7 @@ paths:
 
         > **PLEASE NOTE**
         >
-        > This version now supports uploads with no file size limitations and offers faster uploads. The previous endpoint (which had a 500MB size limit) is now deprecated. You can find details in the [changelog](https://docs.fastpix.io/changelog/api-update-direct-upload-media-from-device).
+        > This version now supports uploads with no file size limitations and offers faster uploads. The previous endpoint (which had a 500MB size limit) is now deprecated. You can find details in the [changelog](https://fastpix.com/docs/changelog/release-notes).
 
         #### How it works
 
@@ -2293,16 +2293,16 @@ paths:
 
 
 
-        After uploading, you can use the <a href="https://docs.fastpix.io/reference/get-media">Get Media by ID</a> endpoint to check the status of the uploaded media asset and see if it has transitioned to a `ready` status for playback. 
+        After uploading, you can use the <a href="https://fastpix.com/docs/video-on-demand-api/manage-videos/get-media">Get Media by ID</a> endpoint to check the status of the uploaded media asset and see if it has transitioned to a `ready` status for playback. 
 
-        To notify your application about the status of this API request check for the webhooks for <a href="https://docs.fastpix.io/docs/webhooks-collection#media-related-events">media related events</a>.  
+        To notify your application about the status of this API request check for the webhooks for <a href="https://fastpix.com/docs/webhooks/webhook-event-reference#media-related-events">media related events</a>.  
 
 
         #### Example
 
         A social media platform allows users to upload video content directly from their phones or computers. This endpoint facilitates the upload process. For example, if you are developing a video-sharing app where users can upload short clips from their mobile devices, this endpoint enables them to select a video, upload it to the platform.
 
-        Related guide: <a href="https://docs.fastpix.io/docs/upload-videos-directly">Upload videos directly</a>
+        Related guide: <a href="https://fastpix.com/docs/upload-videos/upload-videos-from-device">Upload videos directly</a>
       requestBody:
         description: Request body for direct upload
         content:
@@ -2660,7 +2660,7 @@ paths:
 
         Imagine you're managing a video editing platform where users upload full-length videos and create short clips for social media sharing. To keep track of all clips linked to a particular video, you call this API with the sourceMediaId. The response provides a list of all associated clips, allowing you to manage, edit, or repurpose them as needed.
 
-        Related guide: <a href="https://docs.fastpix.io/docs/create-clips-from-existing-media">Create clips from existing media</a>
+        Related guide: <a href="https://fastpix.com/docs/edit-and-transform-videos/clip-and-trim-videos">Create clips from existing media</a>
       operationId: get-media-clips
       parameters:
         - in: path
@@ -3259,7 +3259,7 @@ paths:
         **Example:**  
         A media service provider may retrieve DRM configuration for a workspace to create DRM content.
 
-        Related guide: <a href="https://docs.fastpix.io/docs/secure-playback-with-drm">Manage DRM configuration</a>
+        Related guide: <a href="https://fastpix.com/docs/video-security/set-up-drm-encryption">Manage DRM configuration</a>
       operationId: getDrmConfiguration
       parameters:
         - in: query
@@ -3343,7 +3343,7 @@ paths:
         1. Make a GET request to this endpoint, replacing `{drmConfigurationId}` with the UUID of the DRM configuration.  
         2. The response will contain the associated DRM configuration ID.
 
-        Related guide: <a href="https://docs.fastpix.io/docs/secure-playback-with-drm">Manage DRM configuration</a>
+        Related guide: <a href="https://fastpix.com/docs/video-security/set-up-drm-encryption">Manage DRM configuration</a>
       operationId: getDrmConfigurationById
       parameters:
         - in: path
@@ -3409,7 +3409,7 @@ paths:
         - Start live stream
       summary: Create a new stream
       description: |-
-        Allows you to initiate a new <a href="https://docs.fastpix.io/docs/get-started-with-live-streaming">RTMPS</a> or <a href="https://docs.fastpix.io/docs/using-srt-to-live-stream">SRT</a> live stream on FastPix. Upon creating a stream, FastPix generates a unique `streamKey` and `srtSecret`, which can be used with any broadcasting software (like OBS) to connect to FastPix's RTMPS or SRT servers.
+        Allows you to initiate a new <a href="https://fastpix.com/docs/get-started/live-overview">RTMPS</a> or <a href="https://fastpix.com/docs/broadcast/live-stream-with-srt">SRT</a> live stream on FastPix. Upon creating a stream, FastPix generates a unique `streamKey` and `srtSecret`, which can be used with any broadcasting software (like OBS) to connect to FastPix's RTMPS or SRT servers.
         Leverage SRT for live streaming in environments with unstable networks, taking advantage of its error correction and encryption features for a resilient and secure broadcast. 
 
         <h4>How it works</h4> 
@@ -3418,7 +3418,7 @@ paths:
 
         2. FastPix returns the stream details for both RTMPS and SRT configurations. These keys and IDs from the stream details are essential for connecting the broadcasting software to FastPix’s servers and transmitting the live stream to viewers.
 
-        3. Once the live stream is created, we’ll shoot a `POST` message to the address you give us with the webhook event <a href="https://docs.fastpix.io/docs/live-events#videolive_streamcreated">video.live_stream.created</a>.
+        3. Once the live stream is created, we’ll shoot a `POST` message to the address you give us with the webhook event <a href="https://fastpix.com/docs/live-stream-events/live-events#videolive_streamcreated">video.live_stream.created</a>.
 
 
         **Example:**
@@ -3427,7 +3427,7 @@ paths:
           Imagine a gaming platform that allows users to live stream gameplay directly from their dashboard. The API creates a new stream, provides the necessary stream key, and sets it to "private" so that only specific viewers can access it. 
         
         
-        Related guide: <a href="https://docs.fastpix.io/docs/how-to-livestream">How to live stream</a>
+        Related guide: <a href="https://fastpix.com/docs/get-started/live-quickstart">How to live stream</a>
       operationId: create-new-stream
       requestBody:
         required: true
@@ -3542,7 +3542,7 @@ paths:
         
         Suppose a content creator is hosting a live concert and wants to display the number of live viewers on their dashboard. This endpoint can be queried to show up-to-date viewer statistics.
         
-        Related guide: <a href="https://docs.fastpix.io/docs/manage-streams">Manage streams</a>
+        Related guide: <a href="https://fastpix.com/docs/manage-live-streams/create-and-manage-live-streams">Manage streams</a>
 
       operationId: get-live-stream-viewer-count-by-id
       parameters:
@@ -3598,7 +3598,7 @@ paths:
           Suppose a news agency is broadcasting a live event and wants to track the configurations set for the live stream while also checking the stream's status.
         
         
-        Related guide: <a href="https://docs.fastpix.io/docs/manage-streams">Manage streams</a>
+        Related guide: <a href="https://fastpix.com/docs/manage-live-streams/create-and-manage-live-streams">Manage streams</a>
       operationId: get-live-stream-by-id
       parameters:
         - name: streamId
@@ -3648,14 +3648,14 @@ paths:
       description: |-
         Permanently removes a specified live stream from the workspace. If the stream is still active, the encoder will be disconnected, and the ingestion will stop. This action cannot be undone, and any future playback attempts will fail. 
 
-          By providing the `streamId`, the API will terminate any active connections to the stream and remove it from the list of available live streams. You can further look for <a href="https://docs.fastpix.io/docs/live-events#videolive_streamdeleted">video.live_stream.deleted</a> webhook to notify your system about the status. 
+          By providing the `streamId`, the API will terminate any active connections to the stream and remove it from the list of available live streams. You can further look for <a href="https://fastpix.com/docs/live-stream-events/live-events#videolive_streamdeleted">video.live_stream.deleted</a> webhook to notify your system about the status. 
 
           #### Example
         
           For an online concert platform, a trial stream was mistakenly made public. The event manager deletes the stream before the concert begins to avoid confusion among viewers. 
         
         
-          Related guide: <a href="https://docs.fastpix.io/docs/manage-streams">Manage streams</a>
+          Related guide: <a href="https://fastpix.com/docs/manage-live-streams/create-and-manage-live-streams">Manage streams</a>
       operationId: delete-live-stream
       parameters:
         - name: streamId
@@ -3706,7 +3706,7 @@ paths:
         This endpoint allows you to modify the parameters of an existing live stream, such as its `metadata` (title, description) or the `reconnectWindow`. It’s useful for making changes to a stream that has already been created but not yet ended. Once the live stream is disabled, you cannot update a stream. 
 
 
-          The updated stream parameters and the `streamId` needs to be shared in the request, and FastPix will return the updated stream details. Once updated, <a href="https://docs.fastpix.io/docs/live-events#videolive_streamupdated">video.live_stream.updated</a> webhook event notifies your system. 
+          The updated stream parameters and the `streamId` needs to be shared in the request, and FastPix will return the updated stream details. Once updated, <a href="https://fastpix.com/docs/live-stream-events/live-events#videolive_streamupdated">video.live_stream.updated</a> webhook event notifies your system. 
 
          #### Example
         
@@ -3714,7 +3714,7 @@ paths:
         
         
         
-          Related guide: <a href="https://docs.fastpix.io/docs/manage-streams">Manage streams</a>
+          Related guide: <a href="https://fastpix.com/docs/manage-live-streams/create-and-manage-live-streams">Manage streams</a>
       operationId: update-live-stream
       parameters:
         - name: streamId
@@ -3779,7 +3779,7 @@ paths:
         
         A creator disables a livestream to pause it temporarily. Later, they decide to continue the session. By calling this endpoint with the stream's ID, they can re-enable and restart the same livestream.
         
-        Related guide <a href="https://docs.fastpix.io/docs/manage-streams">Manage streams</a>
+        Related guide <a href="https://fastpix.com/docs/manage-live-streams/create-and-manage-live-streams">Manage streams</a>
       operationId: enable-live-stream
       parameters:
         - name: streamId
@@ -3862,7 +3862,7 @@ paths:
         
         A speaker finishes their live session and wants to prevent the stream from being mistakenly started again. By calling this endpoint, the stream is transitioned to a `disabled` state, ensuring it's permanently stopped (unless re-enabled on a paid plan).
         
-        Related guide <a href="https://docs.fastpix.io/docs/manage-streams">Manage streams</a>
+        Related guide <a href="https://fastpix.com/docs/manage-live-streams/create-and-manage-live-streams">Manage streams</a>
       operationId: disable-live-stream
       parameters:
         - name: streamId
@@ -3927,7 +3927,7 @@ paths:
         
         A virtual event ends, and the system or host needs to close the livestream to prevent further streaming. This endpoint ensures the livestream status is changed from `active` to `idle`, indicating it's officially completed.
         
-        Related guide <a href="https://docs.fastpix.io/docs/manage-streams">Manage streams</a>
+        Related guide <a href="https://fastpix.com/docs/manage-live-streams/create-and-manage-live-streams">Manage streams</a>
       operationId: complete-live-stream
       parameters:
         - name: streamId
@@ -4101,7 +4101,7 @@ paths:
         - Live playback
       summary: Get playbackId details
       description: |-
-        Retrieves details about a previously created playback ID. If you provide the distinct `playbackId` that was given back to you in the previous stream or <a href="https://docs.fastpix.io/reference/create-playbackid-of-stream">create playbackId</a> request, FastPix will provide the relevant playback details such as the access policy. 
+        Retrieves details about a previously created playback ID. If you provide the distinct `playbackId` that was given back to you in the previous stream or <a href="https://fastpix.com/docs/live-stream-api/live-playback/create-playback-id-of-stream">create playbackId</a> request, FastPix will provide the relevant playback details such as the access policy. 
 
         #### Example
         A developer needs to confirm the access policy of the playback ID to ensure whether the stream is public or private for viewers.
@@ -4165,12 +4165,12 @@ paths:
 
         1. Upon calling this endpoint, you need to provide the parent `streamId` and the details of the simulcast target (platform and credentials). The system will generate a unique `simulcastId`, which can be used to manage the simulcast later. 
 
-        2. To notify your application about the status of simulcast related events check for the <a href="https://docs.fastpix.io/docs/webhooks-collection#simulcast-target-events">webhooks for simulcast</a> target events. 
+        2. To notify your application about the status of simulcast related events check for the <a href="https://fastpix.com/docs/webhooks/webhook-event-reference#simulcast-target-events">webhooks for simulcast</a> target events. 
 
         #### Example
         An event manager sets up a live stream for a virtual conference and wants to simulcast the stream on YouTube and Facebook Live. They first create the primary live stream in FastPix, ensuring it's in the idle state. Then, they use the API to create a simulcast target for YouTube. 
 
-        Related guide: <a href="https://docs.fastpix.io/docs/simulcast-to-3rd-party-platforms">Simulcast to 3rd party platforms</a>
+        Related guide: <a href="https://fastpix.com/docs/edit-and-transform-live-stream/simulcast-to-multiple-platforms">Simulcast to 3rd party platforms</a>
       operationId: create-simulcast-of-stream
       parameters:
         - name: streamId
@@ -4233,7 +4233,7 @@ paths:
       description: |-
         Allows you to delete a simulcast using its unique `simulcastId`, which was returned during the simulcast creation process. Deleting a simulcast stops the broadcast to the associated platform, but the parent stream will continue to run if it is live. This action is irreversible, and a new simulcast would need to be created if you want to resume streaming to the same platform. 
 
-        Webhook event: <a href="https://docs.fastpix.io/docs/live-events#videolive_streamsimulcast_targetdeleted">video.live_stream.simulcast_target.deleted</a>
+        Webhook event: <a href="https://fastpix.com/docs/live-stream-events/live-events#videolive_streamsimulcast_targetdeleted">video.live_stream.simulcast_target.deleted</a>
 
 
         #### Example
@@ -4352,7 +4352,7 @@ paths:
       description: |-
         Allows you to enable or disable a specific simulcast associated with a parent live stream. The status of the simulcast can be updated at any point, whether the live stream is active or idle. However, once the live stream is disabled, the simulcast can no longer be modified. 
 
-        Webhook event: <a href="https://docs.fastpix.io/docs/live-events#videolive_streamsimulcast_targetupdated">video.live_stream.simulcast_target.updated</a>
+        Webhook event: <a href="https://fastpix.com/docs/live-stream-events/live-events#videolive_streamsimulcast_targetupdated">video.live_stream.simulcast_target.updated</a>
 
         #### Example
         When a `PATCH` request is made to this endpoint, the API updates the status of the simulcast. This can be useful for pausing or resuming a simulcast on a particular platform without stopping the parent live stream.
@@ -4690,7 +4690,7 @@ paths:
         { 
           "kid": "359302ee-2446-4afe-9348-8b4656b9ddb1", 
           "aud": "media:6cee6f85-9334-4a51-9ce3-e0241d94ceef", 
-          "iss": "fastpix.io", 
+          "iss": "fastpix.com", 
           "sub": "", 
           "iat": 1706703204, 
           "exp": 1735626783 
@@ -4702,7 +4702,7 @@ paths:
         
         * **kid:** The key ID of the signing key. 
         * **aud:** The audience for which the token is intended. 
-        * **iss:** The issuer of the token (e.g., "fastpix.io"). 
+        * **iss:** The issuer of the token (e.g., "fastpix.com"). 
         * **sub:** The subject of the token, typically representing the user or entity the token is issued for. In this case, use the workspaceId fetched from the "Get Signing Key by ID" endpoint. 
         * **groups:** An array of groups the subject belongs to (e.g., ["user"]). 
         * **iat:** The issued-at timestamp, indicating when the token was created. 
@@ -4791,7 +4791,7 @@ paths:
 
           2. Specify the timespan for which you want to retrieve the video views using the `timespan[]` parameter. 
 
-          3. Filter the views based on dimensions such as browser, device, video title, viewer ID, etc., using the `filterby[]` parameter. Get the dimensions by calling <a href="https://docs.fastpix.io/reference/list_dimensions">list the dimensions</a> endpoint. 
+          3. Filter the views based on dimensions such as browser, device, video title, viewer ID, etc., using the `filterby[]` parameter. Get the dimensions by calling <a href="https://fastpix.com/docs/video-data-api/dimensions/list-dimensions">list the dimensions</a> endpoint. 
 
           4. Paginate the results using the `limit` and `offset` parameters. 
 
@@ -4799,7 +4799,7 @@ paths:
 
           6. Receive a response containing the list of video views matching the specified criteria.
 
-        Each view in the response will include a unique `viewId`. You can use this `viewId` to call the <a href="https://docs.fastpix.io/reference/get_video_view_details">get details of video view</a> endpoint to retrieve more detailed information about that specific view. 
+        Each view in the response will include a unique `viewId`. You can use this `viewId` to call the <a href="https://fastpix.com/docs/video-data-api/views/get-video-view-details">get details of video view</a> endpoint to retrieve more detailed information about that specific view. 
 
 
         #### Example
@@ -4807,7 +4807,7 @@ paths:
         Suppose you're managing a video streaming service and need to analyze how the content performs across different devices and browsers. By calling the List Video Views endpoint with filters like `browser_name` and `device_type`, you can get insights into which platforms are most popular with the audience. This data will help you optimize content for the most-used platforms and troubleshoot any playback issues on less common devices.
 
 
-          Related guide: <a href="https://docs.fastpix.io/docs/audience-metrics">Audience metrics</a>, <a href="https://docs.fastpix.io/docs/understand-dashboard-ui#1-views-dashboard">Views dashboard</a>
+          Related guide: <a href="https://fastpix.com/docs/concepts/audience-metrics">Audience metrics</a>, <a href="https://fastpix.com/docs/working-with-video-data/explore-the-dashboard#1-views-dashboard">Views dashboard</a>
       parameters:
         - in: query
           name: timespan[]
@@ -5024,7 +5024,7 @@ paths:
         Suppose a developer receives a report of a poor viewing experience for a specific user. By using this endpoint with the user's `viewId`, the developer can retrieve metrics like buffering duration, playback errors, and session length. This data allows the developer to pinpoint issues (such as poor connectivity or a browser-specific problem) and take steps to improve the user experience.
 
 
-        Related guide: <a href="https://docs.fastpix.io/page/what-video-data-do-we-capture#/">What Video Data do we capture?</a>
+        Related guide: <a href="https://fastpix.com/docs/concepts/what-video-data-do-we-capture#/">What Video Data do we capture?</a>
       parameters:
         - in: path
           name: viewId
@@ -5092,7 +5092,7 @@ paths:
                     longitude: '78.4564'
                     pageLoadTime: 1479
                     pageContext: null
-                    viewPageUrl: https://rltv.fastpix.io/episode/champion-engagement-model-best-practices-for-identifying-and-engaging-your-champion-651c60ac12420922e6058dba
+                    viewPageUrl: https://rltv.fastpix.com/episode/champion-engagement-model-best-practices-for-identifying-and-engaging-your-champion-651c60ac12420922e6058dba
                     playbackScore: 1
                     playerAutoplayOn: true
                     playerHeight: 890
@@ -5326,7 +5326,7 @@ paths:
           5. Receive a response containing the list of top video views matching the specified criteria.
 
 
-          Related guide: <a href="https://docs.fastpix.io/page/how-to-get-top-performing-content">Get top-performing content</a>
+          Related guide: <a href="https://fastpix.com/docs/working-with-video-data/identify-top-performing-content">Get top-performing content</a>
       parameters:
         - in: query
           name: timespan[]
@@ -5630,9 +5630,9 @@ paths:
       description: |
         Retrieves a list of dimensions that can be used as query parameters across various data endpoints. Each dimension has a unique id that can be used to filter data effectively. 
 
-        The dimensions retrieved from this endpoint can be used in conjunction with the <a href="https://docs.fastpix.io/reference/list_video_views">list video views</a> and <a href="https://docs.fastpix.io/reference/list_by_top_content">list by top content</a> endpoints to filter results based on specific criteria. For example, you can filter views by `browser_name`, `os_name`, `device_type`, and more.
+        The dimensions retrieved from this endpoint can be used in conjunction with the <a href="https://fastpix.com/docs/video-data-api/views/list-video-views">list video views</a> and <a href="https://fastpix.com/docs/video-data-api/views/list-by-top-content">list by top content</a> endpoints to filter results based on specific criteria. For example, you can filter views by `browser_name`, `os_name`, `device_type`, and more.
 
-        Related guides: <a href="https://docs.fastpix.io/page/what-video-data-do-we-capture#/">What Video Data do we capture?</a> ,   <a href="https://docs.fastpix.io/docs/user-passable-metadata-1">Use passable dimensions</a>
+        Related guides: <a href="https://fastpix.com/docs/concepts/what-video-data-do-we-capture#/">What Video Data do we capture?</a> ,   <a href="https://fastpix.com/docs/working-with-video-data/pass-custom-metadata-to-metrics">Use passable dimensions</a>
       operationId: list_dimensions
       responses:
         '200':
@@ -5737,14 +5737,14 @@ paths:
         This endpoint returns the filter values associated with a specific dimension, along with the total number of video views for each value. For example, it can list all `browser_name` (dimension) and show how many views occurred for all available browsers like Chrome, Safari (filter values). 
 
 
-        In order to use the <a href="https://docs.fastpix.io/docs/custom-business-metadata">Custom Dimensions</a>, you must enable them in the dashboard under settings option based on the plan you have opted for.
+        In order to use the <a href="https://fastpix.com/docs/working-with-video-data/use-custom-dimensions">Custom Dimensions</a>, you must enable them in the dashboard under settings option based on the plan you have opted for.
 
         #### Example
 
         A developer wants to know how their video content performs across different browsers. By calling this endpoint for the `device_type` dimension, they can retrieve a breakdown of video views by each device (e.g., Desktop, Mobile, Tablet). This data will help the developer understand where optimizations or troubleshooting may be necessary.
 
 
-        Related guide: <a href="https://docs.fastpix.io/docs/understand-dashboard-ui#filters-and-timeframes">Filters and timeframes</a>
+        Related guide: <a href="https://fastpix.com/docs/working-with-video-data/explore-the-dashboard#filters-and-timeframes">Filters and timeframes</a>
       operationId: list_filter_values_for_dimension
       parameters:
         - in: path
@@ -5893,7 +5893,7 @@ paths:
 
         #### How it works
 
-          1. Before using this endpoint, you can call the <a href="https://docs.fastpix.io/reference/list_dimensions">List Dimensions</a> endpoint to retrieve all available dimensions that can be used in your query. 
+          1. Before using this endpoint, you can call the <a href="https://fastpix.com/docs/video-data-api/dimensions/list-dimensions">List Dimensions</a> endpoint to retrieve all available dimensions that can be used in your query. 
 
           2. Make a `GET` request to this endpoint with the required `metricId` and other query parameters. 
 
@@ -5908,7 +5908,7 @@ paths:
         A developer wants to analyze how watch time varies across different device types. By calling this endpoint for the `playing_time` metric and filtering by `device_type`, they can understand how engagement differs between mobile, desktop, and tablet users. This data will guide optimization efforts for different platforms. 
 
 
-        Related guide: <a href="https://docs.fastpix.io/docs/metrics-overview">Understand data definitions</a>
+        Related guide: <a href="https://fastpix.com/docs/concepts/what-video-data-do-we-capture">Understand data definitions</a>
       parameters:
         - in: path
           name: metricId
@@ -6093,7 +6093,7 @@ paths:
 
         #### How it works
 
-          1. Before using this endpoint, you can call the <a href="https://docs.fastpix.io/reference/list_dimensions">list dimensions</a> endpoint to retrieve all available dimensions that can be used in your query. 
+          1. Before using this endpoint, you can call the <a href="https://fastpix.com/docs/video-data-api/dimensions/list-dimensions">list dimensions</a> endpoint to retrieve all available dimensions that can be used in your query. 
 
           2. Make a `GET` request to this endpoint with the required `metricId` and other query parameters. 
 
@@ -6115,7 +6115,7 @@ paths:
           * **globalValue:** A global metric value that reflects the overall performance of the specified metric across the entire dataset for the given timespan. This value is not affected by specific filters. 
 
 
-          Related guide: <a href="https://docs.fastpix.io/docs/metrics-overview">Understand data definitions</a>
+          Related guide: <a href="https://fastpix.com/docs/concepts/what-video-data-do-we-capture">Understand data definitions</a>
       parameters:
         - in: path
           name: metricId
@@ -6412,14 +6412,14 @@ paths:
 
         #### How it works 
 
-          1. Before making a request to this endpoint, call the <a href="https://docs.fastpix.io/reference/list_dimensions">list dimensions</a> endpoint to obtain all available dimensions that can be used for comparison. 
+          1. Before making a request to this endpoint, call the <a href="https://fastpix.com/docs/video-data-api/dimensions/list-dimensions">list dimensions</a> endpoint to obtain all available dimensions that can be used for comparison. 
 
           2. Make a `GET` request to this endpoint with the desired metrics specified in the query parameters. 
 
           3. Receive a response containing the comparison values for the specified metrics across the selected dimensions. 
 
 
-          Related guide: <a href="https://docs.fastpix.io/docs/understand-dashboard-ui#compare-metrics">Compare metrics in dashboard</a>
+          Related guide: <a href="https://fastpix.com/docs/working-with-video-data/explore-the-dashboard#compare-metrics">Compare metrics in dashboard</a>
       parameters:
         - in: query
           name: timespan[]
@@ -6781,7 +6781,7 @@ paths:
         * **code:** The error code associated with the specific error. 
 
 
-        Related guide: <a href="https://docs.fastpix.io/docs/track-playback-errors">Troubleshoot errors</a>
+        Related guide: <a href="https://fastpix.com/docs/working-with-video-data/troubleshoot-playback-errors">Troubleshoot errors</a>
       parameters:
         - in: query
           name: timespan[]
@@ -7383,7 +7383,7 @@ components:
       properties:
         thumbnail:
           type: string
-          example: https://images.fastpix.io/6b13fdaf-f9ac-4970-a13b-01ea417e8783/thumbnail.png
+          example: https://images.fastpix.com/6b13fdaf-f9ac-4970-a13b-01ea417e8783/thumbnail.png
           description: A video thumbnail is a still image that acts as the preview image for your video.
         id:
           type: string
@@ -7778,11 +7778,11 @@ components:
       example:
         inputs:
           - type: video
-            url: https://static.fastpix.io/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4
+            url: https://static.fastpix.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4
             startTime: 0
             endTime: 60
           - type: watermark
-            url: https://static.fastpix.io/watermark-4k.png
+            url: https://static.fastpix.com/watermark-4k.png
             placement:
               xAlign: left
               xMargin: 10%
@@ -7811,7 +7811,7 @@ components:
             Defines the type of input.
         url:
           type: string
-          example: https://static.fastpix.io/sample.mp4
+          example: https://static.fastpix.com/sample.mp4
           description: |
             The url hosts the media file for FastPix, which needs to be downloaded to use further. It supports formats like MP3, MP4, MOV, MKV, or TS, and includes text tracks for subtitles/CC (SRT file/VTT file). While FastPix can handle various audio and video formats and codecs, using standard inputs can help with optimal processing speed.
         startTime:
@@ -7826,12 +7826,12 @@ components:
             End time indicates where encoding should end within the video file. For example, if you want to encode a segment from 3 minutes (180 seconds) to 6 minutes (360 seconds) in a 10-minute (600 seconds) video, the end time is 6 minutes (360 seconds). Note: End time is always mentioned in seconds.
         introUrl:
           type: string
-          example: https://static.fastpix.io/sample.mp4
+          example: https://static.fastpix.com/sample.mp4
           description: |
             The url of the intro video which is to be added at the start of the video.
         outroUrl:
           type: string
-          example: https://static.fastpix.io/sample.mp4
+          example: https://static.fastpix.com/sample.mp4
           description: |
             The url of the outro video which is to be added at the end of the video.
         expungeSegments:
@@ -7891,7 +7891,7 @@ components:
           type: string
           format: uri
           description: URL of the watermark image.
-          example: https://static.fastpix.io/watermark-4k.png
+          example: https://static.fastpix.com/watermark-4k.png
         placement:
           type: object
           properties:
@@ -8170,7 +8170,7 @@ components:
           type: string
           format: uri
           description: The direct URL of the track file. It should point to a valid audio or subtitle file.
-          example: https://static.fastpix.io/music-1.mp3
+          example: https://static.fastpix.com/music-1.mp3
         type:
           type: string
           enum:
@@ -8206,7 +8206,7 @@ components:
           type: string
           format: uri
           description: The direct URL of the track file.
-          example: https://static.fastpix.io/music-1.mp3
+          example: https://static.fastpix.com/music-1.mp3
         languageCode:
           type: string
           description: The BCP 47 language code representing the track's language.
@@ -8476,7 +8476,7 @@ components:
               description: A descriptive message providing more details for the error.
             description:
               type: string
-              example: The Access token does not have permissions to perform the request. Check access token's permissions. Read more https://docs.fastpix.io/docs/user-roles
+              example: The Access token does not have permissions to perform the request. Check access token's permissions. Read more https://fastpix.com/docs/getting-started/set-up-a-workspace
               description: |
                 A detailed explanation of the possible causes for the error.
       example:
@@ -8484,7 +8484,7 @@ components:
         error:
           code: 403
           message: forbidden
-          description: The Access token does not have permissions to perform the request. Check access token's permissions. Read more https://docs.fastpix.io/docs/user-roles
+          description: The Access token does not have permissions to perform the request. Check access token's permissions. Read more https://fastpix.com/docs/getting-started/set-up-a-workspace
     MediaOrPlaybackNotFound:
       type: object
       properties:
@@ -10105,8 +10105,18 @@ components:
           type: boolean
           example: true
           description: It demonstrates whether the request is successful or not.
+        data:
+          type: object
+          description: Contains details about the deleted signing key.
+          properties:
+            message:
+              type: string
+              description: A human-readable confirmation message.
+              example: signing key deleted successfully
       example:
         success: true
+        data:
+          message: signing key deleted successfully
     CreateSigningKeyResponseDTO:
       type: object
       description: Displays the result of the request.

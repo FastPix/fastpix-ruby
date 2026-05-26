@@ -105,6 +105,294 @@ test.test_create_media_from_url
 "
 ```
 
+## 🔎 GET Endpoints OpenAPI/SDK Contract Validator
+
+`validate_get_endpoints.rb` is a contract validator (the Ruby counterpart of the
+PHP `Tests/validate-get-endpoints.ts`). For **every GET endpoint** in the OpenAPI
+spec it:
+
+1. Calls the **live API** directly and captures the raw JSON.
+2. Validates that raw response against the **OpenAPI response schema** (using the
+   optional [`json_schemer`](https://github.com/davishmcclurg/json_schemer) gem —
+   if it isn't installed, this step is skipped and reported as such).
+3. Calls the **Ruby SDK** method for the same `operationId` and captures either the
+   parsed success object or the raised error (normalized).
+4. Compares JSON paths between the raw API JSON and the SDK-parsed JSON, applying
+   the same normalization rules used by the SDK (`snake_case` → `camelCase`,
+   acronym casing, empty-array == missing, `null` == missing, and the
+   `get_video_view_details` event-field remap).
+5. Writes per-endpoint artifacts to `tests/artifacts/` and two reports:
+   - `tests/GET_ENDPOINTS_OPENAPI_RESPONSE_VALIDATION_REPORT.md`
+   - `tests/GET_ENDPOINTS_OPENAPI_RESPONSE_FIX_SUGGESTIONS.md`
+   - and refreshes the consolidated table in this README (between the
+     `GET_ENDPOINTS_CONSOLIDATED` markers below).
+
+### Fixtures
+
+Endpoints with required path params read real IDs from
+`tests/get-endpoints-fixtures.json`. Add a real resource ID per `operationId` to
+avoid `404`s (otherwise a placeholder UUID is used and the row is flagged):
+
+```json
+{
+  "operations": {
+    "get-media": { "pathParams": { "mediaId": "<real-media-id>" } },
+    "list-media": { "query": { "limit": 5, "offset": 1, "orderBy": "desc" } }
+  }
+}
+```
+
+### Run
+
+```bash
+# Optional: enable OpenAPI response-schema validation
+gem install json_schemer
+
+# Run against the live API (real credentials required)
+FASTPIX_USERNAME=your-access-token \
+FASTPIX_PASSWORD=your-secret-key \
+ruby tests/validate_get_endpoints.rb
+
+# Optional: override the base URL (defaults to the spec's servers[0].url)
+FASTPIX_BASE_URL=https://api.fastpix.com/v1/ \
+FASTPIX_USERNAME=... FASTPIX_PASSWORD=... ruby tests/validate_get_endpoints.rb
+```
+
+### Latest consolidated results
+
+<!-- BEGIN GET_ENDPOINTS_CONSOLIDATED -->
+Last generated: 2026-05-21T11:10:10Z
+
+- **Total GET endpoints**: 30
+- **PASS**: 27
+- **FAIL**: 3
+- **SKIP**: 0
+
+| Endpoint | OperationId | OpenAPI valid | SDK parse | Missing in SDK (present in API) | Missing in API (present in SDK) | Empty arrays omitted by SDK | Status |
+|---|---|---:|---:|---|---|---|---|
+| `/on-demand` | `list-media` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/{livestreamId}/live-clips` | `list-live-clips` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/{mediaId}` | `get-media` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/{mediaId}/summary` | `get-media-summary` | ✅ | ❌ | None | None | None | ❌ FAIL |
+| `/on-demand/{mediaId}/input-info` | `retrieveMediaInputInfo` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/{mediaId}/playback-ids` | `list-playback-ids` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/uploads` | `list-uploads` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/{mediaId}/media-clips` | `get-media-clips` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/playlists` | `get-all-playlists` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/playlists/{playlistId}` | `get-playlist-by-id` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/{mediaId}/playback-ids/{playbackId}` | `get-playback-id` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/on-demand/drm-configurations` | `getDrmConfiguration` | ✅ | ❌ | None | None | None | ❌ FAIL |
+| `/on-demand/drm-configurations/{drmConfigurationId}` | `getDrmConfigurationById` | ✅ | ❌ | None | None | None | ❌ FAIL |
+| `/live/streams` | `get-all-streams` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/live/streams/{streamId}/viewer-count` | `get-live-stream-viewer-count-by-id` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/live/streams/{streamId}` | `get-live-stream-by-id` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/live/streams/{streamId}/playback-ids/{playbackId}` | `get-live-stream-playback-id` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/live/streams/{streamId}/simulcast/{simulcastId}` | `get-specific-simulcast-of-stream` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/iam/signing-keys` | `list_signing_keys` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/iam/signing-keys/{signingKeyId}` | `get-signing_key_by_id` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/viewlist` | `list_video_views` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/viewlist/{viewId}` | `get_video_view_details` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/viewlist/top-content` | `list_by_top_content` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/dimensions` | `list_dimensions` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/dimensions/{dimensionsId}` | `list_filter_values_for_dimension` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/metrics/{metricId}/breakdown` | `list_breakdown_values` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/metrics/{metricId}/overall` | `list_overall_values` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/metrics/{metricId}/timeseries` | `get_timeseries_data` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/metrics/comparison` | `list_comparison_values` | ✅ | ✅ | None | None | None | ✅ PASS |
+| `/data/errors` | `list_errors` | ✅ | ✅ | None | None | None | ✅ PASS |
+
+#### Missing fields (full lists)
+
+- **list-media** (`/on-demand`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list-live-clips** (`/on-demand/{livestreamId}/live-clips`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-media** (`/on-demand/{mediaId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-media-summary** (`/on-demand/{mediaId}/summary`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **retrieveMediaInputInfo** (`/on-demand/{mediaId}/input-info`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list-playback-ids** (`/on-demand/{mediaId}/playback-ids`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list-uploads** (`/on-demand/uploads`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-media-clips** (`/on-demand/{mediaId}/media-clips`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-all-playlists** (`/on-demand/playlists`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-playlist-by-id** (`/on-demand/playlists/{playlistId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-playback-id** (`/on-demand/{mediaId}/playback-ids/{playbackId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **getDrmConfiguration** (`/on-demand/drm-configurations`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **getDrmConfigurationById** (`/on-demand/drm-configurations/{drmConfigurationId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-all-streams** (`/live/streams`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-live-stream-viewer-count-by-id** (`/live/streams/{streamId}/viewer-count`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-live-stream-by-id** (`/live/streams/{streamId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-live-stream-playback-id** (`/live/streams/{streamId}/playback-ids/{playbackId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-specific-simulcast-of-stream** (`/live/streams/{streamId}/simulcast/{simulcastId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list_signing_keys** (`/iam/signing-keys`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get-signing_key_by_id** (`/iam/signing-keys/{signingKeyId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list_video_views** (`/data/viewlist`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get_video_view_details** (`/data/viewlist/{viewId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list_by_top_content** (`/data/viewlist/top-content`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list_dimensions** (`/data/dimensions`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list_filter_values_for_dimension** (`/data/dimensions/{dimensionsId}`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list_breakdown_values** (`/data/metrics/{metricId}/breakdown`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list_overall_values** (`/data/metrics/{metricId}/overall`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **get_timeseries_data** (`/data/metrics/{metricId}/timeseries`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list_comparison_values** (`/data/metrics/comparison`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+- **list_errors** (`/data/errors`)
+  - **Missing in SDK (present in API)**: None
+  - **Missing in API (present in SDK)**: None
+  - **Empty arrays omitted by SDK**: None
+  - **Empty arrays omitted by API**: None
+
+Full details: `tests/GET_ENDPOINTS_OPENAPI_RESPONSE_VALIDATION_REPORT.md`
+<!-- END GET_ENDPOINTS_CONSOLIDATED -->
+
+## 🔁 Non-GET Endpoints Lifecycle Validator
+
+`validate_non_get_endpoints.rb` is the mutating counterpart (Ruby port of the PHP
+`Tests/validate-non-get-endpoints.ts`), following the same structure. Because
+POST/PUT/PATCH/DELETE operations **mutate live data**, it cannot hit the raw API
+and the SDK separately. Instead it invokes the Ruby SDK once per operation and,
+from that single call, captures both the deserialized SDK value **and** the raw
+HTTP status + body for OpenAPI validation.
+
+It runs a self-cleaning **create → update → delete** lifecycle:
+
+1. **CREATE** (POST) — creates real resources (signing key, playlist, stream,
+   media, tracks, playback IDs, simulcast, upload) and captures their IDs.
+2. **UPDATE** (PUT/PATCH) — exercises updates against the captured IDs.
+3. **DELETE** (DELETE) — tears everything down **last**.
+
+Steps whose required IDs were never captured (an upstream create failed) are
+reported as **SKIP** instead of being called with `nil`s. It polls for async
+provisioning (media → `Ready`, track → present) and retries operations that
+return "not ready for updates". No fixtures are required.
+
+```bash
+# real credentials required — this creates and deletes real resources
+FASTPIX_USERNAME=your-access-token \
+FASTPIX_PASSWORD=your-secret-key \
+ruby tests/validate_non_get_endpoints.rb
+```
+
+Output: per-operation artifacts in `tests/artifacts-non-get/` and a report at
+`tests/NON_GET_ENDPOINTS_VALIDATION_REPORT.md` (Summary, Captured resources,
+Consolidated table, Per-operation details).
+
+> Note: `complete-live-stream` requires an actively-streaming encoder, so with no
+> live ingest it is expected to fail — the one allowed failure in a
+> credentials-only run.
+
 ## 📊 Test Output
 
 The test suite provides detailed output showing:

@@ -39,7 +39,7 @@ After the key pair is generated, the developer must securely store the private k
 
 
 **Detailed example:**  You are building a video-on-demand platform that restricts access based on user subscriptions. To ensure only subscribed users can stream content, you generate a signing key using this API. Each time a user logs in, you create a JWT signed with the private key. When the user attempts to play a video, FastPix uses the public key to verify the token and confirms that the user is authorized.<br/>
-Related guide: <a href="https://docs.fastpix.io/docs/secure-playback-with-jwts">Create and use signing keys</a>
+Related guide: <a href="https://fastpix.com/docs/video-security/secure-media-access-with-jwts">Create and use signing keys</a>
 
 ### Example Usage
 
@@ -229,7 +229,7 @@ In the response, the API returns the workspaceId and publicKey associated with t
 { 
   "kid": "your-signing-key-id", 
   "aud": "media:your-media-id", 
-  "iss": "fastpix.io", 
+  "iss": "fastpix.com", 
   "sub": "", 
   "iat": 1706703204, 
   "exp": 1735626783 
@@ -241,7 +241,7 @@ In the response, the API returns the workspaceId and publicKey associated with t
 
 * **kid:** The key ID of the signing key. 
 * **aud:** The audience for which the token is intended, enter the playbackId here.
-* **iss:**  The issuer of the token (for example, "fastpix.io "). 
+* **iss:**  The issuer of the token (for example, "fastpix.com "). 
 * **sub:** The subject of the token, typically representing the user or entity the token is issued for. In this case, use the workspaceId fetched from the "Get Signing Key by ID" endpoint. 
 * **groups:** An array of groups the subject belongs to (for example, ["user"]).
 * **iat:** The issued-at timestamp, indicating when the token was created. 

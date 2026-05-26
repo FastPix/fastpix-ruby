@@ -22,7 +22,7 @@ module FastpixClient
         field :language_name, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageName') } }
 
         sig { params(url: T.nilable(::String), type: T.nilable(Models::Components::AddTrackRequestType), language_code: T.nilable(::String), language_name: T.nilable(::String)).void }
-        def initialize(url: 'https://static.fastpix.io/music-1.mp3', type: Models::Components::AddTrackRequestType::AUDIO, language_code: 'it', language_name: 'Italian')
+        def initialize(url: 'https://static.fastpix.com/music-1.mp3', type: Models::Components::AddTrackRequestType::AUDIO, language_code: 'it', language_name: 'Italian')
           @url = url
           @type = type
           @language_code = language_code

@@ -15,7 +15,7 @@ req = Models::Components::CreateMediaRequest.new(
   inputs: [
     Models::Components::PullVideoInput.new(
       type: 'video',
-      url: 'https://static.fastpix.io/fp-sample-video.mp4',
+      url: 'https://static.fastpix.com/fp-sample-video.mp4',
     ),
   ],
   metadata: { "key1": 'value1' },
