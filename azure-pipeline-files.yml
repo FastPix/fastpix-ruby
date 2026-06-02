@@ -1,0 +1,54 @@
+trigger:
+- feature/*
+
+pr:
+- feature/*
+
+resources:
+- repo: self
+
+variables:
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: SonarCloudAnalysis
+  displayName: SonarCloud Analysis Stage
+
+  jobs:
+  - job: Analyze
+    displayName: Run SonarCloud Analysis
+
+    pool:
+      vmImage: $(vmImageName)
+
+    steps:
+    - checkout: self
+      fetchDepth: 0
+
+    - task: SonarCloudPrepare@3
+      displayName: 'Prepare SonarCloud Analysis'
+      inputs:
+        SonarCloud: 'sdk_sonar'
+        organization: 'fastpix'
+        scannerMode: 'CLI'
+        configMode: 'manual'
+        cliProjectKey: 'FastPix_ruby-language-sdk'
+        cliProjectName: 'ruby-language-sdk'
+        extraProperties: |
+          sonar.projectKey=FastPix_ruby-language-sdk
+          sonar.organization=fastpix
+          sonar.projectName=ruby-language-sdk
+          sonar.sources=.
+          sonar.sourceEncoding=UTF-8
+
+    - script: |
+        echo "Running SonarCloud analysis for Ruby SDK"
+      displayName: 'Build Step'
+
+    - task: SonarCloudAnalyze@3
+      displayName: 'Run SonarCloud Code Analysis'
+
+    - task: SonarCloudPublish@3
+      displayName: 'Publish SonarCloud Quality Gate Results'
+      inputs:
+        pollingTimeoutSec: '300'
