@@ -3,6 +3,16 @@
 # typed: true
 # frozen_string_literal: true
 
+require_relative 'fastpix_client/utils/utils'
+require_relative 'fastpix_client/utils/request_bodies'
+require_relative 'fastpix_client/utils/query_params'
+require_relative 'fastpix_client/utils/forms'
+require_relative 'fastpix_client/utils/headers'
+require_relative 'fastpix_client/utils/url'
+require_relative 'fastpix_client/utils/security'
+require_relative 'crystalline'
+require_relative 'fastpix_client/sdkconfiguration'
+
 module FastpixClient
   autoload :Fastpixapi, 'fastpix_client/fastpixapi'
   autoload :InputVideo, 'fastpix_client/input_video'
@@ -27,13 +37,3 @@ module FastpixClient
     autoload :Callbacks, 'fastpix_client/models/callbacks'
   end
 end
-
-require_relative 'fastpix_client/utils/utils'
-require_relative 'fastpix_client/utils/request_bodies'
-require_relative 'fastpix_client/utils/query_params'
-require_relative 'fastpix_client/utils/forms'
-require_relative 'fastpix_client/utils/headers'
-require_relative 'fastpix_client/utils/url'
-require_relative 'fastpix_client/utils/security'
-require_relative 'crystalline'
-require_relative 'fastpix_client/sdkconfiguration'

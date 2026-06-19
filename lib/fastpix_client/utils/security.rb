@@ -12,6 +12,9 @@ module FastpixClient
   module Utils
     extend T::Sig
 
+    SECURITY_NOT_SUPPORTED = 'not supported'
+    BEARER_PREFIX = 'bearer '
+
     sig { params(req: Faraday::Request, security: Object).void }
     def self.configure_request_security(req, security)
       return if security.nil?
@@ -75,33 +78,42 @@ module FastpixClient
     def self._parse_security_scheme_value(req, scheme_metadata, security_metadata, value)
       scheme_type = scheme_metadata[:type]
       sub_type = scheme_metadata[:sub_type]
-
       header_name = security_metadata[:field_name]
 
       case scheme_type
       when 'apiKey'
-        case sub_type
-        when 'header'
-          req.headers[header_name] = value
-        when 'query'
-          req.params[header_name] = value
-        when 'cookie'
-          req.headers['Cookie'][header_name] = value
-        else
-          raise StandardError, 'not supported'
-        end
-      when 'openIdConnect'
-        req.headers[header_name] = value.downcase.start_with?('bearer ') ? value : "Bearer #{value}"
-      when 'oauth2'
-        req.headers[header_name] = value.downcase.start_with?('bearer ') ? value : "Bearer #{value}"
+        _apply_api_key_scheme(req, sub_type, header_name, value)
+      when 'openIdConnect', 'oauth2'
+        req.headers[header_name] = _bearerize(value)
       when 'http'
         if sub_type == 'bearer'
-          req.headers[header_name] = value.downcase.start_with?('bearer ') ? value : "Bearer #{value}"
+          req.headers[header_name] = _bearerize(value)
         elsif sub_type != 'custom'
-          raise StandardError, 'not supported'
+          raise StandardError, SECURITY_NOT_SUPPORTED
         end
       else
-        raise StandardError, 'not supported'
+        raise StandardError, SECURITY_NOT_SUPPORTED
+      end
+    end
+
+    # Prefixes the value with `Bearer ` unless it is already a bearer token.
+    sig { params(value: String).returns(String) }
+    def self._bearerize(value)
+      value.downcase.start_with?(BEARER_PREFIX) ? value : "Bearer #{value}"
+    end
+
+    # Applies an apiKey security scheme to the request for the given sub_type.
+    sig { params(req: Faraday::Request, sub_type: T.nilable(String), header_name: T.nilable(String), value: String).void }
+    def self._apply_api_key_scheme(req, sub_type, header_name, value)
+      case sub_type
+      when 'header'
+        req.headers[header_name] = value
+      when 'query'
+        req.params[header_name] = value
+      when 'cookie'
+        req.headers['Cookie'][header_name] = value
+      else
+        raise StandardError, SECURITY_NOT_SUPPORTED
       end
     end
 

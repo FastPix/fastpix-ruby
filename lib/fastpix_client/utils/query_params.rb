@@ -72,45 +72,55 @@ module FastpixClient
       return params if obj.nil?
 
       if obj.respond_to? :fields
-        T.unsafe(obj).fields.each do |obj_field|
-          obj_param_metadata = obj_field.metadata[:query_param]
-          next if obj_param_metadata.nil?
-
-          val = obj.send(obj_field.name)
-          next if val.nil?
-
-          key = "#{metadata.fetch(:field_name, field_name)}[#{obj_param_metadata.fetch(:field_name, obj_field.name)}]"
-          if val.is_a? Array
-            val.each do |v|
-              next if v.nil?
-
-              params[key] = [] if !params.include? key
-
-              T.must(params[key]) << val_to_string(v)
-            end
-          else
-            params[key] = [val_to_string(val)]
-          end
-        end
+        _deep_object_from_object(params, metadata, field_name, obj)
       elsif obj.is_a? Hash
-        obj.each do |key, value|
-          next if value.nil?
-
-          param_key = "#{metadata.fetch(:field_name, field_name)}[#{key}]"
-          if value.is_a? Array
-            value.each do |val|
-              next if val.nil?
-
-              params[param_key] = [] if !params.include? param_key
-
-              T.must(params[param_key]).append(val_to_string(val))
-            end
-          else
-            params[param_key] = [val_to_string(value)]
-          end
-        end
+        _deep_object_from_hash(params, metadata, field_name, obj)
       end
       params
+    end
+
+    # Adds deepObject query params from a MetadataFields object (mutates `params`).
+    def self._deep_object_from_object(params, metadata, field_name, obj)
+      T.unsafe(obj).fields.each do |obj_field|
+        obj_param_metadata = obj_field.metadata[:query_param]
+        next if obj_param_metadata.nil?
+
+        val = obj.send(obj_field.name)
+        next if val.nil?
+
+        key = "#{metadata.fetch(:field_name, field_name)}[#{obj_param_metadata.fetch(:field_name, obj_field.name)}]"
+        if val.is_a? Array
+          val.each do |v|
+            next if v.nil?
+
+            params[key] = [] unless params.include? key
+
+            T.must(params[key]) << val_to_string(v)
+          end
+        else
+          params[key] = [val_to_string(val)]
+        end
+      end
+    end
+
+    # Adds deepObject query params from a Hash (mutates `params`).
+    def self._deep_object_from_hash(params, metadata, field_name, obj)
+      obj.each do |key, value|
+        next if value.nil?
+
+        param_key = "#{metadata.fetch(:field_name, field_name)}[#{key}]"
+        if value.is_a? Array
+          value.each do |val|
+            next if val.nil?
+
+            params[param_key] = [] unless params.include? param_key
+
+            T.must(params[param_key]).append(val_to_string(val))
+          end
+        else
+          params[param_key] = [val_to_string(value)]
+        end
+      end
     end
 
 
