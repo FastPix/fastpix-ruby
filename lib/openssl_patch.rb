@@ -2,11 +2,7 @@
 # This file should be required before any SSL connections are made
 
 require 'openssl'
-begin
-  require 'net/http'
-rescue LoadError
-  # Net::HTTP is optional; the related patch below is skipped when unavailable.
-end
+require 'net/http'
 
 # Find certificate file
 CERT_FILE = if File.exist?('/opt/homebrew/etc/openssl@3/cert.pem')

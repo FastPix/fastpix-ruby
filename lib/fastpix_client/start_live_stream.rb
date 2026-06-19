@@ -39,7 +39,7 @@ module FastpixClient
 
       if http_response.nil?
         raise error unless error.nil?
-        raise RuntimeError, 'no response'
+        raise StandardError, 'no response'
       end
 
       http_response

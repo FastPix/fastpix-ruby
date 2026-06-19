@@ -5,11 +5,7 @@
 # This script runs all available samples in the correct order
 
 require 'time'
-begin
-  require 'fastpixapi'
-rescue LoadError
-  # Availability is reported by check_prerequisites below.
-end
+require 'fastpixapi'
 
 # Configuration
 USERNAME = ENV['FASTPIX_USERNAME'] || 'your_username_here'

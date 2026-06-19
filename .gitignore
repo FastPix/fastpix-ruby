@@ -7,3 +7,6 @@ tests/artifacts-non-get/
 tests/GET_ENDPOINTS_OPENAPI_RESPONSE_VALIDATION_REPORT.md
 tests/GET_ENDPOINTS_OPENAPI_RESPONSE_FIX_SUGGESTIONS.md
 tests/NON_GET_ENDPOINTS_VALIDATION_REPORT.md
+
+# Vendored gems (build output, restored by `bundle install`)
+vendor/

@@ -41,6 +41,7 @@ stages:
           sonar.organization=fastpix
           sonar.projectName=ruby-language-sdk
           sonar.sources=.
+          sonar.exclusions=vendor/**
           sonar.sourceEncoding=UTF-8
 
     - script: |

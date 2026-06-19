@@ -17,10 +17,10 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.2'
-        bundler-cache: false  # Disabled to allow lockfile updates
+        bundler-cache: false
 
     - name: Install dependencies
-      run: bundle install --jobs 4 --retry 3
+      run: bundle install --frozen --jobs 4 --retry 3
 
     - name: Show updated Gemfile.lock (for debugging)
       if: failure()

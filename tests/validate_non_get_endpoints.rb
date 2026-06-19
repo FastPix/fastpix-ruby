@@ -87,7 +87,7 @@ def resolve_spec_path
   found = candidates.find { |p| File.exist?(p) }
   return found unless found.nil?
 
-  raise RuntimeError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
+  raise StandardError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
 end
 
 def load_openapi_spec
