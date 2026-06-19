@@ -54,10 +54,8 @@ module FastpixClient
         # f.response :logger, nil, { headers: true, bodies: true, errors: true }
       end
       
-      if !server_url.nil?
-        if !url_params.nil?
-          server_url = Utils.template_url(server_url, url_params)
-        end
+      if !server_url.nil? && !url_params.nil?
+        server_url = Utils.template_url(server_url, url_params)
       end
 
       server_idx = 0 if server_idx.nil?

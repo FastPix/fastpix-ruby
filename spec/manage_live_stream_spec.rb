@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'fastpixapi'
 require_relative '../config/fastpix_config'
 
+SUCCESS_CONTEXT = 'when the request is successful'
+
 RSpec.describe FastpixApiSDK::ManageLiveStream do
   let(:sdk_config) do
     FastpixApiSDK::SDKConfiguration.new(
@@ -21,7 +23,7 @@ RSpec.describe FastpixApiSDK::ManageLiveStream do
   let(:manage_live_stream) { described_class.new(sdk_config) }
 
   describe '#get_all_streams' do
-    context 'when the request is successful' do
+    context SUCCESS_CONTEXT do
       it 'retrieves all live streams' do
         response = manage_live_stream.get_all_streams
         puts "RESPONSE (get_all_streams success): #{JSON.pretty_generate(response.get_streams_response.to_dict)}"
@@ -32,7 +34,7 @@ RSpec.describe FastpixApiSDK::ManageLiveStream do
   end
 
   describe '#get_live_stream_by_id' do
-    context 'when the request is successful' do
+    context SUCCESS_CONTEXT do
       it 'retrieves a live stream by ID' do
         all_streams_response = manage_live_stream.get_all_streams
         stream_id = all_streams_response.get_streams_response.data.first.stream_id
@@ -45,7 +47,7 @@ RSpec.describe FastpixApiSDK::ManageLiveStream do
   end
 
   describe '#delete_live_stream' do
-    context 'when the request is successful' do
+    context SUCCESS_CONTEXT do
       it 'deletes a live stream' do
         all_streams_response = manage_live_stream.get_all_streams
         stream_id = all_streams_response.get_streams_response.data.first.stream_id
@@ -58,7 +60,7 @@ RSpec.describe FastpixApiSDK::ManageLiveStream do
   end
 
   describe '#update_live_stream' do
-    context 'when the request is successful' do
+    context SUCCESS_CONTEXT do
       it 'updates a live stream' do
         all_streams_response = manage_live_stream.get_all_streams
         stream_id = all_streams_response.get_streams_response.data.first.stream_id

@@ -14,7 +14,7 @@ module FastpixClient
     sig { params(clazz: Object, query_params: Object, url_override: T.nilable(::String), gbls: T.nilable(T::Hash[Symbol, T::Hash[Symbol, T::Hash[Symbol, Object]]])).returns(T::Hash[T.any(String, Symbol), T::Array[String]]) }
     def self.get_query_params(clazz, query_params, url_override = nil, gbls = nil)
       parsed_params = T.let({}, T::Hash[T.any(String, Symbol), T::Array[String]])
-      if !url_override.nil?
+      unless url_override.nil?
         parsed_url = URI.parse url_override
         URI.decode_www_form(parsed_url.query.to_s).each do |key, value|
           parsed_params[key] ||= []

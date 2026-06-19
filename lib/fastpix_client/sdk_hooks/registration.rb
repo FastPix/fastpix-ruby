@@ -18,10 +18,10 @@ module FastpixClient
 
       sig do
         params(
-          hooks: Hooks
+          _hooks: Hooks
         ).void
       end
-      def self.init_hooks(hooks)
+      def self.init_hooks(_hooks)
         # example_hook = ExampleHook.new
 
         # hooks.register_sdk_init_hook example_hook

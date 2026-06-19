@@ -2,6 +2,11 @@
 # This file should be required before any SSL connections are made
 
 require 'openssl'
+begin
+  require 'net/http'
+rescue LoadError
+  # Net::HTTP is optional; the related patch below is skipped when unavailable.
+end
 
 # Find certificate file
 CERT_FILE = if File.exist?('/opt/homebrew/etc/openssl@3/cert.pem')
@@ -42,14 +47,12 @@ if CERT_FILE && File.exist?(CERT_FILE)
     OpenSSL::X509::DEFAULT_CERT_FILE.replace(CERT_FILE)
   end
   
-  # Patch Net::HTTP to use our certificate store
-  begin
-    require 'net/http' unless defined?(Net::HTTP)
-    
+  # Patch Net::HTTP to use our certificate store (skipped if Net::HTTP is unavailable)
+  if defined?(Net::HTTP)
     module Net
       class HTTP
         alias_method :original_connect, :connect
-        
+
         def connect
           original_connect
           # Ensure SSL context uses our certificate file (skip if context is frozen, e.g. Bundler)
@@ -62,8 +65,6 @@ if CERT_FILE && File.exist?(CERT_FILE)
         end
       end
     end
-  rescue LoadError
-    # Net::HTTP not available, skip
   end
   
   puts "[OpenSSL Patch] Configured SSL certificate: #{CERT_FILE}" if ENV['DEBUG']

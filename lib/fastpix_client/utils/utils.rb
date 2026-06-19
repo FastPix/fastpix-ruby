@@ -53,23 +53,17 @@ module FastpixClient
     def self.match_content_type(content_type, pattern)
       return true if content_type == pattern || ['*', '*/*'].include?(pattern)
 
-      pieces = content_type.split(';')
-      pieces.each do |piece|
-        return true if pattern == piece.strip
-      end
-
-      false
+      content_type.split(';').any? { |piece| pattern == piece.strip }
     end
 
     sig { params(status_code: Integer, status_codes: T::Array[String]).returns(T::Boolean) }
     def self.match_status_code(status_code, status_codes)
       return true if status_codes.include? 'default'
+
       status_code = status_code.to_s
-      status_codes.each do |code|
-        return true if code == status_code
-        return true if code.downcase.end_with?('xx') && status_code[0] == code[0]
+      status_codes.any? do |code|
+        code == status_code || (code.downcase.end_with?('xx') && status_code[0] == code[0])
       end
-      false
     end
 
     sig { params(optional: T::Boolean).returns(T.proc.params(s: String).returns(T.nilable(DateTime))) }

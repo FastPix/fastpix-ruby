@@ -32,12 +32,8 @@ module FastpixClient
       request_val = request.send(request_field_name)
 
       request_metadata = T.let(nil, T.nilable(T::Array[T::Array[T.any(T::Array[T.nilable(String)], String)]]))
-      T.unsafe(request).fields.each do |f|
-        if f.name == request_field_name
-          request_metadata = f.metadata[:request]
-          break
-        end
-      end
+      matched_field = T.unsafe(request).fields.find { |f| f.name == request_field_name }
+      request_metadata = matched_field.metadata[:request] unless matched_field.nil?
       raise StandardError, 'invalid request type' if request_metadata.nil?
 
       serialize_content_type(

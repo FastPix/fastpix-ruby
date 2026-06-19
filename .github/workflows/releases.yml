@@ -27,7 +27,7 @@ jobs:
       run: cat Gemfile.lock
 
     - name: Build the gem
-      run: gem build *.gemspec
+      run: gem build ./*.gemspec
 
     - name: Push to RubyGems
       env:

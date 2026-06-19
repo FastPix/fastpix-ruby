@@ -48,6 +48,7 @@ module Crystalline
           begin
             value = JSON.parse(value)
           rescue TypeError, JSON::ParserError
+            # Not valid JSON; keep the original value unchanged.
           end
           # rubocop:enable Lint/SuppressedException
           return value
@@ -157,9 +158,9 @@ module Crystalline
     end
 
     def field(field_name)
-      fields.each do |f|
-        return f if f.name == field_name
-      end
+      # `|| fields` preserves the original each-loop behaviour of returning the
+      # full fields list when no field matches.
+      fields.find { |f| f.name == field_name } || fields
     end
 
     def marshal_single(field)

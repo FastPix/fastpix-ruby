@@ -61,21 +61,33 @@ ARTIFACTS_DIRNAME = 'artifacts-non-get'
 REPORT_MD = 'NON_GET_ENDPOINTS_VALIDATION_REPORT.md'
 MAX_PREVIEW_CHARS = 4000
 PHASE_ORDER = %w[CREATE UPDATE DELETE].freeze
+OP_CREATE_MEDIA = 'create-media'
+OP_CREATE_MEDIA_PLAYBACK_ID = 'create-media-playback-id'
+OP_CREATE_PLAYLIST = 'create-a-playlist'
+OP_CREATE_STREAM = 'create-new-stream'
+OP_ADD_MEDIA_TRACK = 'Add-media-track'
+OP_GENERATE_SUBTITLE = 'Generate-subtitle-track'
+OP_CREATE_STREAM_PLAYBACK = 'create-playbackId-of-stream'
+OP_CREATE_SIMULCAST = 'create-simulcast-of-stream'
+OP_DIRECT_UPLOAD = 'direct-upload-video-media'
+SDK_VALIDATE_TAG = 'sdk-validate'
 
 # ---------------------------------------------------------------------------
 # Spec loading + endpoint extraction
 # ---------------------------------------------------------------------------
 
 def resolve_spec_path
-  return ENV['FASTPIX_SPEC'] if ENV['FASTPIX_SPEC'] && File.exist?(ENV['FASTPIX_SPEC'])
+  return ENV.fetch('FASTPIX_SPEC', nil) if ENV.fetch('FASTPIX_SPEC', nil) && File.exist?(ENV.fetch('FASTPIX_SPEC', nil))
 
   candidates = [
     File.join(ROOT_DIR, 'fastpixapi.yaml'),
     File.join(ROOT_DIR, 'fastpix.yaml'),
     File.join(ROOT_DIR, 'openapi.yaml')
   ]
-  candidates.each { |p| return p if File.exist?(p) }
-  raise "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(', ')}"
+  found = candidates.find { |p| File.exist?(p) }
+  return found unless found.nil?
+
+  raise RuntimeError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
 end
 
 def load_openapi_spec
@@ -256,15 +268,8 @@ def extract_sdk_data(res)
   if res.respond_to?(:object) && !res.object.nil?
     data = res.object
   elsif res.class.respond_to?(:fields)
-    res.class.fields.each do |f|
-      next if metadata.include?(f.name)
-
-      val = res.send(f.name)
-      next if val.nil?
-
-      data = val
-      break
-    end
+    field = res.class.fields.find { |f| !metadata.include?(f.name) && !res.send(f.name).nil? }
+    data = res.send(field.name) unless field.nil?
   end
   return nil if data.nil?
 
@@ -329,33 +334,33 @@ def invoke_sdk(operation_id, request, base_url, username, password)
   res =
     case operation_id
     # ---------------- POST (create) ----------------
-    when 'create-media'
-      s.input_video.create_media(request: C::CreateMediaRequest.new(inputs: [C::PullVideoInput.new], metadata: { 'source' => 'sdk-validate' }))
+    when OP_CREATE_MEDIA
+      s.input_video.create_media(request: C::CreateMediaRequest.new(inputs: [C::PullVideoInput.new], metadata: { 'source' => SDK_VALIDATE_TAG }))
     when 'create_signing_key'
       s.signing_keys.create_signing_key
-    when 'create-a-playlist'
+    when OP_CREATE_PLAYLIST
       s.playlist.create_a_playlist(request: C::CreatePlaylistRequestManual.new(
         name: 'sdk-validate-playlist',
         reference_id: "sdkvalidate#{Time.now.to_i}",
         type: C::CreatePlaylistRequestManualType::MANUAL
       ))
-    when 'create-new-stream'
+    when OP_CREATE_STREAM
       s.start_live_stream.create_new_stream(request: C::CreateLiveStreamRequest.new(
         playback_settings: C::PlaybackSettings.new,
-        input_media_settings: C::InputMediaSettings.new(metadata: { 'name' => 'sdk-validate' })
+        input_media_settings: C::InputMediaSettings.new(metadata: { 'name' => SDK_VALIDATE_TAG })
       ))
-    when 'create-media-playback-id'
+    when OP_CREATE_MEDIA_PLAYBACK_ID
       s.playback.create_media_playback_id(body: O::CreateMediaPlaybackIdRequestBody.new(access_policy: C::AccessPolicy::PUBLIC), media_id: g['mediaId'])
-    when 'Add-media-track'
+    when OP_ADD_MEDIA_TRACK
       s.manage_videos.add_media_track(body: O::AddMediaTrackRequestBody.new(tracks: C::AddTrackRequest.new), media_id: g['mediaId'])
-    when 'Generate-subtitle-track'
+    when OP_GENERATE_SUBTITLE
       s.manage_videos.generate_subtitle_track(body: C::TrackSubtitlesGenerateRequest.new, media_id: g['mediaId'], track_id: g['trackId'])
-    when 'create-playbackId-of-stream'
+    when OP_CREATE_STREAM_PLAYBACK
       s.live_playback.create_playback_id_of_stream(body: C::PlaybackIdRequest.new, stream_id: g['streamId'])
-    when 'create-simulcast-of-stream'
+    when OP_CREATE_SIMULCAST
       s.simulcast_stream.create_simulcast_of_stream(body: C::SimulcastRequest.new(url: 'rtmp://example.com/live', stream_key: "sk-#{Time.now.to_i}"), stream_id: g['streamId'])
-    when 'direct-upload-video-media'
-      s.input_video.direct_upload_video_media(request: O::DirectUploadVideoMediaRequest.new(push_media_settings: O::PushMediaSettings.new(metadata: { 'source' => 'sdk-validate' })))
+    when OP_DIRECT_UPLOAD
+      s.input_video.direct_upload_video_media(request: O::DirectUploadVideoMediaRequest.new(push_media_settings: O::PushMediaSettings.new(metadata: { 'source' => SDK_VALIDATE_TAG })))
 
     # ---------------- PUT / PATCH (update) ----------------
     when 'updated-media'
@@ -496,15 +501,15 @@ end
 STEPS = [
   # ---- CREATE ----
   { op: 'create_signing_key', phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:signingKeyId] = v&.dig('data', 'id') } },
-  { op: 'create-a-playlist', phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:playlistId] = v&.dig('data', 'id') } },
-  { op: 'create-new-stream', phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:streamId] = v&.dig('data', 'streamId') || v&.dig('data', 'id') } },
-  { op: 'create-media', phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:mediaId] = v&.dig('data', 'id'); c[:mediaPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id') } },
-  { op: 'create-media-playback-id', phase: 'CREATE', needs: %i[mediaId], request: ->(c) { { 'mediaId' => c[:mediaId] } }, capture: ->(v, c) { c[:createdPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id') || v&.dig('data', 'id') } },
-  { op: 'Add-media-track', phase: 'CREATE', needs: %i[mediaId], request: ->(c) { { 'mediaId' => c[:mediaId] } }, capture: ->(v, c) { c[:trackId] = v&.dig('data', 'id') } },
-  { op: 'create-playbackId-of-stream', phase: 'CREATE', needs: %i[streamId], request: ->(c) { { 'streamId' => c[:streamId] } }, capture: ->(v, c) { c[:streamPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id') || v&.dig('data', 'id') } },
-  { op: 'create-simulcast-of-stream', phase: 'CREATE', needs: %i[streamId], request: ->(c) { { 'streamId' => c[:streamId] } }, capture: ->(v, c) { c[:simulcastId] = v&.dig('data', 'simulcastId') || v&.dig('data', 'id') } },
-  { op: 'direct-upload-video-media', phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:uploadId] = v&.dig('data', 'uploadId') || v&.dig('data', 'id') } },
-  { op: 'Generate-subtitle-track', phase: 'CREATE', needs: %i[mediaId trackId], request: ->(c) { { 'mediaId' => c[:mediaId], 'trackId' => c[:trackId] } } },
+  { op: OP_CREATE_PLAYLIST, phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:playlistId] = v&.dig('data', 'id') } },
+  { op: OP_CREATE_STREAM, phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:streamId] = v&.dig('data', 'streamId') || v&.dig('data', 'id') } },
+  { op: OP_CREATE_MEDIA, phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:mediaId] = v&.dig('data', 'id'); c[:mediaPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id') } },
+  { op: OP_CREATE_MEDIA_PLAYBACK_ID, phase: 'CREATE', needs: %i[mediaId], request: ->(c) { { 'mediaId' => c[:mediaId] } }, capture: ->(v, c) { c[:createdPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id') || v&.dig('data', 'id') } },
+  { op: OP_ADD_MEDIA_TRACK, phase: 'CREATE', needs: %i[mediaId], request: ->(c) { { 'mediaId' => c[:mediaId] } }, capture: ->(v, c) { c[:trackId] = v&.dig('data', 'id') } },
+  { op: OP_CREATE_STREAM_PLAYBACK, phase: 'CREATE', needs: %i[streamId], request: ->(c) { { 'streamId' => c[:streamId] } }, capture: ->(v, c) { c[:streamPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id') || v&.dig('data', 'id') } },
+  { op: OP_CREATE_SIMULCAST, phase: 'CREATE', needs: %i[streamId], request: ->(c) { { 'streamId' => c[:streamId] } }, capture: ->(v, c) { c[:simulcastId] = v&.dig('data', 'simulcastId') || v&.dig('data', 'id') } },
+  { op: OP_DIRECT_UPLOAD, phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:uploadId] = v&.dig('data', 'uploadId') || v&.dig('data', 'id') } },
+  { op: OP_GENERATE_SUBTITLE, phase: 'CREATE', needs: %i[mediaId trackId], request: ->(c) { { 'mediaId' => c[:mediaId], 'trackId' => c[:trackId] } } },
 
   # ---- UPDATE (PUT/PATCH) ----
   { op: 'updated-media', phase: 'UPDATE', needs: %i[mediaId], request: ->(c) { { 'mediaId' => c[:mediaId] } } },
@@ -544,9 +549,9 @@ STEPS = [
 
 # Maps a capture key to the operationId that produces it, for the report.
 CAPTURE_SOURCE = {
-  signingKeyId: 'create_signing_key', playlistId: 'create-a-playlist', streamId: 'create-new-stream',
-  mediaId: 'create-media', createdPlaybackId: 'create-media-playback-id', trackId: 'Add-media-track',
-  streamPlaybackId: 'create-playbackId-of-stream', simulcastId: 'create-simulcast-of-stream', uploadId: 'direct-upload-video-media'
+  signingKeyId: 'create_signing_key', playlistId: OP_CREATE_PLAYLIST, streamId: OP_CREATE_STREAM,
+  mediaId: OP_CREATE_MEDIA, createdPlaybackId: OP_CREATE_MEDIA_PLAYBACK_ID, trackId: OP_ADD_MEDIA_TRACK,
+  streamPlaybackId: OP_CREATE_STREAM_PLAYBACK, simulcastId: OP_CREATE_SIMULCAST, uploadId: OP_DIRECT_UPLOAD
 }.freeze
 
 # ---------------------------------------------------------------------------
@@ -651,9 +656,9 @@ def main
   spec = load_openapi_spec
   endpoints = extract_non_get_endpoints(spec)
 
-  base_url = ENV['FASTPIX_BASE_URL'] || ENV['FASTPIX_SERVER_URL'] || spec.dig('servers', 0, 'url') || 'https://api.fastpix.com/v1/'
-  username = ENV['FASTPIX_USERNAME']
-  password = ENV['FASTPIX_PASSWORD']
+  base_url = ENV.fetch('FASTPIX_BASE_URL', nil) || ENV.fetch('FASTPIX_SERVER_URL', nil) || spec.dig('servers', 0, 'url') || 'https://api.fastpix.com/v1/'
+  username = ENV.fetch('FASTPIX_USERNAME', nil)
+  password = ENV.fetch('FASTPIX_PASSWORD', nil)
   if username.to_s.empty? || password.to_s.empty?
     abort 'Set FASTPIX_USERNAME and FASTPIX_PASSWORD env vars (real credentials) for live API validation.'
   end
@@ -680,7 +685,7 @@ def main
     end
 
     # generating subtitles needs the just-added track to be fetched/ready first
-    if step[:op] == 'Generate-subtitle-track' && ctx[:mediaId] && ctx[:trackId]
+    if step[:op] == OP_GENERATE_SUBTITLE && ctx[:mediaId] && ctx[:trackId]
       warn "  ⏳ waiting for track #{ctx[:trackId]} to be ready..."
       warn "  track status: #{wait_for_track_ready(base_url, username, password, ctx[:mediaId], ctx[:trackId])}"
     end
@@ -720,7 +725,7 @@ def main
 
     # a just-created media must reach "Ready" before playback-ids / tracks can
     # be added, otherwise those create steps 400 and cascade into SKIPs.
-    if step[:op] == 'create-media' && ctx[:mediaId]
+    if step[:op] == OP_CREATE_MEDIA && ctx[:mediaId]
       warn "  ⏳ waiting for media #{ctx[:mediaId]} to be Ready..."
       warn "  media status: #{wait_for_media_ready(base_url, username, password, ctx[:mediaId])}"
     end

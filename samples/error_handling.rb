@@ -133,7 +133,7 @@ begin
   # Example 6: Comprehensive error handling wrapper
   puts "\n6. Testing comprehensive error handling wrapper..."
   
-  def safe_api_call(description, &block)
+  def safe_api_call(description, &_block)
     puts "   #{description}..."
     begin
       result = yield
@@ -185,7 +185,7 @@ begin
   # Example 7: Retry logic for transient errors
   puts "\n7. Testing retry logic for transient errors..."
   
-  def api_call_with_retry(description, max_retries: 3, &block)
+  def api_call_with_retry(description, max_retries: 3, &_block)
     puts "   #{description} (with retry logic)..."
     
     retries = 0

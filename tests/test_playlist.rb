@@ -4,6 +4,7 @@
 require_relative 'test_helper'
 
 class TestPlaylist < Minitest::Test
+  NO_PLAYLIST_ID_DETAILS = '   Details: No playlist ID available from previous test'
   def initialize(test_name = nil)
     super(test_name)
     @username = self.class.class_variable_defined?(:@@username) ? self.class.class_variable_get(:@@username) : ENV['FASTPIX_USERNAME'] || 'YOUR_FASTPIX_USERNAME'
@@ -66,7 +67,7 @@ class TestPlaylist < Minitest::Test
           response.object&.success == true &&
           response.object&.data&.id == @test_playlist_id
         else
-          puts "   Details: No playlist ID available from previous test"
+          puts NO_PLAYLIST_ID_DETAILS
           true # Skip test if no playlist ID available
         end
       rescue => e
@@ -93,7 +94,7 @@ class TestPlaylist < Minitest::Test
           response.status_code == 200 &&
           response.object&.success == true
         else
-          puts "   Details: No playlist ID available from previous test"
+          puts NO_PLAYLIST_ID_DETAILS
           true # Skip test if no playlist ID available
         end
       rescue => e
@@ -132,7 +133,7 @@ class TestPlaylist < Minitest::Test
             true # Skip test if no media available
           end
         else
-          puts "   Details: No playlist ID available from previous test"
+          puts NO_PLAYLIST_ID_DETAILS
           true # Skip test if no playlist ID available
         end
       rescue => e
@@ -170,7 +171,7 @@ class TestPlaylist < Minitest::Test
             true # Skip test if not enough media available
           end
         else
-          puts "   Details: No playlist ID available from previous test"
+          puts NO_PLAYLIST_ID_DETAILS
           true # Skip test if no playlist ID available
         end
       rescue => e
@@ -209,7 +210,7 @@ class TestPlaylist < Minitest::Test
             true # Skip test if no media available
           end
         else
-          puts "   Details: No playlist ID available from previous test"
+          puts NO_PLAYLIST_ID_DETAILS
           true # Skip test if no playlist ID available
         end
       rescue => e
@@ -228,7 +229,7 @@ class TestPlaylist < Minitest::Test
           response.status_code == 200 &&
           response.object&.success == true
         else
-          puts "   Details: No playlist ID available from previous test"
+          puts NO_PLAYLIST_ID_DETAILS
           true # Skip test if no playlist ID available
         end
       rescue => e

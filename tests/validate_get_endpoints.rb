@@ -61,6 +61,10 @@ MAX_PREVIEW_CHARS = 4000
 PLACEHOLDER_UUID = '00000000-0000-0000-0000-000000000000'
 REPORT_MD = 'GET_ENDPOINTS_OPENAPI_RESPONSE_VALIDATION_REPORT.md'
 FIX_SUGGESTIONS_MD = 'GET_ENDPOINTS_OPENAPI_RESPONSE_FIX_SUGGESTIONS.md'
+TIMESPAN_24_HOURS = '24:hours'
+ONEOF_NO_MATCH_MSG = 'must match exactly one schema in oneOf'
+NONE_BULLET = '- None'
+TYPE_STRING_YAML = '  type: string'
 
 # ---------------------------------------------------------------------------
 # Spec + fixtures loading
@@ -68,15 +72,17 @@ FIX_SUGGESTIONS_MD = 'GET_ENDPOINTS_OPENAPI_RESPONSE_FIX_SUGGESTIONS.md'
 
 def resolve_spec_path
   # Allow an explicit override via FASTPIX_SPEC; otherwise use the bundled spec.
-  return ENV['FASTPIX_SPEC'] if ENV['FASTPIX_SPEC'] && File.exist?(ENV['FASTPIX_SPEC'])
+  return ENV.fetch('FASTPIX_SPEC', nil) if ENV.fetch('FASTPIX_SPEC', nil) && File.exist?(ENV.fetch('FASTPIX_SPEC', nil))
 
   candidates = [
     File.join(ROOT_DIR, 'fastpixapi.yaml'),
     File.join(ROOT_DIR, 'fastpix.yaml'),
     File.join(ROOT_DIR, 'openapi.yaml')
   ]
-  candidates.each { |p| return p if File.exist?(p) }
-  raise "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(', ')}"
+  found = candidates.find { |p| File.exist?(p) }
+  return found unless found.nil?
+
+  raise RuntimeError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
 end
 
 def load_openapi_spec
@@ -139,25 +145,27 @@ def default_sdk_request(operation_id)
   when 'list_filter_values_for_dimension'
     { 'dimensionsId' => 'browser_name' }
   when 'list_breakdown_values'
-    { 'metricId' => 'quality_of_experience_score', 'timespan' => '24:hours', 'groupBy' => 'browser_name' }
+    { 'metricId' => 'quality_of_experience_score', 'timespan' => TIMESPAN_24_HOURS, 'groupBy' => 'browser_name' }
   when 'list_overall_values'
-    { 'metricId' => 'quality_of_experience_score', 'timespan' => '24:hours' }
+    { 'metricId' => 'quality_of_experience_score', 'timespan' => TIMESPAN_24_HOURS }
   when 'get_timeseries_data'
-    { 'metricId' => 'quality_of_experience_score', 'timespan' => '24:hours', 'groupBy' => 'hour' }
+    { 'metricId' => 'quality_of_experience_score', 'timespan' => TIMESPAN_24_HOURS, 'groupBy' => 'hour' }
   when 'list_comparison_values'
-    { 'timespan' => '24:hours', 'dimension' => 'browser_name', 'value' => 'Chrome' }
+    { 'timespan' => TIMESPAN_24_HOURS, 'dimension' => 'browser_name', 'value' => 'Chrome' }
   when 'list_errors'
-    { 'timespan' => '24:hours', 'limit' => 5 }
+    { 'timespan' => TIMESPAN_24_HOURS, 'limit' => 5 }
   when 'list_video_views'
-    { 'timespan' => '24:hours', 'limit' => 5, 'offset' => 1 }
+    { 'timespan' => TIMESPAN_24_HOURS, 'limit' => 5, 'offset' => 1 }
   when 'list_by_top_content'
-    { 'timespan' => '24:hours', 'limit' => 5 }
+    { 'timespan' => TIMESPAN_24_HOURS, 'limit' => 5 }
   when 'list-media', 'list-uploads', 'get-all-streams'
     { 'limit' => 5, 'offset' => 1, 'orderBy' => 'desc' }
   when 'getDrmConfiguration'
     { 'limit' => 10, 'offset' => 1 }
   when 'get-all-playlists', 'list_signing_keys'
     { 'limit' => 5, 'offset' => 1 }
+  else
+    nil
   end
 end
 
@@ -395,15 +403,8 @@ def extract_sdk_data(res)
   if res.respond_to?(:object) && !res.object.nil?
     data = res.object
   elsif res.class.respond_to?(:fields)
-    res.class.fields.each do |f|
-      next if metadata.include?(f.name)
-
-      val = res.send(f.name)
-      next if val.nil?
-
-      data = val
-      break
-    end
+    field = res.class.fields.find { |f| !metadata.include?(f.name) && !res.send(f.name).nil? }
+    data = res.send(field.name) unless field.nil?
   end
 
   data = res if data.nil?
@@ -526,7 +527,7 @@ def ajv_style_message(error)
   type = error['type'].to_s
   case type
   when 'oneOf'
-    'must match exactly one schema in oneOf'
+    ONEOF_NO_MATCH_MSG
   when 'anyOf'
     'must match a schema in anyOf'
   when 'enum'
@@ -698,7 +699,7 @@ def generate_fix_suggestions(r)
   paths = openapi_error_paths(r)
 
   # 1) oneOf overlap on tracks
-  if has_openapi_error(r, 'must match exactly one schema in oneOf') && paths.any? { |p| p.include?('tracks') }
+  if has_openapi_error(r, ONEOF_NO_MATCH_MSG) && paths.any? { |p| p.include?('tracks') }
     out << {
       title: 'Fix `tracks[].oneOf` overlap by constraining `type` per track schema',
       why: 'The current track schemas overlap (e.g. `type` is a free string and distinguishing fields are not required), so a single track object can match multiple branches. `oneOf` requires exactly one match.',
@@ -708,19 +709,19 @@ def generate_fix_suggestions(r)
         '',
         '# VideoTrack (and VideoTrackForGetAll)',
         'type:',
-        '  type: string',
+        TYPE_STRING_YAML,
         '  enum: [video]',
         '  example: video',
         '',
         '# AudioTrack',
         'type:',
-        '  type: string',
+        TYPE_STRING_YAML,
         '  enum: [audio]',
         '  example: audio',
         '',
         '# SubtitleTrack',
         'type:',
-        '  type: string',
+        TYPE_STRING_YAML,
         '  enum: [subtitle]',
         '  example: subtitle'
       ].join("\n")
@@ -737,7 +738,7 @@ def generate_fix_suggestions(r)
   end
 
   # 3) Redundant oneOf for /data/dimensions
-  if has_openapi_error(r, 'must match exactly one schema in oneOf') && (r[:endpoint] == '/data/dimensions' || paths.any? { |p| p.include?('dimensions') })
+  if has_openapi_error(r, ONEOF_NO_MATCH_MSG) && (r[:endpoint] == '/data/dimensions' || paths.any? { |p| p.include?('dimensions') })
     out << {
       title: 'Remove redundant `oneOf` on `/data/dimensions` response schema',
       why: '`data` is defined as `oneOf: [array<string>, $ref: Dimensions]` and `Dimensions` itself is also `array<string>`, so valid responses can match multiple branches.',
@@ -746,7 +747,7 @@ def generate_fix_suggestions(r)
   end
 
   # 4) Overlapping numeric oneOf: integer vs number
-  if has_openapi_error(r, 'must match exactly one schema in oneOf') && paths.any? { |p| p.include?('value') }
+  if has_openapi_error(r, ONEOF_NO_MATCH_MSG) && paths.any? { |p| p.include?('value') }
     out << {
       title: 'Avoid `oneOf: [integer, number]` overlaps (integers are also numbers)',
       why: 'In JSON Schema, `integer` is a subset of `number`. A value like `0` matches both, causing oneOf validation errors.',
@@ -875,19 +876,19 @@ def write_report(results)
 
     lines << "**Missing in SDK (present in API) — #{r[:missing_in_sdk].size}**"
     lines << ''
-    lines << (r[:missing_in_sdk].empty? ? '- None' : r[:missing_in_sdk].map { |p| "- `#{p}`" }.join("\n"))
+    lines << (r[:missing_in_sdk].empty? ? NONE_BULLET : r[:missing_in_sdk].map { |p| "- `#{p}`" }.join("\n"))
     lines << ''
     lines << "**Missing in API (present in SDK) — #{r[:missing_in_api].size}**"
     lines << ''
-    lines << (r[:missing_in_api].empty? ? '- None' : r[:missing_in_api].map { |p| "- `#{p}`" }.join("\n"))
+    lines << (r[:missing_in_api].empty? ? NONE_BULLET : r[:missing_in_api].map { |p| "- `#{p}`" }.join("\n"))
     lines << ''
     lines << "**Empty arrays omitted by SDK — #{r[:empty_arrays_omitted_in_sdk].size}**"
     lines << ''
-    lines << (r[:empty_arrays_omitted_in_sdk].empty? ? '- None' : r[:empty_arrays_omitted_in_sdk].map { |p| "- `#{p}`" }.join("\n"))
+    lines << (r[:empty_arrays_omitted_in_sdk].empty? ? NONE_BULLET : r[:empty_arrays_omitted_in_sdk].map { |p| "- `#{p}`" }.join("\n"))
     lines << ''
     lines << "**Empty arrays omitted by API — #{r[:empty_arrays_omitted_in_api].size}**"
     lines << ''
-    lines << (r[:empty_arrays_omitted_in_api].empty? ? '- None' : r[:empty_arrays_omitted_in_api].map { |p| "- `#{p}`" }.join("\n"))
+    lines << (r[:empty_arrays_omitted_in_api].empty? ? NONE_BULLET : r[:empty_arrays_omitted_in_api].map { |p| "- `#{p}`" }.join("\n"))
     lines << ''
   end
 
@@ -1004,9 +1005,9 @@ def main
   endpoints = extract_get_endpoints(spec)
   fixtures = read_fixtures
 
-  base_url = ENV['FASTPIX_BASE_URL'] || spec.dig('servers', 0, 'url') || 'https://api.fastpix.com/v1/'
-  username = ENV['FASTPIX_USERNAME']
-  password = ENV['FASTPIX_PASSWORD']
+  base_url = ENV.fetch('FASTPIX_BASE_URL', nil) || spec.dig('servers', 0, 'url') || 'https://api.fastpix.com/v1/'
+  username = ENV.fetch('FASTPIX_USERNAME', nil)
+  password = ENV.fetch('FASTPIX_PASSWORD', nil)
 
   if username.to_s.empty? || password.to_s.empty? || username == 'your-access-token' || password == 'your-secret-key'
     abort 'Set FASTPIX_USERNAME and FASTPIX_PASSWORD env vars (real credentials) for live API validation.'
