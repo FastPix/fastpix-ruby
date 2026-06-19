@@ -61,7 +61,7 @@ module Crystalline
         constants(false).each do |const_name|
           instance = const_get(const_name, false)
           unless instance.is_a? self
-            raise 'Enum constants must be instances of the Enum class (e.g. `Foo = new`)'
+            raise StandardError, 'Enum constants must be instances of the Enum class (e.g. `Foo = new`)'
           end
           @mapping[instance.serialize] = instance
         end
@@ -71,7 +71,7 @@ module Crystalline
         if @mapping.include? val
           @mapping[val]
         else
-          raise "Invalid value for enum: #{val}"
+          raise StandardError, "Invalid value for enum: #{val}"
         end
       end
     end

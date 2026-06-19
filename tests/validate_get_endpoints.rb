@@ -38,6 +38,10 @@ require 'net/http'
 require 'uri'
 require 'time'
 
+# Optional OpenAPI response schema validation via json_schemer (skipped when absent).
+JSON_SCHEMER_AVAILABLE = Gem::Specification.find_all_by_name('json_schemer').any?
+require 'json_schemer' if JSON_SCHEMER_AVAILABLE
+
 # Make sure we can load the SDK from ../lib regardless of cwd.
 TESTS_DIR = __dir__
 ROOT_DIR = File.expand_path('..', TESTS_DIR)
@@ -46,15 +50,6 @@ $LOAD_PATH.unshift(File.join(ROOT_DIR, 'lib'))
 require 'fastpixapi'
 
 Models = ::FastpixClient::Models
-
-# Optional OpenAPI response schema validation via json_schemer.
-JSON_SCHEMER_AVAILABLE =
-  begin
-    require 'json_schemer'
-    true
-  rescue LoadError
-    false
-  end
 
 ARTIFACTS_DIRNAME = 'artifacts'
 MAX_PREVIEW_CHARS = 4000
@@ -82,7 +77,7 @@ def resolve_spec_path
   found = candidates.find { |p| File.exist?(p) }
   return found unless found.nil?
 
-  raise StandardError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
+  raise "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
 end
 
 def load_openapi_spec
@@ -298,100 +293,118 @@ def invoke_sdk(operation_id, request, base_url, username, password)
   g = ->(k) { request[k] }
   s = build_sdk(base_url, username, password)
 
-  res =
-    case operation_id
-    when 'list-media'
-      s.manage_videos.list_media(limit: g['limit'], offset: g['offset'], order_by: sort_order(g['orderBy']))
-    when 'get-media'
-      s.manage_videos.get_media(media_id: g['mediaId'])
-    when 'get-media-summary'
-      s.manage_videos.get_media_summary(media_id: g['mediaId'])
-    when 'retrieveMediaInputInfo'
-      s.manage_videos.retrieve_media_input_info(media_id: g['mediaId'])
-    when 'list-uploads'
-      s.manage_videos.list_uploads(limit: g['limit'], offset: g['offset'], order_by: sort_order(g['orderBy']))
-    when 'get-media-clips'
-      s.manage_videos.get_media_clips(media_id: g['mediaId'], offset: g['offset'], limit: g['limit'], order_by: sort_order(g['orderBy']))
-    when 'list-live-clips'
-      s.manage_videos.list_live_clips(livestream_id: g['livestreamId'], limit: g['limit'], offset: g['offset'], order_by: sort_order(g['orderBy']))
-    when 'get-all-playlists'
-      s.playlist.get_all_playlists(limit: g['limit'], offset: g['offset'])
-    when 'get-playlist-by-id'
-      s.playlist.get_playlist_by_id(playlist_id: g['playlistId'])
-    when 'list-playback-ids'
-      s.playback.list_playback_ids(media_id: g['mediaId'])
-    when 'get-playback-id'
-      s.playback.get_playback_id(media_id: g['mediaId'], playback_id: g['playbackId'])
-    when 'getDrmConfiguration'
-      s.drm_configurations.get_drm_configuration(offset: g['offset'], limit: g['limit'])
-    when 'getDrmConfigurationById'
-      s.drm_configurations.get_drm_configuration_by_id(drm_configuration_id: g['drmConfigurationId'])
-    when 'get-all-streams'
-      s.manage_live_stream.get_all_streams(limit: g['limit'], offset: g['offset'], order_by: to_enum(Models::Operations::OrderBy, g['orderBy']))
-    when 'get-live-stream-by-id'
-      s.manage_live_stream.get_live_stream_by_id(stream_id: g['streamId'])
-    when 'get-live-stream-viewer-count-by-id'
-      s.manage_live_stream.get_live_stream_viewer_count_by_id(stream_id: g['streamId'])
-    when 'get-live-stream-playback-id'
-      s.live_playback.get_live_stream_playback_id(stream_id: g['streamId'], playback_id: g['playbackId'])
-    when 'get-specific-simulcast-of-stream'
-      s.simulcast_stream.get_specific_simulcast_of_stream(stream_id: g['streamId'], simulcast_id: g['simulcastId'])
-    when 'list_signing_keys'
-      s.signing_keys.list_signing_keys(limit: g['limit'], offset: g['offset'])
-    when 'get-signing_key_by_id'
-      s.signing_keys.get_signing_key_by_id(signing_key_id: g['signingKeyId'])
-    when 'list_video_views'
-      req = Models::Operations::ListVideoViewsRequest.new(
-        timespan: to_enum(Models::Operations::ListVideoViewsTimespan, g['timespan']),
-        limit: g['limit'],
-        offset: g['offset']
-      )
-      s.views.list_video_views(request: req)
-    when 'get_video_view_details'
-      s.views.get_video_view_details(view_id: g['viewId'])
-    when 'list_by_top_content'
-      s.views.list_by_top_content(timespan: to_enum(Models::Operations::ListByTopContentTimespan, g['timespan']), limit: g['limit'])
-    when 'list_dimensions'
-      s.dimensions.list_dimensions
-    when 'list_filter_values_for_dimension'
-      s.dimensions.list_filter_values_for_dimension(
-        dimensions_id: to_enum(Models::Operations::DimensionsId, g['dimensionsId']),
-        timespan: to_enum(Models::Operations::ListFilterValuesForDimensionTimespan, g['timespan'])
-      )
-    when 'list_breakdown_values'
-      req = Models::Operations::ListBreakdownValuesRequest.new(
-        metric_id: to_enum(Models::Operations::ListBreakdownValuesMetricId, g['metricId']),
-        timespan: to_enum(Models::Operations::ListBreakdownValuesTimespan, g['timespan']),
-        group_by: g['groupBy']
-      )
-      s.metrics.list_breakdown_values(request: req)
-    when 'list_overall_values'
-      s.metrics.list_overall_values(
-        metric_id: to_enum(Models::Operations::ListOverallValuesMetricId, g['metricId']),
-        timespan: to_enum(Models::Operations::ListOverallValuesTimespan, g['timespan'])
-      )
-    when 'get_timeseries_data'
-      req = Models::Operations::GetTimeseriesDataRequest.new(
-        metric_id: to_enum(Models::Operations::GetTimeseriesDataMetricId, g['metricId']),
-        timespan: to_enum(Models::Operations::GetTimeseriesDataTimespan, g['timespan']),
-        group_by: to_enum(Models::Operations::GroupBy, g['groupBy'])
-      )
-      s.metrics.get_timeseries_data(request: req)
-    when 'list_comparison_values'
-      s.metrics.list_comparison_values(
-        timespan: to_enum(Models::Operations::ListComparisonValuesTimespan, g['timespan']),
-        dimension: to_enum(Models::Operations::Dimension, g['dimension']),
-        value: g['value']
-      )
-    when 'list_errors'
-      s.errors.list_errors(timespan: to_enum(Models::Operations::ListErrorsTimespan, g['timespan']), limit: g['limit'])
-    else
-      return { ok: false, error: { 'name' => 'SDKMappingError', 'message' => "No Ruby SDK method mapping for operationId '#{operation_id}'" } }
-    end
+  res = invoke_sdk_media_ops(operation_id, g, s)
+  res = invoke_sdk_analytics_ops(operation_id, g, s) if res == :unhandled
+  if res == :unhandled
+    return { ok: false, error: { 'name' => 'SDKMappingError', 'message' => "No Ruby SDK method mapping for operationId '#{operation_id}'" } }
+  end
 
   { ok: true, value: extract_sdk_data(res) }
 rescue StandardError => e
   { ok: false, error: normalize_error(e) }
+end
+
+# Media / playlist / playback / DRM / live-stream / simulcast / signing-key reads.
+# Returns :unhandled when the operationId belongs to another group.
+def invoke_sdk_media_ops(operation_id, g, s)
+  case operation_id
+  when 'list-media'
+    s.manage_videos.list_media(limit: g['limit'], offset: g['offset'], order_by: sort_order(g['orderBy']))
+  when 'get-media'
+    s.manage_videos.get_media(media_id: g['mediaId'])
+  when 'get-media-summary'
+    s.manage_videos.get_media_summary(media_id: g['mediaId'])
+  when 'retrieveMediaInputInfo'
+    s.manage_videos.retrieve_media_input_info(media_id: g['mediaId'])
+  when 'list-uploads'
+    s.manage_videos.list_uploads(limit: g['limit'], offset: g['offset'], order_by: sort_order(g['orderBy']))
+  when 'get-media-clips'
+    s.manage_videos.get_media_clips(media_id: g['mediaId'], offset: g['offset'], limit: g['limit'], order_by: sort_order(g['orderBy']))
+  when 'list-live-clips'
+    s.manage_videos.list_live_clips(livestream_id: g['livestreamId'], limit: g['limit'], offset: g['offset'], order_by: sort_order(g['orderBy']))
+  when 'get-all-playlists'
+    s.playlist.get_all_playlists(limit: g['limit'], offset: g['offset'])
+  when 'get-playlist-by-id'
+    s.playlist.get_playlist_by_id(playlist_id: g['playlistId'])
+  when 'list-playback-ids'
+    s.playback.list_playback_ids(media_id: g['mediaId'])
+  when 'get-playback-id'
+    s.playback.get_playback_id(media_id: g['mediaId'], playback_id: g['playbackId'])
+  when 'getDrmConfiguration'
+    s.drm_configurations.get_drm_configuration(offset: g['offset'], limit: g['limit'])
+  when 'getDrmConfigurationById'
+    s.drm_configurations.get_drm_configuration_by_id(drm_configuration_id: g['drmConfigurationId'])
+  when 'get-all-streams'
+    s.manage_live_stream.get_all_streams(limit: g['limit'], offset: g['offset'], order_by: to_enum(Models::Operations::OrderBy, g['orderBy']))
+  when 'get-live-stream-by-id'
+    s.manage_live_stream.get_live_stream_by_id(stream_id: g['streamId'])
+  when 'get-live-stream-viewer-count-by-id'
+    s.manage_live_stream.get_live_stream_viewer_count_by_id(stream_id: g['streamId'])
+  when 'get-live-stream-playback-id'
+    s.live_playback.get_live_stream_playback_id(stream_id: g['streamId'], playback_id: g['playbackId'])
+  when 'get-specific-simulcast-of-stream'
+    s.simulcast_stream.get_specific_simulcast_of_stream(stream_id: g['streamId'], simulcast_id: g['simulcastId'])
+  when 'list_signing_keys'
+    s.signing_keys.list_signing_keys(limit: g['limit'], offset: g['offset'])
+  when 'get-signing_key_by_id'
+    s.signing_keys.get_signing_key_by_id(signing_key_id: g['signingKeyId'])
+  else
+    :unhandled
+  end
+end
+
+# Views / dimensions / metrics / errors (analytics) reads.
+# Returns :unhandled when the operationId belongs to another group.
+def invoke_sdk_analytics_ops(operation_id, g, s)
+  case operation_id
+  when 'list_video_views'
+    req = Models::Operations::ListVideoViewsRequest.new(
+      timespan: to_enum(Models::Operations::ListVideoViewsTimespan, g['timespan']),
+      limit: g['limit'],
+      offset: g['offset']
+    )
+    s.views.list_video_views(request: req)
+  when 'get_video_view_details'
+    s.views.get_video_view_details(view_id: g['viewId'])
+  when 'list_by_top_content'
+    s.views.list_by_top_content(timespan: to_enum(Models::Operations::ListByTopContentTimespan, g['timespan']), limit: g['limit'])
+  when 'list_dimensions'
+    s.dimensions.list_dimensions
+  when 'list_filter_values_for_dimension'
+    s.dimensions.list_filter_values_for_dimension(
+      dimensions_id: to_enum(Models::Operations::DimensionsId, g['dimensionsId']),
+      timespan: to_enum(Models::Operations::ListFilterValuesForDimensionTimespan, g['timespan'])
+    )
+  when 'list_breakdown_values'
+    req = Models::Operations::ListBreakdownValuesRequest.new(
+      metric_id: to_enum(Models::Operations::ListBreakdownValuesMetricId, g['metricId']),
+      timespan: to_enum(Models::Operations::ListBreakdownValuesTimespan, g['timespan']),
+      group_by: g['groupBy']
+    )
+    s.metrics.list_breakdown_values(request: req)
+  when 'list_overall_values'
+    s.metrics.list_overall_values(
+      metric_id: to_enum(Models::Operations::ListOverallValuesMetricId, g['metricId']),
+      timespan: to_enum(Models::Operations::ListOverallValuesTimespan, g['timespan'])
+    )
+  when 'get_timeseries_data'
+    req = Models::Operations::GetTimeseriesDataRequest.new(
+      metric_id: to_enum(Models::Operations::GetTimeseriesDataMetricId, g['metricId']),
+      timespan: to_enum(Models::Operations::GetTimeseriesDataTimespan, g['timespan']),
+      group_by: to_enum(Models::Operations::GroupBy, g['groupBy'])
+    )
+    s.metrics.get_timeseries_data(request: req)
+  when 'list_comparison_values'
+    s.metrics.list_comparison_values(
+      timespan: to_enum(Models::Operations::ListComparisonValuesTimespan, g['timespan']),
+      dimension: to_enum(Models::Operations::Dimension, g['dimension']),
+      value: g['value']
+    )
+  when 'list_errors'
+    s.errors.list_errors(timespan: to_enum(Models::Operations::ListErrorsTimespan, g['timespan']), limit: g['limit'])
+  else
+    :unhandled
+  end
 end
 
 # Pull the actual response payload out of the SDK response object, skipping
@@ -458,35 +471,38 @@ def openapi_to_json_schema(node)
   when Array
     node.map { |n| openapi_to_json_schema(n) }
   when Hash
-    out = {}
     nullable = node['nullable'] == true
+    out = {}
     node.each do |k, v|
-      next if k == 'nullable'
-      next if k == 'discriminator' # not a validation keyword
-      next if k == 'example' || k == 'examples'
+      # `nullable` is handled below; discriminator/example(s) are not validation keywords.
+      next if %w[nullable discriminator example examples].include?(k)
 
       out[k] = openapi_to_json_schema(v)
     end
-    if nullable
-      # OpenAPI 3.0 `nullable: true` allows null. Express that in JSON Schema,
-      # covering plain types as well as oneOf/anyOf/$ref/enum shapes (mirrors how
-      # ajv / openapi-response-validator admits null in the PHP harness).
-      if out.key?('type')
-        t = out['type']
-        out['type'] = t.is_a?(Array) ? (t + ['null']).uniq : [t, 'null']
-        # an enum that doesn't list null would still reject null, so admit it.
-        out['enum'] = (out['enum'] + [nil]).uniq if out['enum'].is_a?(Array) && !out['enum'].include?(nil)
-      elsif out.key?('oneOf')
-        out['oneOf'] = out['oneOf'] + [{ 'type' => 'null' }]
-      elsif out.key?('anyOf')
-        out['anyOf'] = out['anyOf'] + [{ 'type' => 'null' }]
-      else
-        out = { 'anyOf' => [out, { 'type' => 'null' }] }
-      end
-    end
-    out
+    nullable ? apply_nullable_schema(out) : out
   else
     node
+  end
+end
+
+# OpenAPI 3.0 `nullable: true` allows null. Express that in JSON Schema, covering
+# plain types as well as oneOf/anyOf/$ref/enum shapes (mirrors how ajv /
+# openapi-response-validator admits null in the PHP harness).
+def apply_nullable_schema(out)
+  if out.key?('type')
+    t = out['type']
+    out['type'] = t.is_a?(Array) ? (t + ['null']).uniq : [t, 'null']
+    # an enum that doesn't list null would still reject null, so admit it.
+    out['enum'] = (out['enum'] + [nil]).uniq if out['enum'].is_a?(Array) && !out['enum'].include?(nil)
+    out
+  elsif out.key?('oneOf')
+    out['oneOf'] = out['oneOf'] + [{ 'type' => 'null' }]
+    out
+  elsif out.key?('anyOf')
+    out['anyOf'] = out['anyOf'] + [{ 'type' => 'null' }]
+    out
+  else
+    { 'anyOf' => [out, { 'type' => 'null' }] }
   end
 end
 
@@ -611,24 +627,32 @@ def collect_json_paths(value, prefix = '', include_empty_arrays: true)
     return out
   end
 
-  if value.is_a?(Array)
-    return out if !include_empty_arrays && value.empty?
-
-    ap = prefix.empty? ? '[]' : "#{prefix}[]"
-    out << ap
-    value.each { |item| collect_json_paths(item, ap, include_empty_arrays: include_empty_arrays).each { |p| out << p } }
-    return out
-  end
+  return collect_array_paths(value, prefix, include_empty_arrays, out) if value.is_a?(Array)
 
   value.each do |k, v|
-    next if !include_empty_arrays && v.is_a?(Array) && v.empty?
-    next if !include_empty_arrays && v.nil?
-    next if !include_empty_arrays && v.is_a?(Hash) && v.empty?
+    next if skip_empty_value?(v, include_empty_arrays)
 
     p = prefix.empty? ? k : "#{prefix}.#{k}"
     out << p
     collect_json_paths(v, p, include_empty_arrays: include_empty_arrays).each { |c| out << c }
   end
+  out
+end
+
+# When empty arrays are excluded, skip empty arrays, nils, and empty hashes.
+def skip_empty_value?(value, include_empty_arrays)
+  return false if include_empty_arrays
+
+  (value.is_a?(Array) && value.empty?) || value.nil? || (value.is_a?(Hash) && value.empty?)
+end
+
+# Collects paths for an Array node into `out` (returns `out`).
+def collect_array_paths(value, prefix, include_empty_arrays, out)
+  return out if !include_empty_arrays && value.empty?
+
+  ap = prefix.empty? ? '[]' : "#{prefix}[]"
+  out << ap
+  value.each { |item| collect_json_paths(item, ap, include_empty_arrays: include_empty_arrays).each { |p| out << p } }
   out
 end
 
@@ -695,8 +719,13 @@ def has_openapi_error(r, includes)
 end
 
 def generate_fix_suggestions(r)
-  out = []
   paths = openapi_error_paths(r)
+  schema_fix_suggestions(r, paths) + data_fix_suggestions(r)
+end
+
+# Suggestions derived from OpenAPI schema-validation errors (checks 1-5).
+def schema_fix_suggestions(r, paths)
+  out = []
 
   # 1) oneOf overlap on tracks
   if has_openapi_error(r, ONEOF_NO_MATCH_MSG) && paths.any? { |p| p.include?('tracks') }
@@ -763,6 +792,13 @@ def generate_fix_suggestions(r)
       where: 'In OpenAPI spec: `components/schemas/Views.properties.fpApiVersion`'
     }
   end
+
+  out
+end
+
+# Suggestions derived from request/response diff data (checks 6-8).
+def data_fix_suggestions(r)
+  out = []
 
   # 6) Placeholder fixture guidance (common 404)
   if (r[:note] || '').include?('Placeholder used') && r[:sdk_parse_ok] == false && (r[:sdk_parse_error] || '') =~ /404|not found/i
@@ -837,60 +873,7 @@ def write_report(results)
   lines << '## Per-endpoint details (full missing parameter lists)'
   lines << ''
 
-  results.each do |r|
-    lines << "### #{r[:operation_id]} (`#{r[:endpoint]}`)"
-    lines << ''
-    lines << "- **Status**: #{r[:status]}"
-    lines << "- **Note**: #{r[:note]}" if r[:note]
-    lines << "- **OpenAPI valid**: #{r[:openapi_valid] ? 'yes' : 'no'}"
-    if !r[:openapi_valid] && r[:openapi_errors].any?
-      lines << '- **OpenAPI errors**:'
-      r[:openapi_errors].each do |e|
-        loc = e['path'] && !e['path'].empty? ? "`#{e['path']}`" : ''
-        lines << "  - #{loc} #{e['message']}".strip
-      end
-    end
-    lines << "- **SDK parse**: #{r[:sdk_parse_ok] ? 'ok' : 'failed'}"
-    lines << "- **SDK parse error**: #{r[:sdk_parse_error]}" if !r[:sdk_parse_ok] && r[:sdk_parse_error]
-    lines << "- **API response file**: `#{r[:api_response_file]}`" if r[:api_response_file]
-    lines << "- **SDK response file**: `#{r[:sdk_response_file]}`" if r[:sdk_response_file]
-    lines << ''
-
-    if r[:api_response_preview]
-      lines << '**API response (preview)**'
-      lines << ''
-      lines << '```json'
-      lines << r[:api_response_preview]
-      lines << '```'
-      lines << ''
-    end
-
-    if r[:sdk_response_preview]
-      lines << '**SDK response (preview)**'
-      lines << ''
-      lines << '```json'
-      lines << r[:sdk_response_preview]
-      lines << '```'
-      lines << ''
-    end
-
-    lines << "**Missing in SDK (present in API) — #{r[:missing_in_sdk].size}**"
-    lines << ''
-    lines << (r[:missing_in_sdk].empty? ? NONE_BULLET : r[:missing_in_sdk].map { |p| "- `#{p}`" }.join("\n"))
-    lines << ''
-    lines << "**Missing in API (present in SDK) — #{r[:missing_in_api].size}**"
-    lines << ''
-    lines << (r[:missing_in_api].empty? ? NONE_BULLET : r[:missing_in_api].map { |p| "- `#{p}`" }.join("\n"))
-    lines << ''
-    lines << "**Empty arrays omitted by SDK — #{r[:empty_arrays_omitted_in_sdk].size}**"
-    lines << ''
-    lines << (r[:empty_arrays_omitted_in_sdk].empty? ? NONE_BULLET : r[:empty_arrays_omitted_in_sdk].map { |p| "- `#{p}`" }.join("\n"))
-    lines << ''
-    lines << "**Empty arrays omitted by API — #{r[:empty_arrays_omitted_in_api].size}**"
-    lines << ''
-    lines << (r[:empty_arrays_omitted_in_api].empty? ? NONE_BULLET : r[:empty_arrays_omitted_in_api].map { |p| "- `#{p}`" }.join("\n"))
-    lines << ''
-  end
+  results.each { |r| append_endpoint_detail(lines, r) }
 
   File.write(File.join(TESTS_DIR, REPORT_MD), "#{lines.join("\n")}\n")
   write_fix_suggestions(results)
@@ -899,6 +882,72 @@ def write_report(results)
   warn "Report generated: #{File.join(TESTS_DIR, REPORT_MD)}"
   warn "Fix suggestions: #{File.join(TESTS_DIR, FIX_SUGGESTIONS_MD)}"
   warn "Summary: total=#{total} pass=#{passed} fail=#{failed}"
+end
+
+# Appends the full per-endpoint detail block for one result to `lines`.
+def append_endpoint_detail(lines, r)
+  lines << "### #{r[:operation_id]} (`#{r[:endpoint]}`)"
+  lines << ''
+  lines << "- **Status**: #{r[:status]}"
+  lines << "- **Note**: #{r[:note]}" if r[:note]
+  lines << "- **OpenAPI valid**: #{r[:openapi_valid] ? 'yes' : 'no'}"
+  append_openapi_errors(lines, r)
+  lines << "- **SDK parse**: #{r[:sdk_parse_ok] ? 'ok' : 'failed'}"
+  lines << "- **SDK parse error**: #{r[:sdk_parse_error]}" if !r[:sdk_parse_ok] && r[:sdk_parse_error]
+  lines << "- **API response file**: `#{r[:api_response_file]}`" if r[:api_response_file]
+  lines << "- **SDK response file**: `#{r[:sdk_response_file]}`" if r[:sdk_response_file]
+  lines << ''
+  append_response_previews(lines, r)
+  append_missing_sections(lines, r)
+end
+
+def append_openapi_errors(lines, r)
+  return unless !r[:openapi_valid] && r[:openapi_errors].any?
+
+  lines << '- **OpenAPI errors**:'
+  r[:openapi_errors].each do |e|
+    loc = e['path'] && !e['path'].empty? ? "`#{e['path']}`" : ''
+    lines << "  - #{loc} #{e['message']}".strip
+  end
+end
+
+def append_response_previews(lines, r)
+  if r[:api_response_preview]
+    lines << '**API response (preview)**'
+    lines << ''
+    lines << '```json'
+    lines << r[:api_response_preview]
+    lines << '```'
+    lines << ''
+  end
+
+  return unless r[:sdk_response_preview]
+
+  lines << '**SDK response (preview)**'
+  lines << ''
+  lines << '```json'
+  lines << r[:sdk_response_preview]
+  lines << '```'
+  lines << ''
+end
+
+def append_missing_sections(lines, r)
+  lines << "**Missing in SDK (present in API) — #{r[:missing_in_sdk].size}**"
+  lines << ''
+  lines << (r[:missing_in_sdk].empty? ? NONE_BULLET : r[:missing_in_sdk].map { |p| "- `#{p}`" }.join("\n"))
+  lines << ''
+  lines << "**Missing in API (present in SDK) — #{r[:missing_in_api].size}**"
+  lines << ''
+  lines << (r[:missing_in_api].empty? ? NONE_BULLET : r[:missing_in_api].map { |p| "- `#{p}`" }.join("\n"))
+  lines << ''
+  lines << "**Empty arrays omitted by SDK — #{r[:empty_arrays_omitted_in_sdk].size}**"
+  lines << ''
+  lines << (r[:empty_arrays_omitted_in_sdk].empty? ? NONE_BULLET : r[:empty_arrays_omitted_in_sdk].map { |p| "- `#{p}`" }.join("\n"))
+  lines << ''
+  lines << "**Empty arrays omitted by API — #{r[:empty_arrays_omitted_in_api].size}**"
+  lines << ''
+  lines << (r[:empty_arrays_omitted_in_api].empty? ? NONE_BULLET : r[:empty_arrays_omitted_in_api].map { |p| "- `#{p}`" }.join("\n"))
+  lines << ''
 end
 
 def write_fix_suggestions(results)
@@ -910,49 +959,57 @@ def write_fix_suggestions(results)
   lines << ''
   lines << "Total failing endpoints: #{failing.size}"
   lines << ''
-  failing.each do |r|
-    lines << "## #{r[:operation_id]} (`#{r[:endpoint]}`)"
-    lines << ''
-    lines << "- **Status**: #{r[:status]}"
-    lines << "- **OpenAPI valid**: #{r[:openapi_valid] ? 'yes' : 'no'}"
-    lines << "- **SDK parse**: #{r[:sdk_parse_ok] ? 'ok' : 'failed'}"
-    lines << "- **API artifact**: `#{r[:api_response_file]}`" if r[:api_response_file]
-    lines << "- **SDK artifact**: `#{r[:sdk_response_file]}`" if r[:sdk_response_file]
-    lines << ''
-
-    if !r[:openapi_valid] && (r[:openapi_errors] || []).any?
-      lines << '### Observed OpenAPI errors'
-      lines << ''
-      r[:openapi_errors].each do |e|
-        loc = e['path'] && !e['path'].empty? ? "`#{e['path']}`" : ''
-        lines << "- #{loc} #{e['message']}".strip
-      end
-      lines << ''
-    end
-
-    suggestions = r[:fix_suggestions] || []
-    lines << '### Suggested fixes'
-    lines << ''
-    if suggestions.empty?
-      lines << '- No heuristic suggestions available for this failure yet.'
-      lines << ''
-      next
-    end
-    suggestions.each do |sug|
-      lines << "- **#{sug[:title]}**"
-      lines << "  - **why**: #{sug[:why]}"
-      lines << "  - **where**: #{sug[:where]}" if sug[:where]
-      if sug[:paste_yaml]
-        lines << '  - **paste**:'
-        lines << ''
-        lines << '```yaml'
-        lines << sug[:paste_yaml]
-        lines << '```'
-      end
-      lines << ''
-    end
-  end
+  failing.each { |r| append_fix_suggestion_detail(lines, r) }
   File.write(File.join(TESTS_DIR, FIX_SUGGESTIONS_MD), "#{lines.join("\n")}\n")
+end
+
+# Appends one failing endpoint's fix-suggestion section to `lines`.
+def append_fix_suggestion_detail(lines, r)
+  lines << "## #{r[:operation_id]} (`#{r[:endpoint]}`)"
+  lines << ''
+  lines << "- **Status**: #{r[:status]}"
+  lines << "- **OpenAPI valid**: #{r[:openapi_valid] ? 'yes' : 'no'}"
+  lines << "- **SDK parse**: #{r[:sdk_parse_ok] ? 'ok' : 'failed'}"
+  lines << "- **API artifact**: `#{r[:api_response_file]}`" if r[:api_response_file]
+  lines << "- **SDK artifact**: `#{r[:sdk_response_file]}`" if r[:sdk_response_file]
+  lines << ''
+  append_observed_openapi_errors(lines, r)
+
+  suggestions = r[:fix_suggestions] || []
+  lines << '### Suggested fixes'
+  lines << ''
+  if suggestions.empty?
+    lines << '- No heuristic suggestions available for this failure yet.'
+    lines << ''
+    return
+  end
+  suggestions.each { |sug| append_suggestion(lines, sug) }
+end
+
+def append_observed_openapi_errors(lines, r)
+  return unless !r[:openapi_valid] && (r[:openapi_errors] || []).any?
+
+  lines << '### Observed OpenAPI errors'
+  lines << ''
+  r[:openapi_errors].each do |e|
+    loc = e['path'] && !e['path'].empty? ? "`#{e['path']}`" : ''
+    lines << "- #{loc} #{e['message']}".strip
+  end
+  lines << ''
+end
+
+def append_suggestion(lines, sug)
+  lines << "- **#{sug[:title]}**"
+  lines << "  - **why**: #{sug[:why]}"
+  lines << "  - **where**: #{sug[:where]}" if sug[:where]
+  if sug[:paste_yaml]
+    lines << '  - **paste**:'
+    lines << ''
+    lines << '```yaml'
+    lines << sug[:paste_yaml]
+    lines << '```'
+  end
+  lines << ''
 end
 
 def update_readme(results, generated_at)
@@ -1013,85 +1070,92 @@ def main
     abort 'Set FASTPIX_USERNAME and FASTPIX_PASSWORD env vars (real credentials) for live API validation.'
   end
 
-  results = []
-  endpoints.each_with_index do |ep, i|
-    warn "[#{i + 1}/#{endpoints.size}] #{ep['operationId']} (#{ep['path']})"
-
-    built = build_url(base_url, ep, fixtures)
-    api = call_api(built[:url], username, password)
-
-    if api[:error]
-      openapi_valid = false
-      openapi_errors = [{ 'message' => "Request failed: #{api[:error]}" }]
-    else
-      openapi_valid, openapi_errors = make_response_validator(spec, ep, api[:status], api[:body])
-    end
-
-    sdk = invoke_sdk(ep['operationId'], build_sdk_request(ep, fixtures), base_url, username, password)
-    if sdk[:ok]
-      sdk_parse_ok = true
-      sdk_parse_error = nil
-      sdk_value = sdk[:value]
-      sdk_printed = sdk[:value]
-    else
-      sdk_parse_ok = false
-      sdk_parse_error = sdk[:error]['message']
-      sdk_value = nil
-      sdk_printed = sdk[:error]
-      warn "  ⚠️  SDK call failed: #{sdk_parse_error}"
-    end
-
-    api_norm = normalize_json(remap_api_for_comparison(ep['operationId'], api[:body]))
-    sdk_norm = sdk_value.is_a?(Hash) || sdk_value.is_a?(Array) ? normalize_json(sdk_value) : nil
-
-    api_paths = collect_json_paths(api_norm, '', include_empty_arrays: false)
-    sdk_paths = sdk_norm ? collect_json_paths(sdk_norm, '', include_empty_arrays: false) : Set.new
-
-    missing_in_sdk = sdk_paths.empty? ? [] : sort_unique(api_paths.reject { |p| sdk_paths.include?(p) }.to_a)
-    missing_in_api = sdk_paths.empty? ? [] : sort_unique(sdk_paths.reject { |p| api_paths.include?(p) }.to_a)
-
-    api_strict = collect_json_paths(api_norm, '', include_empty_arrays: true)
-    sdk_strict = sdk_norm ? collect_json_paths(sdk_norm, '', include_empty_arrays: true) : Set.new
-    api_empty = collect_empty_array_field_paths(api_norm)
-    sdk_empty = sdk_norm ? collect_empty_array_field_paths(sdk_norm) : Set.new
-    empty_omitted_sdk = sort_unique(api_empty.reject { |p| sdk_strict.include?(p) }.to_a)
-    empty_omitted_api = sort_unique(sdk_empty.reject { |p| api_strict.include?(p) }.to_a)
-
-    pass = openapi_valid && sdk_parse_ok && missing_in_sdk.empty? && missing_in_api.empty?
-    artifacts = write_artifacts(ep['operationId'], api[:body], sdk_printed)
-
-    results << {
-      endpoint: ep['path'],
-      operation_id: ep['operationId'],
-      openapi_valid: openapi_valid,
-      openapi_errors: openapi_errors,
-      sdk_parse_ok: sdk_parse_ok,
-      sdk_parse_error: sdk_parse_error,
-      missing_in_sdk: missing_in_sdk,
-      missing_in_api: missing_in_api,
-      empty_arrays_omitted_in_sdk: empty_omitted_sdk,
-      empty_arrays_omitted_in_api: empty_omitted_api,
-      api_response_file: artifacts[:api_path],
-      sdk_response_file: artifacts[:sdk_path],
-      api_response_preview: artifacts[:api_preview],
-      sdk_response_preview: artifacts[:sdk_preview],
-      status: pass ? 'PASS' : 'FAIL',
-      note: built[:note]
-    }
-  rescue StandardError => e
-    warn "  ✗ Unexpected error: #{e.message}"
-    results << {
-      endpoint: ep['path'], operation_id: ep['operationId'],
-      openapi_valid: false, openapi_errors: [{ 'message' => "Unexpected error: #{e.message}" }],
-      sdk_parse_ok: false, sdk_parse_error: e.message,
-      missing_in_sdk: [], missing_in_api: [],
-      empty_arrays_omitted_in_sdk: [], empty_arrays_omitted_in_api: [],
-      status: 'FAIL', note: 'Unexpected error during processing'
-    }
+  results = endpoints.each_with_index.map do |ep, i|
+    process_endpoint(spec, ep, i, endpoints.size, base_url, username, password, fixtures)
   end
 
   results.each { |r| r[:fix_suggestions] = generate_fix_suggestions(r) if r[:status] == 'FAIL' }
   write_report(results)
+end
+
+# Invokes the SDK for an endpoint; returns [parse_ok, parse_error, value, printed].
+def run_sdk_call(ep, base_url, username, password, fixtures)
+  sdk = invoke_sdk(ep['operationId'], build_sdk_request(ep, fixtures), base_url, username, password)
+  return [true, nil, sdk[:value], sdk[:value]] if sdk[:ok]
+
+  warn "  ⚠️  SDK call failed: #{sdk[:error]['message']}"
+  [false, sdk[:error]['message'], nil, sdk[:error]]
+end
+
+# Computes [missing_in_sdk, missing_in_api, empty_omitted_sdk, empty_omitted_api].
+def compute_path_diffs(api_norm, sdk_norm)
+  api_paths = collect_json_paths(api_norm, '', include_empty_arrays: false)
+  sdk_paths = sdk_norm ? collect_json_paths(sdk_norm, '', include_empty_arrays: false) : Set.new
+
+  missing_in_sdk = sdk_paths.empty? ? [] : sort_unique(api_paths.reject { |p| sdk_paths.include?(p) }.to_a)
+  missing_in_api = sdk_paths.empty? ? [] : sort_unique(sdk_paths.reject { |p| api_paths.include?(p) }.to_a)
+
+  api_strict = collect_json_paths(api_norm, '', include_empty_arrays: true)
+  sdk_strict = sdk_norm ? collect_json_paths(sdk_norm, '', include_empty_arrays: true) : Set.new
+  api_empty = collect_empty_array_field_paths(api_norm)
+  sdk_empty = sdk_norm ? collect_empty_array_field_paths(sdk_norm) : Set.new
+  empty_omitted_sdk = sort_unique(api_empty.reject { |p| sdk_strict.include?(p) }.to_a)
+  empty_omitted_api = sort_unique(sdk_empty.reject { |p| api_strict.include?(p) }.to_a)
+
+  [missing_in_sdk, missing_in_api, empty_omitted_sdk, empty_omitted_api]
+end
+
+# Runs one endpoint through API + SDK validation and returns its result hash.
+def process_endpoint(spec, ep, i, total, base_url, username, password, fixtures)
+  warn "[#{i + 1}/#{total}] #{ep['operationId']} (#{ep['path']})"
+
+  built = build_url(base_url, ep, fixtures)
+  api = call_api(built[:url], username, password)
+
+  if api[:error]
+    openapi_valid = false
+    openapi_errors = [{ 'message' => "Request failed: #{api[:error]}" }]
+  else
+    openapi_valid, openapi_errors = make_response_validator(spec, ep, api[:status], api[:body])
+  end
+
+  sdk_parse_ok, sdk_parse_error, sdk_value, sdk_printed = run_sdk_call(ep, base_url, username, password, fixtures)
+
+  api_norm = normalize_json(remap_api_for_comparison(ep['operationId'], api[:body]))
+  sdk_norm = sdk_value.is_a?(Hash) || sdk_value.is_a?(Array) ? normalize_json(sdk_value) : nil
+  missing_in_sdk, missing_in_api, empty_omitted_sdk, empty_omitted_api = compute_path_diffs(api_norm, sdk_norm)
+
+  pass = openapi_valid && sdk_parse_ok && missing_in_sdk.empty? && missing_in_api.empty?
+  artifacts = write_artifacts(ep['operationId'], api[:body], sdk_printed)
+
+  {
+    endpoint: ep['path'],
+    operation_id: ep['operationId'],
+    openapi_valid: openapi_valid,
+    openapi_errors: openapi_errors,
+    sdk_parse_ok: sdk_parse_ok,
+    sdk_parse_error: sdk_parse_error,
+    missing_in_sdk: missing_in_sdk,
+    missing_in_api: missing_in_api,
+    empty_arrays_omitted_in_sdk: empty_omitted_sdk,
+    empty_arrays_omitted_in_api: empty_omitted_api,
+    api_response_file: artifacts[:api_path],
+    sdk_response_file: artifacts[:sdk_path],
+    api_response_preview: artifacts[:api_preview],
+    sdk_response_preview: artifacts[:sdk_preview],
+    status: pass ? 'PASS' : 'FAIL',
+    note: built[:note]
+  }
+rescue StandardError => e
+  warn "  ✗ Unexpected error: #{e.message}"
+  {
+    endpoint: ep['path'], operation_id: ep['operationId'],
+    openapi_valid: false, openapi_errors: [{ 'message' => "Unexpected error: #{e.message}" }],
+    sdk_parse_ok: false, sdk_parse_error: e.message,
+    missing_in_sdk: [], missing_in_api: [],
+    empty_arrays_omitted_in_sdk: [], empty_arrays_omitted_in_api: [],
+    status: 'FAIL', note: 'Unexpected error during processing'
+  }
 end
 
 main if $PROGRAM_NAME == __FILE__

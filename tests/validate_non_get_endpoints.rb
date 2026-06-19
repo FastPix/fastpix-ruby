@@ -41,6 +41,10 @@ require 'net/http'
 require 'uri'
 require 'time'
 
+# Optional OpenAPI response schema validation via json_schemer (skipped when absent).
+JSON_SCHEMER_AVAILABLE = Gem::Specification.find_all_by_name('json_schemer').any?
+require 'json_schemer' if JSON_SCHEMER_AVAILABLE
+
 TESTS_DIR = __dir__
 ROOT_DIR = File.expand_path('..', TESTS_DIR)
 $LOAD_PATH.unshift(File.join(ROOT_DIR, 'lib'))
@@ -48,14 +52,6 @@ $LOAD_PATH.unshift(File.join(ROOT_DIR, 'lib'))
 require 'fastpixapi'
 
 Models = ::FastpixClient::Models
-
-JSON_SCHEMER_AVAILABLE =
-  begin
-    require 'json_schemer'
-    true
-  rescue LoadError
-    false
-  end
 
 ARTIFACTS_DIRNAME = 'artifacts-non-get'
 REPORT_MD = 'NON_GET_ENDPOINTS_VALIDATION_REPORT.md'
@@ -87,7 +83,7 @@ def resolve_spec_path
   found = candidates.find { |p| File.exist?(p) }
   return found unless found.nil?
 
-  raise StandardError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
+  raise "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
 end
 
 def load_openapi_spec
@@ -121,30 +117,35 @@ def openapi_to_json_schema(node)
   when Array
     node.map { |n| openapi_to_json_schema(n) }
   when Hash
-    out = {}
     nullable = node['nullable'] == true
+    out = {}
     node.each do |k, v|
       next if %w[nullable discriminator example examples].include?(k)
 
       out[k] = openapi_to_json_schema(v)
     end
-    if nullable
-      if out.key?('type')
-        t = out['type']
-        out['type'] = t.is_a?(Array) ? (t + ['null']).uniq : [t, 'null']
-        # an enum that doesn't list null would still reject null, so admit it.
-        out['enum'] = (out['enum'] + [nil]).uniq if out['enum'].is_a?(Array) && !out['enum'].include?(nil)
-      elsif out.key?('oneOf')
-        out['oneOf'] += [{ 'type' => 'null' }]
-      elsif out.key?('anyOf')
-        out['anyOf'] += [{ 'type' => 'null' }]
-      else
-        out = { 'anyOf' => [out, { 'type' => 'null' }] }
-      end
-    end
-    out
+    nullable ? apply_nullable_schema(out) : out
   else
     node
+  end
+end
+
+# Expresses OpenAPI 3.0 `nullable: true` as JSON-Schema null acceptance.
+def apply_nullable_schema(out)
+  if out.key?('type')
+    t = out['type']
+    out['type'] = t.is_a?(Array) ? (t + ['null']).uniq : [t, 'null']
+    # an enum that doesn't list null would still reject null, so admit it.
+    out['enum'] = (out['enum'] + [nil]).uniq if out['enum'].is_a?(Array) && !out['enum'].include?(nil)
+    out
+  elsif out.key?('oneOf')
+    out['oneOf'] += [{ 'type' => 'null' }]
+    out
+  elsif out.key?('anyOf')
+    out['anyOf'] += [{ 'type' => 'null' }]
+    out
+  else
+    { 'anyOf' => [out, { 'type' => 'null' }] }
   end
 end
 
@@ -217,24 +218,32 @@ def collect_json_paths(value, prefix = '', include_empty_arrays: true)
     return out
   end
 
-  if value.is_a?(Array)
-    return out if !include_empty_arrays && value.empty?
-
-    ap = prefix.empty? ? '[]' : "#{prefix}[]"
-    out << ap
-    value.each { |item| collect_json_paths(item, ap, include_empty_arrays: include_empty_arrays).each { |p| out << p } }
-    return out
-  end
+  return collect_array_paths(value, prefix, include_empty_arrays, out) if value.is_a?(Array)
 
   value.each do |k, v|
-    next if !include_empty_arrays && v.is_a?(Array) && v.empty?
-    next if !include_empty_arrays && v.nil?
-    next if !include_empty_arrays && v.is_a?(Hash) && v.empty?
+    next if skip_empty_value?(v, include_empty_arrays)
 
     p = prefix.empty? ? k : "#{prefix}.#{k}"
     out << p
     collect_json_paths(v, p, include_empty_arrays: include_empty_arrays).each { |c| out << c }
   end
+  out
+end
+
+# When empty arrays are excluded, skip empty arrays, nils, and empty hashes.
+def skip_empty_value?(value, include_empty_arrays)
+  return false if include_empty_arrays
+
+  (value.is_a?(Array) && value.empty?) || value.nil? || (value.is_a?(Hash) && value.empty?)
+end
+
+# Collects paths for an Array node into `out` (returns `out`).
+def collect_array_paths(value, prefix, include_empty_arrays, out)
+  return out if !include_empty_arrays && value.empty?
+
+  ap = prefix.empty? ? '[]' : "#{prefix}[]"
+  out << ap
+  value.each { |item| collect_json_paths(item, ap, include_empty_arrays: include_empty_arrays).each { |p| out << p } }
   out
 end
 
@@ -331,99 +340,12 @@ def invoke_sdk(operation_id, request, base_url, username, password)
   g = ->(k) { request[k] }
   s = build_sdk(base_url, username, password)
 
-  res =
-    case operation_id
-    # ---------------- POST (create) ----------------
-    when OP_CREATE_MEDIA
-      s.input_video.create_media(request: C::CreateMediaRequest.new(inputs: [C::PullVideoInput.new], metadata: { 'source' => SDK_VALIDATE_TAG }))
-    when 'create_signing_key'
-      s.signing_keys.create_signing_key
-    when OP_CREATE_PLAYLIST
-      s.playlist.create_a_playlist(request: C::CreatePlaylistRequestManual.new(
-        name: 'sdk-validate-playlist',
-        reference_id: "sdkvalidate#{Time.now.to_i}",
-        type: C::CreatePlaylistRequestManualType::MANUAL
-      ))
-    when OP_CREATE_STREAM
-      s.start_live_stream.create_new_stream(request: C::CreateLiveStreamRequest.new(
-        playback_settings: C::PlaybackSettings.new,
-        input_media_settings: C::InputMediaSettings.new(metadata: { 'name' => SDK_VALIDATE_TAG })
-      ))
-    when OP_CREATE_MEDIA_PLAYBACK_ID
-      s.playback.create_media_playback_id(body: O::CreateMediaPlaybackIdRequestBody.new(access_policy: C::AccessPolicy::PUBLIC), media_id: g['mediaId'])
-    when OP_ADD_MEDIA_TRACK
-      s.manage_videos.add_media_track(body: O::AddMediaTrackRequestBody.new(tracks: C::AddTrackRequest.new), media_id: g['mediaId'])
-    when OP_GENERATE_SUBTITLE
-      s.manage_videos.generate_subtitle_track(body: C::TrackSubtitlesGenerateRequest.new, media_id: g['mediaId'], track_id: g['trackId'])
-    when OP_CREATE_STREAM_PLAYBACK
-      s.live_playback.create_playback_id_of_stream(body: C::PlaybackIdRequest.new, stream_id: g['streamId'])
-    when OP_CREATE_SIMULCAST
-      s.simulcast_stream.create_simulcast_of_stream(body: C::SimulcastRequest.new(url: 'rtmp://example.com/live', stream_key: "sk-#{Time.now.to_i}"), stream_id: g['streamId'])
-    when OP_DIRECT_UPLOAD
-      s.input_video.direct_upload_video_media(request: O::DirectUploadVideoMediaRequest.new(push_media_settings: O::PushMediaSettings.new(metadata: { 'source' => SDK_VALIDATE_TAG })))
-
-    # ---------------- PUT / PATCH (update) ----------------
-    when 'updated-media'
-      s.manage_videos.updated_media(body: O::UpdatedMediaRequestBody.new(metadata: { 'updated' => 'true' }, title: 'SDK Validate Title'), media_id: g['mediaId'])
-    when 'updated-source-access'
-      s.manage_videos.updated_source_access(body: O::UpdatedSourceAccessRequestBody.new(source_access: true), media_id: g['mediaId'])
-    when 'updated-mp4Support'
-      s.manage_videos.updated_mp4_support(body: O::UpdatedMp4SupportRequestBody.new, media_id: g['mediaId'])
-    when 'update-media-summary'
-      s.in_video_ai_features.update_media_summary(body: O::UpdateMediaSummaryRequestBody.new(generate: true), media_id: g['mediaId'])
-    when 'update-media-chapters'
-      s.in_video_ai_features.update_media_chapters(body: O::UpdateMediaChaptersRequestBody.new(chapters: true), media_id: g['mediaId'])
-    when 'update-media-named-entities'
-      s.in_video_ai_features.update_media_named_entities(body: O::UpdateMediaNamedEntitiesRequestBody.new(named_entities: true), media_id: g['mediaId'])
-    when 'update-media-moderation'
-      s.in_video_ai_features.update_media_moderation(body: O::UpdateMediaModerationRequestBody.new(moderation: O::UpdateMediaModerationModeration.new), media_id: g['mediaId'])
-    when 'update-media-track'
-      s.manage_videos.update_media_track(body: C::UpdateTrackRequest.new, track_id: g['trackId'], media_id: g['mediaId'])
-    when 'update-domain-restrictions'
-      s.playback.update_domain_restrictions(body: O::UpdateDomainRestrictionsRequestBody.new(allow: ['example.com']), media_id: g['mediaId'], playback_id: g['playbackId'])
-    when 'update-user-agent-restrictions'
-      s.playback.update_user_agent_restrictions(body: O::UpdateUserAgentRestrictionsRequestBody.new(allow: ['Mozilla']), media_id: g['mediaId'], playback_id: g['playbackId'])
-    when 'update-a-playlist'
-      s.playlist.update_a_playlist(body: C::UpdatePlaylistRequest.new(name: 'SDK Validate Updated', description: 'updated by validator'), playlist_id: g['playlistId'])
-    when 'add-media-to-playlist'
-      s.playlist.add_media_to_playlist(body: C::MediaIdsRequest.new(media_ids: [g['mediaId']]), playlist_id: g['playlistId'])
-    when 'change-media-order-in-playlist'
-      s.playlist.change_media_order_in_playlist(body: C::MediaIdsRequest.new(media_ids: [g['mediaId']]), playlist_id: g['playlistId'])
-    when 'update-live-stream'
-      s.manage_live_stream.update_live_stream(body: C::PatchLiveStreamRequest.new(metadata: { 'updated' => 'true' }, reconnect_window: 120), stream_id: g['streamId'])
-    when 'update-specific-simulcast-of-stream'
-      s.simulcast_stream.update_specific_simulcast_of_stream(body: C::SimulcastUpdateRequest.new(is_enabled: false), stream_id: g['streamId'], simulcast_id: g['simulcastId'])
-    when 'enable-live-stream'
-      s.manage_live_stream.enable_live_stream(stream_id: g['streamId'])
-    when 'disable-live-stream'
-      s.manage_live_stream.disable_live_stream(stream_id: g['streamId'])
-    when 'complete-live-stream'
-      s.manage_live_stream.complete_live_stream(stream_id: g['streamId'])
-    when 'cancel-upload'
-      s.manage_videos.cancel_upload(upload_id: g['uploadId'])
-
-    # ---------------- DELETE ----------------
-    when 'delete-media-from-playlist'
-      s.playlist.delete_media_from_playlist(body: C::MediaIdsRequest.new(media_ids: [g['mediaId']]), playlist_id: g['playlistId'])
-    when 'delete-a-playlist'
-      s.playlist.delete_a_playlist(playlist_id: g['playlistId'])
-    when 'delete-media-track'
-      s.manage_videos.delete_media_track(media_id: g['mediaId'], track_id: g['trackId'])
-    when 'delete-media-playback-id'
-      s.playback.delete_media_playback_id(media_id: g['mediaId'], playback_id: g['playbackId'])
-    when 'delete-simulcast-of-stream'
-      s.simulcast_stream.delete_simulcast_of_stream(stream_id: g['streamId'], simulcast_id: g['simulcastId'])
-    when 'delete-playbackId-of-stream'
-      s.live_playback.delete_playback_id_of_stream(stream_id: g['streamId'], playback_id: g['playbackId'])
-    when 'delete-live-stream'
-      s.manage_live_stream.delete_live_stream(stream_id: g['streamId'])
-    when 'delete-media'
-      s.manage_videos.delete_media(media_id: g['mediaId'])
-    when 'delete_signing_key'
-      s.signing_keys.delete_signing_key(signing_key_id: g['signingKeyId'])
-    else
-      return { ok: false, error: { 'name' => 'SDKMappingError', 'message' => "No Ruby SDK mapping for #{operation_id}" } }
-    end
+  res = invoke_sdk_create_ops(operation_id, g, s)
+  res = invoke_sdk_update_ops(operation_id, g, s) if res == :unhandled
+  res = invoke_sdk_delete_ops(operation_id, g, s) if res == :unhandled
+  if res == :unhandled
+    return { ok: false, error: { 'name' => 'SDKMappingError', 'message' => "No Ruby SDK mapping for #{operation_id}" } }
+  end
 
   {
     ok: true,
@@ -433,6 +355,113 @@ def invoke_sdk(operation_id, request, base_url, username, password)
   }
 rescue StandardError => e
   { ok: false, error: normalize_error(e) }
+end
+
+# POST (create) operations. Returns :unhandled for other operationIds.
+def invoke_sdk_create_ops(operation_id, g, s)
+  case operation_id
+  when OP_CREATE_MEDIA
+    s.input_video.create_media(request: C::CreateMediaRequest.new(inputs: [C::PullVideoInput.new], metadata: { 'source' => SDK_VALIDATE_TAG }))
+  when 'create_signing_key'
+    s.signing_keys.create_signing_key
+  when OP_CREATE_PLAYLIST
+    s.playlist.create_a_playlist(request: C::CreatePlaylistRequestManual.new(
+      name: 'sdk-validate-playlist',
+      reference_id: "sdkvalidate#{Time.now.to_i}",
+      type: C::CreatePlaylistRequestManualType::MANUAL
+    ))
+  when OP_CREATE_STREAM
+    s.start_live_stream.create_new_stream(request: C::CreateLiveStreamRequest.new(
+      playback_settings: C::PlaybackSettings.new,
+      input_media_settings: C::InputMediaSettings.new(metadata: { 'name' => SDK_VALIDATE_TAG })
+    ))
+  when OP_CREATE_MEDIA_PLAYBACK_ID
+    s.playback.create_media_playback_id(body: O::CreateMediaPlaybackIdRequestBody.new(access_policy: C::AccessPolicy::PUBLIC), media_id: g['mediaId'])
+  when OP_ADD_MEDIA_TRACK
+    s.manage_videos.add_media_track(body: O::AddMediaTrackRequestBody.new(tracks: C::AddTrackRequest.new), media_id: g['mediaId'])
+  when OP_GENERATE_SUBTITLE
+    s.manage_videos.generate_subtitle_track(body: C::TrackSubtitlesGenerateRequest.new, media_id: g['mediaId'], track_id: g['trackId'])
+  when OP_CREATE_STREAM_PLAYBACK
+    s.live_playback.create_playback_id_of_stream(body: C::PlaybackIdRequest.new, stream_id: g['streamId'])
+  when OP_CREATE_SIMULCAST
+    s.simulcast_stream.create_simulcast_of_stream(body: C::SimulcastRequest.new(url: 'rtmp://example.com/live', stream_key: "sk-#{Time.now.to_i}"), stream_id: g['streamId'])
+  when OP_DIRECT_UPLOAD
+    s.input_video.direct_upload_video_media(request: O::DirectUploadVideoMediaRequest.new(push_media_settings: O::PushMediaSettings.new(metadata: { 'source' => SDK_VALIDATE_TAG })))
+  else
+    :unhandled
+  end
+end
+
+# PUT / PATCH (update) operations. Returns :unhandled for other operationIds.
+def invoke_sdk_update_ops(operation_id, g, s)
+  case operation_id
+  when 'updated-media'
+    s.manage_videos.updated_media(body: O::UpdatedMediaRequestBody.new(metadata: { 'updated' => 'true' }, title: 'SDK Validate Title'), media_id: g['mediaId'])
+  when 'updated-source-access'
+    s.manage_videos.updated_source_access(body: O::UpdatedSourceAccessRequestBody.new(source_access: true), media_id: g['mediaId'])
+  when 'updated-mp4Support'
+    s.manage_videos.updated_mp4_support(body: O::UpdatedMp4SupportRequestBody.new, media_id: g['mediaId'])
+  when 'update-media-summary'
+    s.in_video_ai_features.update_media_summary(body: O::UpdateMediaSummaryRequestBody.new(generate: true), media_id: g['mediaId'])
+  when 'update-media-chapters'
+    s.in_video_ai_features.update_media_chapters(body: O::UpdateMediaChaptersRequestBody.new(chapters: true), media_id: g['mediaId'])
+  when 'update-media-named-entities'
+    s.in_video_ai_features.update_media_named_entities(body: O::UpdateMediaNamedEntitiesRequestBody.new(named_entities: true), media_id: g['mediaId'])
+  when 'update-media-moderation'
+    s.in_video_ai_features.update_media_moderation(body: O::UpdateMediaModerationRequestBody.new(moderation: O::UpdateMediaModerationModeration.new), media_id: g['mediaId'])
+  when 'update-media-track'
+    s.manage_videos.update_media_track(body: C::UpdateTrackRequest.new, track_id: g['trackId'], media_id: g['mediaId'])
+  when 'update-domain-restrictions'
+    s.playback.update_domain_restrictions(body: O::UpdateDomainRestrictionsRequestBody.new(allow: ['example.com']), media_id: g['mediaId'], playback_id: g['playbackId'])
+  when 'update-user-agent-restrictions'
+    s.playback.update_user_agent_restrictions(body: O::UpdateUserAgentRestrictionsRequestBody.new(allow: ['Mozilla']), media_id: g['mediaId'], playback_id: g['playbackId'])
+  when 'update-a-playlist'
+    s.playlist.update_a_playlist(body: C::UpdatePlaylistRequest.new(name: 'SDK Validate Updated', description: 'updated by validator'), playlist_id: g['playlistId'])
+  when 'add-media-to-playlist'
+    s.playlist.add_media_to_playlist(body: C::MediaIdsRequest.new(media_ids: [g['mediaId']]), playlist_id: g['playlistId'])
+  when 'change-media-order-in-playlist'
+    s.playlist.change_media_order_in_playlist(body: C::MediaIdsRequest.new(media_ids: [g['mediaId']]), playlist_id: g['playlistId'])
+  when 'update-live-stream'
+    s.manage_live_stream.update_live_stream(body: C::PatchLiveStreamRequest.new(metadata: { 'updated' => 'true' }, reconnect_window: 120), stream_id: g['streamId'])
+  when 'update-specific-simulcast-of-stream'
+    s.simulcast_stream.update_specific_simulcast_of_stream(body: C::SimulcastUpdateRequest.new(is_enabled: false), stream_id: g['streamId'], simulcast_id: g['simulcastId'])
+  when 'enable-live-stream'
+    s.manage_live_stream.enable_live_stream(stream_id: g['streamId'])
+  when 'disable-live-stream'
+    s.manage_live_stream.disable_live_stream(stream_id: g['streamId'])
+  when 'complete-live-stream'
+    s.manage_live_stream.complete_live_stream(stream_id: g['streamId'])
+  when 'cancel-upload'
+    s.manage_videos.cancel_upload(upload_id: g['uploadId'])
+  else
+    :unhandled
+  end
+end
+
+# DELETE operations. Returns :unhandled for other operationIds.
+def invoke_sdk_delete_ops(operation_id, g, s)
+  case operation_id
+  when 'delete-media-from-playlist'
+    s.playlist.delete_media_from_playlist(body: C::MediaIdsRequest.new(media_ids: [g['mediaId']]), playlist_id: g['playlistId'])
+  when 'delete-a-playlist'
+    s.playlist.delete_a_playlist(playlist_id: g['playlistId'])
+  when 'delete-media-track'
+    s.manage_videos.delete_media_track(media_id: g['mediaId'], track_id: g['trackId'])
+  when 'delete-media-playback-id'
+    s.playback.delete_media_playback_id(media_id: g['mediaId'], playback_id: g['playbackId'])
+  when 'delete-simulcast-of-stream'
+    s.simulcast_stream.delete_simulcast_of_stream(stream_id: g['streamId'], simulcast_id: g['simulcastId'])
+  when 'delete-playbackId-of-stream'
+    s.live_playback.delete_playback_id_of_stream(stream_id: g['streamId'], playback_id: g['playbackId'])
+  when 'delete-live-stream'
+    s.manage_live_stream.delete_live_stream(stream_id: g['streamId'])
+  when 'delete-media'
+    s.manage_videos.delete_media(media_id: g['mediaId'])
+  when 'delete_signing_key'
+    s.signing_keys.delete_signing_key(signing_key_id: g['signingKeyId'])
+  else
+    :unhandled
+  end
 end
 
 # ---------------------------------------------------------------------------
@@ -604,48 +633,60 @@ def write_report(results, ctx)
   lines << ''
   lines << '| Phase | Method | OperationId | HTTP | OpenAPI valid | SDK | Missing in SDK | Missing in API | Status |'
   lines << '|---|---|---|---:|:--:|:--:|---|---|:--:|'
+  append_consolidated_rows(lines, results)
+  lines << ''
+  lines << '## Per-operation details'
+  lines << ''
+  results.each { |r| append_operation_detail(lines, r) }
+
+  File.write(File.join(TESTS_DIR, REPORT_MD), "#{lines.join("\n")}\n")
+  warn "Report generated: #{File.join(TESTS_DIR, REPORT_MD)}"
+end
+
+# Appends the consolidated table rows (grouped by phase) to `lines`.
+def append_consolidated_rows(lines, results)
   PHASE_ORDER.each do |phase|
     results.select { |r| r[:phase] == phase }.each do |r|
       ov = r[:openapi_valid].nil? ? '—' : (r[:openapi_valid] ? '✅' : '❌')
       sdk = r[:status] == 'SKIP' ? '—' : (r[:sdk_ok] ? '✅' : '❌')
       mis = ->(a) { a.any? ? a.join(', ') : 'None' }
-      st = case r[:status]
-           when 'PASS' then '✅ PASS'
-           when 'SKIP' then '⤳ SKIP'
-           when 'XFAIL' then '⚠️ XFAIL'
-           else '❌ FAIL'
-           end
+      st = consolidated_status_label(r[:status])
       lines << "| #{r[:phase]} | #{r[:method]} | `#{r[:operation_id]}` | #{r[:http_status] || '—'} | #{ov} | #{sdk} | #{mis.call(r[:missing_in_sdk])} | #{mis.call(r[:missing_in_api])} | #{st} |"
     end
   end
-  lines << ''
-  lines << '## Per-operation details'
-  lines << ''
-  results.each do |r|
-    lines << "### #{r[:operation_id]} (`#{r[:method]} #{r[:path]}`)"
-    lines << "- **Phase**: #{r[:phase]}"
-    lines << "- **Status**: #{r[:status]}"
-    lines << "- **HTTP status**: #{r[:http_status]}" unless r[:http_status].nil?
-    lines << "- **Captured id**: `#{r[:captured_id]}`" if r[:captured_id]
-    lines << "- **Note**: #{r[:note]}" if r[:note]
-    lines << "- **SDK error**: #{preview(r[:sdk_error])}" if r[:sdk_error]
-    if r[:openapi_errors].any?
-      lines << '- **OpenAPI errors**:'
-      r[:openapi_errors].first(20).each { |e| lines << "  - `#{e['path']}` #{e['message']}" }
-    end
-    if r[:missing_in_sdk].any?
-      lines << '- **Missing in SDK (present in API)**:'
-      r[:missing_in_sdk].each { |p| lines << "  - `#{p}`" }
-    end
-    if r[:missing_in_api].any?
-      lines << '- **Missing in API (present in SDK)**:'
-      r[:missing_in_api].each { |p| lines << "  - `#{p}`" }
-    end
-    lines << ''
-  end
+end
 
-  File.write(File.join(TESTS_DIR, REPORT_MD), "#{lines.join("\n")}\n")
-  warn "Report generated: #{File.join(TESTS_DIR, REPORT_MD)}"
+def consolidated_status_label(status)
+  case status
+  when 'PASS' then '✅ PASS'
+  when 'SKIP' then '⤳ SKIP'
+  when 'XFAIL' then '⚠️ XFAIL'
+  else '❌ FAIL'
+  end
+end
+
+# Appends one operation's detail block to `lines`.
+def append_operation_detail(lines, r)
+  lines << "### #{r[:operation_id]} (`#{r[:method]} #{r[:path]}`)"
+  lines << "- **Phase**: #{r[:phase]}"
+  lines << "- **Status**: #{r[:status]}"
+  lines << "- **HTTP status**: #{r[:http_status]}" unless r[:http_status].nil?
+  lines << "- **Captured id**: `#{r[:captured_id]}`" if r[:captured_id]
+  lines << "- **Note**: #{r[:note]}" if r[:note]
+  lines << "- **SDK error**: #{preview(r[:sdk_error])}" if r[:sdk_error]
+  if r[:openapi_errors].any?
+    lines << '- **OpenAPI errors**:'
+    r[:openapi_errors].first(20).each { |e| lines << "  - `#{e['path']}` #{e['message']}" }
+  end
+  if r[:missing_in_sdk].any?
+    lines << '- **Missing in SDK (present in API)**:'
+    r[:missing_in_sdk].each { |p| lines << "  - `#{p}`" }
+  end
+  if r[:missing_in_api].any?
+    lines << '- **Missing in API (present in SDK)**:'
+    r[:missing_in_api].each { |p| lines << "  - `#{p}`" }
+  end
+  lines << ''
 end
 
 # ---------------------------------------------------------------------------
@@ -664,92 +705,8 @@ def main
   end
 
   ctx = {}
-  results = []
-
-  STEPS.each_with_index do |step, i|
-    ep = endpoints[step[:op]]
-    base = { operation_id: step[:op], method: ep&.fetch('method', '?'), path: ep&.fetch('path', '?'),
-             phase: step[:phase], openapi_errors: [], missing_in_sdk: [], missing_in_api: [] }
-    warn "[#{i + 1}/#{STEPS.size}] (#{step[:phase]}) #{step[:op]}"
-
-    unless ep
-      results << base.merge(status: 'SKIP', http_status: nil, openapi_valid: nil, sdk_ok: false, note: 'operationId not found in spec')
-      next
-    end
-
-    missing = (step[:needs] || []).reject { |k| ctx[k] }
-    if missing.any?
-      warn "  ⤳ SKIP (missing: #{missing.join(', ')})"
-      results << base.merge(status: 'SKIP', http_status: nil, openapi_valid: nil, sdk_ok: false, note: "missing dependency: #{missing.join(', ')}")
-      next
-    end
-
-    # generating subtitles needs the just-added track to be fetched/ready first
-    if step[:op] == OP_GENERATE_SUBTITLE && ctx[:mediaId] && ctx[:trackId]
-      warn "  ⏳ waiting for track #{ctx[:trackId]} to be ready..."
-      warn "  track status: #{wait_for_track_ready(base_url, username, password, ctx[:mediaId], ctx[:trackId])}"
-    end
-
-    request = step[:request].call(ctx)
-    php = invoke_sdk(step[:op], request, base_url, username, password)
-
-    # wait for an async-provisioning resource by retrying while the error matches.
-    if step[:retry_on]
-      attempt = 0
-      max_attempts = 24 # ~2 min at 5s
-      while !php[:ok] && attempt < max_attempts && JSON.generate(php[:error] || {}).include?(step[:retry_on])
-        attempt += 1
-        warn '  ⏳ resource not ready, retrying...' if attempt == 1
-        sleep(5)
-        php = invoke_sdk(step[:op], request, base_url, username, password)
-      end
-    end
-
-    unless php[:ok]
-      msg = "#{php[:error]['name'] || 'Error'}: #{php[:error]['message'] || 'SDK call failed'}"
-      xfail = step[:expect_fail]
-      warn "  #{xfail ? '⚠️  XFAIL (expected)' : '❌ FAIL'} — #{msg.lines.first.to_s.strip[0, 120]}"
-      write_artifacts(step[:op], php[:error]['bodyJson'], php[:error])
-      results << base.merge(
-        status: xfail ? 'XFAIL' : 'FAIL',
-        http_status: php[:error]['statusCode'],
-        openapi_valid: nil,
-        sdk_ok: false,
-        sdk_error: msg,
-        note: xfail ? 'expected failure: requires an actively-streaming encoder ingest' : nil
-      )
-      next
-    end
-
-    step[:capture]&.call(php[:value], ctx)
-
-    # a just-created media must reach "Ready" before playback-ids / tracks can
-    # be added, otherwise those create steps 400 and cascade into SKIPs.
-    if step[:op] == OP_CREATE_MEDIA && ctx[:mediaId]
-      warn "  ⏳ waiting for media #{ctx[:mediaId]} to be Ready..."
-      warn "  media status: #{wait_for_media_ready(base_url, username, password, ctx[:mediaId])}"
-    end
-
-    captured_id = CAPTURE_SOURCE.find { |key, op| op == step[:op] && ctx[key] }&.then { |key, _| ctx[key] }
-
-    openapi_valid, openapi_errors = validate_openapi_response(spec, ep, php[:status_code], php[:raw_body])
-
-    api_norm = normalize_json(php[:raw_body])
-    sdk_norm = php[:value].is_a?(Hash) || php[:value].is_a?(Array) ? normalize_json(php[:value]) : nil
-    api_paths = collect_json_paths(api_norm, '', include_empty_arrays: false)
-    sdk_paths = sdk_norm ? collect_json_paths(sdk_norm, '', include_empty_arrays: false) : Set.new
-    missing_in_sdk = sdk_paths.empty? ? [] : sort_unique(api_paths.reject { |p| sdk_paths.include?(p) }.to_a)
-    missing_in_api = sdk_paths.empty? ? [] : sort_unique(sdk_paths.reject { |p| api_paths.include?(p) }.to_a)
-
-    write_artifacts(step[:op], php[:raw_body], php[:value])
-
-    status = (openapi_valid.nil? || openapi_valid) && missing_in_sdk.empty? && missing_in_api.empty? ? 'PASS' : 'FAIL'
-    warn "  #{status == 'PASS' ? '✅ PASS' : '❌ FAIL'} (HTTP #{php[:status_code] || '?'})#{captured_id ? " id=#{captured_id}" : ''}"
-
-    results << base.merge(
-      status: status, http_status: php[:status_code], openapi_valid: openapi_valid, openapi_errors: openapi_errors,
-      sdk_ok: true, missing_in_sdk: missing_in_sdk, missing_in_api: missing_in_api, captured_id: captured_id
-    )
+  results = STEPS.each_with_index.map do |step, i|
+    process_step(step, i, spec, endpoints, ctx, base_url, username, password)
   end
 
   write_report(results, ctx)
@@ -758,6 +715,107 @@ def main
   skip = results.count { |r| r[:status] == 'SKIP' }
   xfail = results.count { |r| r[:status] == 'XFAIL' }
   warn "Summary: total=#{results.size} pass=#{pass} fail=#{fail} skip=#{skip} xfail=#{xfail}"
+end
+
+# Runs a single lifecycle step and returns its result hash (mutating ctx on capture).
+def process_step(step, i, spec, endpoints, ctx, base_url, username, password)
+  ep = endpoints[step[:op]]
+  base = { operation_id: step[:op], method: ep&.fetch('method', '?'), path: ep&.fetch('path', '?'),
+           phase: step[:phase], openapi_errors: [], missing_in_sdk: [], missing_in_api: [] }
+  warn "[#{i + 1}/#{STEPS.size}] (#{step[:phase]}) #{step[:op]}"
+
+  unless ep
+    return base.merge(status: 'SKIP', http_status: nil, openapi_valid: nil, sdk_ok: false, note: 'operationId not found in spec')
+  end
+
+  missing = (step[:needs] || []).reject { |k| ctx[k] }
+  if missing.any?
+    warn "  ⤳ SKIP (missing: #{missing.join(', ')})"
+    return base.merge(status: 'SKIP', http_status: nil, openapi_valid: nil, sdk_ok: false, note: "missing dependency: #{missing.join(', ')}")
+  end
+
+  await_track_if_needed(step, ctx, base_url, username, password)
+
+  request = step[:request].call(ctx)
+  php = invoke_with_retry(step, request, base_url, username, password)
+
+  return build_failure_result(step, php, base) unless php[:ok]
+
+  step[:capture]&.call(php[:value], ctx)
+  await_media_if_needed(step, ctx, base_url, username, password)
+
+  build_success_result(step, ep, php, base, ctx, spec)
+end
+
+# Generating subtitles needs the just-added track to be fetched/ready first.
+def await_track_if_needed(step, ctx, base_url, username, password)
+  return unless step[:op] == OP_GENERATE_SUBTITLE && ctx[:mediaId] && ctx[:trackId]
+
+  warn "  ⏳ waiting for track #{ctx[:trackId]} to be ready..."
+  warn "  track status: #{wait_for_track_ready(base_url, username, password, ctx[:mediaId], ctx[:trackId])}"
+end
+
+# A just-created media must reach "Ready" before playback-ids / tracks can be added.
+def await_media_if_needed(step, ctx, base_url, username, password)
+  return unless step[:op] == OP_CREATE_MEDIA && ctx[:mediaId]
+
+  warn "  ⏳ waiting for media #{ctx[:mediaId]} to be Ready..."
+  warn "  media status: #{wait_for_media_ready(base_url, username, password, ctx[:mediaId])}"
+end
+
+# Invokes the SDK, retrying while an async-provisioning error matches step[:retry_on].
+def invoke_with_retry(step, request, base_url, username, password)
+  php = invoke_sdk(step[:op], request, base_url, username, password)
+  return php unless step[:retry_on]
+
+  attempt = 0
+  max_attempts = 24 # ~2 min at 5s
+  while !php[:ok] && attempt < max_attempts && JSON.generate(php[:error] || {}).include?(step[:retry_on])
+    attempt += 1
+    warn '  ⏳ resource not ready, retrying...' if attempt == 1
+    sleep(5)
+    php = invoke_sdk(step[:op], request, base_url, username, password)
+  end
+  php
+end
+
+# Builds the result hash for a failed SDK call (FAIL or XFAIL).
+def build_failure_result(step, php, base)
+  msg = "#{php[:error]['name'] || 'Error'}: #{php[:error]['message'] || 'SDK call failed'}"
+  xfail = step[:expect_fail]
+  warn "  #{xfail ? '⚠️  XFAIL (expected)' : '❌ FAIL'} — #{msg.lines.first.to_s.strip[0, 120]}"
+  write_artifacts(step[:op], php[:error]['bodyJson'], php[:error])
+  base.merge(
+    status: xfail ? 'XFAIL' : 'FAIL',
+    http_status: php[:error]['statusCode'],
+    openapi_valid: nil,
+    sdk_ok: false,
+    sdk_error: msg,
+    note: xfail ? 'expected failure: requires an actively-streaming encoder ingest' : nil
+  )
+end
+
+# Builds the result hash for a successful SDK call (validates + diffs).
+def build_success_result(step, ep, php, base, ctx, spec)
+  captured_id = CAPTURE_SOURCE.find { |key, op| op == step[:op] && ctx[key] }&.then { |key, _| ctx[key] }
+  openapi_valid, openapi_errors = validate_openapi_response(spec, ep, php[:status_code], php[:raw_body])
+
+  api_norm = normalize_json(php[:raw_body])
+  sdk_norm = php[:value].is_a?(Hash) || php[:value].is_a?(Array) ? normalize_json(php[:value]) : nil
+  api_paths = collect_json_paths(api_norm, '', include_empty_arrays: false)
+  sdk_paths = sdk_norm ? collect_json_paths(sdk_norm, '', include_empty_arrays: false) : Set.new
+  missing_in_sdk = sdk_paths.empty? ? [] : sort_unique(api_paths.reject { |p| sdk_paths.include?(p) }.to_a)
+  missing_in_api = sdk_paths.empty? ? [] : sort_unique(sdk_paths.reject { |p| api_paths.include?(p) }.to_a)
+
+  write_artifacts(step[:op], php[:raw_body], php[:value])
+
+  status = (openapi_valid.nil? || openapi_valid) && missing_in_sdk.empty? && missing_in_api.empty? ? 'PASS' : 'FAIL'
+  warn "  #{status == 'PASS' ? '✅ PASS' : '❌ FAIL'} (HTTP #{php[:status_code] || '?'})#{captured_id ? " id=#{captured_id}" : ''}"
+
+  base.merge(
+    status: status, http_status: php[:status_code], openapi_valid: openapi_valid, openapi_errors: openapi_errors,
+    sdk_ok: true, missing_in_sdk: missing_in_sdk, missing_in_api: missing_in_api, captured_id: captured_id
+  )
 end
 
 main if $PROGRAM_NAME == __FILE__
