@@ -20,8 +20,9 @@ jobs:
         bundler-cache: false
 
     - name: Install dependencies
-      # Resolve against the target Ruby; the lockfile is refreshed as needed.
-      run: bundle install --jobs 4 --retry 3
+      # Install strictly from the committed Gemfile.lock so dependencies are
+      # locked to verified versions; fails if the lockfile is out of date.
+      run: bundle install --deployment --jobs 4 --retry 3
 
     - name: Show resolved Gemfile.lock (for debugging)
       if: failure()
