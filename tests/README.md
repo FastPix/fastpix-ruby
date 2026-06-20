@@ -161,7 +161,7 @@ FASTPIX_USERNAME=... FASTPIX_PASSWORD=... ruby tests/validate_get_endpoints.rb
 ### Latest consolidated results
 
 <!-- BEGIN GET_ENDPOINTS_CONSOLIDATED -->
-Last generated: 2026-06-19T18:25:01Z
+Last generated: 2026-06-20T06:26:53Z
 
 - **Total GET endpoints**: 30
 - **PASS**: 25

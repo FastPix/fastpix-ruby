@@ -27,7 +27,9 @@ stages:
     - checkout: self
       fetchDepth: 0
 
-    - task: SonarCloudPrepare@3
+    # NOSONAR - Azure DevOps task references support only the major version (@3);
+    # a full semver (@3.x.y) is not valid syntax, so the version is left as-is.
+    - task: SonarCloudPrepare@3 # NOSONAR
       displayName: 'Prepare SonarCloud Analysis'
       inputs:
         SonarCloud: 'sdk_sonar'
@@ -48,10 +50,10 @@ stages:
         echo "Running SonarCloud analysis for Ruby SDK"
       displayName: 'Build Step'
 
-    - task: SonarCloudAnalyze@3
+    - task: SonarCloudAnalyze@3 # NOSONAR
       displayName: 'Run SonarCloud Code Analysis'
 
-    - task: SonarCloudPublish@3
+    - task: SonarCloudPublish@3 # NOSONAR
       displayName: 'Publish SonarCloud Quality Gate Results'
       inputs:
         pollingTimeoutSec: '300'

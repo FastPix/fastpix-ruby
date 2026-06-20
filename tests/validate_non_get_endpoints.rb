@@ -53,6 +53,9 @@ require 'fastpixapi'
 
 Models = ::FastpixClient::Models
 
+# Raised when the OpenAPI spec file cannot be located on disk.
+class SpecNotFoundError < StandardError; end
+
 ARTIFACTS_DIRNAME = 'artifacts-non-get'
 REPORT_MD = 'NON_GET_ENDPOINTS_VALIDATION_REPORT.md'
 MAX_PREVIEW_CHARS = 4000
@@ -83,7 +86,7 @@ def resolve_spec_path
   found = candidates.find { |p| File.exist?(p) }
   return found unless found.nil?
 
-  raise "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
+  raise SpecNotFoundError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
 end
 
 def load_openapi_spec
@@ -704,9 +707,10 @@ def main
     abort 'Set FASTPIX_USERNAME and FASTPIX_PASSWORD env vars (real credentials) for live API validation.'
   end
 
+  conn = { base_url: base_url, username: username, password: password }
   ctx = {}
   results = STEPS.each_with_index.map do |step, i|
-    process_step(step, i, spec, endpoints, ctx, base_url, username, password)
+    process_step(step, i, spec, endpoints, ctx, conn)
   end
 
   write_report(results, ctx)
@@ -718,7 +722,8 @@ def main
 end
 
 # Runs a single lifecycle step and returns its result hash (mutating ctx on capture).
-def process_step(step, i, spec, endpoints, ctx, base_url, username, password)
+def process_step(step, i, spec, endpoints, ctx, conn)
+  base_url, username, password = conn.values_at(:base_url, :username, :password)
   ep = endpoints[step[:op]]
   base = { operation_id: step[:op], method: ep&.fetch('method', '?'), path: ep&.fetch('path', '?'),
            phase: step[:phase], openapi_errors: [], missing_in_sdk: [], missing_in_api: [] }

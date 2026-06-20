@@ -65,6 +65,9 @@ TYPE_STRING_YAML = '  type: string'
 # Spec + fixtures loading
 # ---------------------------------------------------------------------------
 
+# Raised when no OpenAPI spec file can be located.
+class SpecNotFoundError < StandardError; end
+
 def resolve_spec_path
   # Allow an explicit override via FASTPIX_SPEC; otherwise use the bundled spec.
   return ENV.fetch('FASTPIX_SPEC', nil) if ENV.fetch('FASTPIX_SPEC', nil) && File.exist?(ENV.fetch('FASTPIX_SPEC', nil))
@@ -77,7 +80,7 @@ def resolve_spec_path
   found = candidates.find { |p| File.exist?(p) }
   return found unless found.nil?
 
-  raise "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
+  raise SpecNotFoundError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
 end
 
 def load_openapi_spec
@@ -1070,8 +1073,9 @@ def main
     abort 'Set FASTPIX_USERNAME and FASTPIX_PASSWORD env vars (real credentials) for live API validation.'
   end
 
+  conn = { base_url: base_url, username: username, password: password }
   results = endpoints.each_with_index.map do |ep, i|
-    process_endpoint(spec, ep, i, endpoints.size, base_url, username, password, fixtures)
+    process_endpoint(spec, ep, i, endpoints.size, conn, fixtures)
   end
 
   results.each { |r| r[:fix_suggestions] = generate_fix_suggestions(r) if r[:status] == 'FAIL' }
@@ -1106,8 +1110,12 @@ def compute_path_diffs(api_norm, sdk_norm)
 end
 
 # Runs one endpoint through API + SDK validation and returns its result hash.
-def process_endpoint(spec, ep, i, total, base_url, username, password, fixtures)
+def process_endpoint(spec, ep, i, total, conn, fixtures)
   warn "[#{i + 1}/#{total}] #{ep['operationId']} (#{ep['path']})"
+
+  base_url = conn[:base_url]
+  username = conn[:username]
+  password = conn[:password]
 
   built = build_url(base_url, ep, fixtures)
   api = call_api(built[:url], username, password)
