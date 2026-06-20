@@ -89,10 +89,10 @@ module FastpixClient
         if sub_type == 'bearer'
           req.headers[header_name] = _bearerize(value)
         elsif sub_type != 'custom'
-          raise StandardError, SECURITY_NOT_SUPPORTED
+          raise ArgumentError, SECURITY_NOT_SUPPORTED
         end
       else
-        raise StandardError, SECURITY_NOT_SUPPORTED
+        raise ArgumentError, SECURITY_NOT_SUPPORTED
       end
     end
 
@@ -113,7 +113,7 @@ module FastpixClient
       when 'cookie'
         req.headers['Cookie'][header_name] = value
       else
-        raise StandardError, SECURITY_NOT_SUPPORTED
+        raise ArgumentError, SECURITY_NOT_SUPPORTED
       end
     end
 

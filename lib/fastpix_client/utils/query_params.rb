@@ -55,7 +55,7 @@ module FastpixClient
               metadata, f_name, value, '|'
             )
           else
-            raise StandardError, 'not yet implemented'
+            raise ArgumentError, 'not yet implemented'
           end
         end
       end

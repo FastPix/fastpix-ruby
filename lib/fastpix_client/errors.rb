@@ -39,7 +39,7 @@ module FastpixClient
 
       if http_response.nil?
         raise error unless error.nil?
-        raise StandardError, 'no response'
+        raise ::FastpixClient::Models::Errors::EmptyResponseError, 'no response'
       end
 
       http_response

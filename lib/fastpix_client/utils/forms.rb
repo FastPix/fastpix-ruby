@@ -115,7 +115,7 @@ module FastpixClient
           file_name = T.let(file_obj.send(file_field.name), String)
         end
       end
-      raise StandardError, 'invalid multipart/form-data file' if T.unsafe(file_name) == '' || T.unsafe(content).nil?
+      raise ArgumentError, 'invalid multipart/form-data file' if T.unsafe(file_name) == '' || T.unsafe(content).nil?
 
       [file_name, content]
     end
@@ -184,7 +184,7 @@ module FastpixClient
                 )
               )
             else
-              raise StandardError, "Invalid form style for field #{field.name}"
+              raise ArgumentError, "Invalid form style for field #{field.name}"
             end
           end
         end
@@ -193,7 +193,7 @@ module FastpixClient
           form[key] = [val_to_string(value)]
         end
       else
-        raise StandardError, "Invalid request body type #{data.class}"
+        raise ArgumentError, "Invalid request body type #{data.class}"
       end
 
       form

@@ -46,7 +46,7 @@ module FastpixClient
 
       if http_response.nil?
         raise error unless error.nil?
-        raise StandardError, 'no response'
+        raise ::FastpixClient::Models::Errors::EmptyResponseError, 'no response'
       end
 
       http_response
@@ -56,7 +56,7 @@ module FastpixClient
     # Encodes the request body based on its serialized content type.
     sig { params(req_content_type: T.nilable(String), data: T.untyped, form: T.untyped).returns(T.untyped) }
     def encode_request_body(req_content_type, data, form)
-      raise StandardError, 'request body is required' if data.nil? && form.nil?
+      raise ArgumentError, 'request body is required' if data.nil? && form.nil?
 
       if form
         Utils.encode_form(form)

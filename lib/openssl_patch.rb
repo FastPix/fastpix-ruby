@@ -4,26 +4,27 @@
 require 'openssl'
 require 'net/http'
 
-# Find certificate file
-CERT_FILE = if File.exist?('/opt/homebrew/etc/openssl@3/cert.pem')
-              '/opt/homebrew/etc/openssl@3/cert.pem'
-            elsif File.exist?('/usr/local/etc/openssl@3/cert.pem')
-              '/usr/local/etc/openssl@3/cert.pem'
-            elsif File.exist?('/etc/ssl/certs/ca-certificates.crt')
-              '/etc/ssl/certs/ca-certificates.crt'
-            elsif File.exist?('/etc/ssl/cert.pem')
-              '/etc/ssl/cert.pem'
-            else
-              nil
-            end
+# Find certificate file (guarded so re-loading this file does not warn about a
+# redefined constant).
+unless defined?(CERT_FILE)
+  CERT_FILE = if File.exist?('/opt/homebrew/etc/openssl@3/cert.pem')
+                '/opt/homebrew/etc/openssl@3/cert.pem'
+              elsif File.exist?('/usr/local/etc/openssl@3/cert.pem')
+                '/usr/local/etc/openssl@3/cert.pem'
+              elsif File.exist?('/etc/ssl/certs/ca-certificates.crt')
+                '/etc/ssl/certs/ca-certificates.crt'
+              elsif File.exist?('/etc/ssl/cert.pem')
+                '/etc/ssl/cert.pem'
+              end
+end
 
 if CERT_FILE && File.exist?(CERT_FILE)
   # Patch OpenSSL::X509::Store to always include our certificate file
   module OpenSSL
     module X509
       class Store
-        alias_method :original_set_default_paths, :set_default_paths
-        
+        alias_method :original_set_default_paths, :set_default_paths unless method_defined?(:original_set_default_paths)
+
         def set_default_paths
           original_set_default_paths
           add_file(CERT_FILE) if CERT_FILE && File.exist?(CERT_FILE)
@@ -38,8 +39,10 @@ if CERT_FILE && File.exist?(CERT_FILE)
   ENV['CURL_CA_BUNDLE'] = CERT_FILE
   ENV['RUBY_OPENSSL_CA_CERT_FILE'] = CERT_FILE
   
-  # Also patch the default certificate file constant if possible
-  if defined?(OpenSSL::X509::DEFAULT_CERT_FILE)
+  # Also patch the default certificate file constant when it is mutable. On
+  # newer Ruby versions this constant is frozen, so skip it there (the
+  # SSL_CERT_FILE env var above already covers that case) to avoid FrozenError.
+  if defined?(OpenSSL::X509::DEFAULT_CERT_FILE) && !OpenSSL::X509::DEFAULT_CERT_FILE.frozen?
     OpenSSL::X509::DEFAULT_CERT_FILE.replace(CERT_FILE)
   end
   
@@ -47,7 +50,7 @@ if CERT_FILE && File.exist?(CERT_FILE)
   if defined?(Net::HTTP)
     module Net
       class HTTP
-        alias_method :original_connect, :connect
+        alias_method :original_connect, :connect unless method_defined?(:original_connect)
 
         def connect
           original_connect

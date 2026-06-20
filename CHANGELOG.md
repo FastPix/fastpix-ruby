@@ -2,6 +2,66 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.3]
+
+A maintenance release focused on internal code quality (SonarCloud), security
+hardening, and CI. It is an internal refactor with **no intended changes to the
+public API, method signatures, request/response models, or wire behavior** and
+is backward compatible with `1.1.2`.
+
+### Changed
+
+- **SDK version bump: `1.1.2` → `1.1.3`.** Updated internal identifiers:
+  - `@sdk_version` constant — now reports `1.1.3`.
+  - `User-Agent` header — outbound requests now identify as
+    `fastpixapi-ruby 1.1.3`.
+
+- **Code-quality refactor across the SDK (SonarCloud), behavior-preserving.**
+  Spanning ~40 files in `lib/fastpix_client/*` (resource clients such as
+  `views`, `playback`, `playlist`, `signing_keys`, `simulcast_stream`, and the
+  `utils/*` helpers `url`, `forms`, `query_params`, `security`, `headers`):
+  - Reduced method cognitive complexity by extracting private helper methods
+    (e.g. response/hook handling), with no change to control flow or outputs.
+  - Replaced duplicated inline string literals with named constants
+    (e.g. `CONTENT_TYPE_JSON`, `API_ERROR_OCCURRED`).
+  - Made raised exceptions specific instead of generic `StandardError`:
+    argument/validation guards now raise `ArgumentError`, and the empty-response
+    guard raises a new `FastpixClient::Models::Errors::EmptyResponseError`. Both
+    are `StandardError` subclasses, so existing `rescue`/`rescue StandardError`
+    handling is unaffected.
+  - Standardized `require` ordering and removed redundant exception-class
+    arguments.
+
+### Security
+
+- Hardened the GitHub Actions release workflow (`.github/workflows/releases.yml`):
+  pinned `actions/checkout` and `ruby/setup-ruby` to full commit SHAs instead of
+  mutable version tags, preventing supply-chain tampering during gem publication.
+- Added SonarCloud static analysis to CI via Azure Pipelines
+  (`azure-pipeline-files.yml`).
+
+### Fixed
+
+- `lib/openssl_patch.rb`: made the optional OpenSSL/cert patch idempotent and
+  compatible with newer Ruby — it no longer raises `FrozenError` when
+  `OpenSSL::X509::DEFAULT_CERT_FILE` is frozen, and no longer warns on repeat
+  loads. (This file is a development helper and is not loaded by the gem at
+  runtime.)
+
+### Internal
+
+- Development-only test harness (not shipped in the gem): standardized `require`
+  ordering, introduced a dedicated `SpecNotFoundError` exception in place of
+  raising string/generic errors, and reduced method parameter counts in
+  `tests/validate_get_endpoints.rb` and `tests/validate_non_get_endpoints.rb`.
+
+### Compatibility
+
+- No changes to public types, method signatures, request/response models,
+  default server URLs, security/auth, hooks, or retry logic.
+- No action required for existing integrations — update the dependency
+  (`bundle update fastpixapi` or `gem update fastpixapi`) and continue.
+
 ## [1.1.2]
 
 ### ⚠️ Important — FastPix is migrating from `.io` to `.com`
