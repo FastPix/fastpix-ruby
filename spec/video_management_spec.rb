@@ -2,6 +2,13 @@ require 'spec_helper'
 require 'fastpixapi'
 require_relative '../config/fastpix_config'
 
+SUCCESS_CONTEXT = 'when the request is successful'
+UNAUTHORIZED_CONTEXT = 'when the request fails with unauthorized error'
+VALIDATION_ERROR_DESC = 'raises validation error'
+PAYLOAD_VALIDATION_FAILED = 'payload validation failed'
+TEST_ID = 'test-id'
+UPDATED_TITLE = 'Updated Title'
+
 RSpec.describe FastpixApiSDK::ManageVideos do
   let(:sdk_config) do
     FastpixApiSDK::SDKConfiguration.new(
@@ -41,7 +48,7 @@ RSpec.describe FastpixApiSDK::ManageVideos do
   end
 
   describe '#list_media' do
-    context 'when the request is successful' do
+    context SUCCESS_CONTEXT do
       it 'retrieves list of videos' do
         response = manage_videos.list_media
         puts "RESPONSE (list_media success): #{JSON.pretty_generate(response.object.data.take(2).map(&:to_dict))}"
@@ -53,7 +60,7 @@ RSpec.describe FastpixApiSDK::ManageVideos do
       end
     end
 
-    context 'when the request fails with unauthorized error' do
+    context UNAUTHORIZED_CONTEXT do
       it 'skips unauthorized error test (cannot simulate without invalid credentials)' do
         skip 'Cannot simulate unauthorized error without invalid credentials.'
       end
@@ -64,7 +71,7 @@ RSpec.describe FastpixApiSDK::ManageVideos do
     let(:media_id) { test_media_id }
 
     describe '#get_media' do
-      context 'when the request is successful' do
+      context SUCCESS_CONTEXT do
         it 'retrieves video status' do
           response = manage_videos.get_media(media_id: media_id)
           puts "RESPONSE (get_media success): #{JSON.pretty_generate(response.object.to_dict)}"
@@ -80,7 +87,7 @@ RSpec.describe FastpixApiSDK::ManageVideos do
       end
 
       context 'when the request fails with not found error' do
-        it 'raises validation error' do
+        it VALIDATION_ERROR_DESC do
           error = nil
           begin
             manage_videos.get_media(media_id: 'non-existent-id')
@@ -90,33 +97,33 @@ RSpec.describe FastpixApiSDK::ManageVideos do
           puts "RESPONSE (get_media not found): #{error ? JSON.pretty_generate(error.to_dict) : 'nil'}"
           expect(error).to be_a(FastpixApiSDK::Models::Errors::ValidationErrorResponse)
           expect(error.error.code).to eq(422)
-          expect(error.error.message).to eq('payload validation failed')
+          expect(error.error.message).to eq(PAYLOAD_VALIDATION_FAILED)
           puts "Available methods for error response: #{error.methods - Object.methods}"
         end
       end
 
-      context 'when the request fails with unauthorized error' do
-        it 'raises validation error' do
+      context UNAUTHORIZED_CONTEXT do
+        it VALIDATION_ERROR_DESC do
           error = nil
           begin
-            manage_videos.get_media(media_id: 'test-id')
+            manage_videos.get_media(media_id: TEST_ID)
           rescue UncaughtThrowError => e
             error = e.tag
           end
           puts "RESPONSE (get_media unauthorized): #{error ? JSON.pretty_generate(error.to_dict) : 'nil'}"
           expect(error).to be_a(FastpixApiSDK::Models::Errors::ValidationErrorResponse)
           expect(error.error.code).to eq(422)
-          expect(error.error.message).to eq('payload validation failed')
+          expect(error.error.message).to eq(PAYLOAD_VALIDATION_FAILED)
           puts "Available methods for error response: #{error.methods - Object.methods}"
         end
       end
     end
 
     describe '#updated_media' do
-      context 'when the request is successful' do
+      context SUCCESS_CONTEXT do
         it 'updates media metadata' do
           metadata = FastpixApiSDK::Models::Operations::UpdatedMediaMetadata.new
-          metadata.instance_variable_set(:@title, 'Updated Title')
+          metadata.instance_variable_set(:@title, UPDATED_TITLE)
           metadata.instance_variable_set(:@description, 'Updated Description')
           request_body = FastpixApiSDK::Models::Operations::UpdatedMediaRequestBody.new(
             metadata: metadata
@@ -128,35 +135,35 @@ RSpec.describe FastpixApiSDK::ManageVideos do
           expect(response.status_code).to eq(200)
           expect(response.object.data.id).to eq(media_id)
           expect(response.object.data.metadata).to be_a(FastpixApiSDK::Models::Components::MediaMetadata)
-          expect(response.object.data.metadata.title).to eq('Updated Title')
+          expect(response.object.data.metadata.title).to eq(UPDATED_TITLE)
           expect(response.object.data.metadata.description).to eq('Updated Description')
         end
       end
 
-      context 'when the request fails with unauthorized error' do
-        it 'raises validation error' do
+      context UNAUTHORIZED_CONTEXT do
+        it VALIDATION_ERROR_DESC do
           metadata = FastpixApiSDK::Models::Operations::UpdatedMediaMetadata.new
-          metadata.instance_variable_set(:@title, 'Updated Title')
+          metadata.instance_variable_set(:@title, UPDATED_TITLE)
           request_body = FastpixApiSDK::Models::Operations::UpdatedMediaRequestBody.new(
             metadata: metadata
           )
 
           error = nil
           begin
-            manage_videos.updated_media(media_id: 'test-id', request_body: request_body)
+            manage_videos.updated_media(media_id: TEST_ID, request_body: request_body)
           rescue UncaughtThrowError => e
             error = e.tag
           end
           puts "RESPONSE (updated_media unauthorized): #{error ? JSON.pretty_generate(error.to_dict) : 'nil'}"
           expect(error).to be_a(FastpixApiSDK::Models::Errors::ValidationErrorResponse)
           expect(error.error.code).to eq(422)
-          expect(error.error.message).to eq('payload validation failed')
+          expect(error.error.message).to eq(PAYLOAD_VALIDATION_FAILED)
         end
       end
     end
 
     describe '#retrieve_media_input_info' do
-      context 'when the request is successful' do
+      context SUCCESS_CONTEXT do
         it 'retrieves media input information' do
           response = manage_videos.retrieve_media_input_info(media_id: media_id)
           puts "RESPONSE (retrieve_media_input_info success): #{JSON.pretty_generate(response.object.to_dict)}"
@@ -169,24 +176,24 @@ RSpec.describe FastpixApiSDK::ManageVideos do
         end
       end
 
-      context 'when the request fails with unauthorized error' do
-        it 'raises validation error' do
+      context UNAUTHORIZED_CONTEXT do
+        it VALIDATION_ERROR_DESC do
           error = nil
           begin
-            manage_videos.retrieve_media_input_info(media_id: 'test-id')
+            manage_videos.retrieve_media_input_info(media_id: TEST_ID)
           rescue UncaughtThrowError => e
             error = e.tag
           end
           puts "RESPONSE (retrieve_media_input_info unauthorized): #{error ? JSON.pretty_generate(error.to_dict) : 'nil'}"
           expect(error).to be_a(FastpixApiSDK::Models::Errors::ValidationErrorResponse)
           expect(error.error.code).to eq(422)
-          expect(error.error.message).to eq('payload validation failed')
+          expect(error.error.message).to eq(PAYLOAD_VALIDATION_FAILED)
         end
       end
     end
 
     describe '#delete_media' do
-      context 'when the request is successful' do
+      context SUCCESS_CONTEXT do
         it 'deletes the media' do
           response = manage_videos.delete_media(media_id: media_id)
           puts "RESPONSE (delete_media success): #{JSON.pretty_generate(response.object.to_dict)}"
@@ -196,18 +203,18 @@ RSpec.describe FastpixApiSDK::ManageVideos do
         end
       end
 
-      context 'when the request fails with unauthorized error' do
-        it 'raises validation error' do
+      context UNAUTHORIZED_CONTEXT do
+        it VALIDATION_ERROR_DESC do
           error = nil
           begin
-            manage_videos.delete_media(media_id: 'test-id')
+            manage_videos.delete_media(media_id: TEST_ID)
           rescue UncaughtThrowError => e
             error = e.tag
           end
           puts "RESPONSE (delete_media unauthorized): #{error ? JSON.pretty_generate(error.to_dict) : 'nil'}"
           expect(error).to be_a(FastpixApiSDK::Models::Errors::ValidationErrorResponse)
           expect(error.error.code).to eq(422)
-          expect(error.error.message).to eq('payload validation failed')
+          expect(error.error.message).to eq(PAYLOAD_VALIDATION_FAILED)
         end
       end
     end

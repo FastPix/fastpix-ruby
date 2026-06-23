@@ -83,7 +83,7 @@ module FastpixClient
       @server_url = server_url
       @timeout = (timeout_ms.to_f / 1000) unless timeout_ms.nil?
       @server_idx = server_idx.nil? ? 0 : server_idx
-      raise StandardError, "Invalid server index #{server_idx}" if @server_idx.negative? || @server_idx >= SERVERS.length
+      raise ArgumentError, "Invalid server index #{server_idx}" if @server_idx.negative? || @server_idx >= SERVERS.length
       if !security_source.nil?
         @security_source = security_source
       elsif !security.nil?
@@ -91,9 +91,9 @@ module FastpixClient
       end
       @language = 'ruby'
       @openapi_doc_version = '1.0.0'
-      @sdk_version = '1.1.2'
+      @sdk_version = '1.1.3'
       @gen_version = '2.801.0'
-      @user_agent = 'fastpixapi-ruby 1.1.2'
+      @user_agent = 'fastpixapi-ruby 1.1.3'
     end
 
     sig { returns([String, T::Hash[Symbol, String]]) }

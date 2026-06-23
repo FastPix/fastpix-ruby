@@ -4,6 +4,7 @@
 require_relative 'test_helper'
 
 class TestLiveStream < Minitest::Test
+  NO_STREAM_ID_DETAILS = '   Details: No stream ID available from previous test'
   def initialize(test_name = nil)
     super(test_name)
     @username = self.class.class_variable_defined?(:@@username) ? self.class.class_variable_get(:@@username) : ENV['FASTPIX_USERNAME'] || 'YOUR_FASTPIX_USERNAME'
@@ -67,7 +68,7 @@ class TestLiveStream < Minitest::Test
           response.object&.success == true &&
           response.object&.data&.id == @test_stream_id
         else
-          puts "   Details: No stream ID available from previous test"
+          puts NO_STREAM_ID_DETAILS
           true # Skip test if no stream ID available
         end
       rescue => e
@@ -87,7 +88,7 @@ class TestLiveStream < Minitest::Test
           response.object&.success == true &&
           response.object&.data&.viewer_count.is_a?(Numeric)
         else
-          puts "   Details: No stream ID available from previous test"
+          puts NO_STREAM_ID_DETAILS
           true # Skip test if no stream ID available
         end
       rescue => e
@@ -115,7 +116,7 @@ class TestLiveStream < Minitest::Test
           response.status_code == 200 &&
           response.object&.success == true
         else
-          puts "   Details: No stream ID available from previous test"
+          puts NO_STREAM_ID_DETAILS
           true # Skip test if no stream ID available
         end
       rescue => e
@@ -142,7 +143,7 @@ class TestLiveStream < Minitest::Test
           response.object&.success == true &&
           response.object&.data&.playback_id
         else
-          puts "   Details: No stream ID available from previous test"
+          puts NO_STREAM_ID_DETAILS
           true # Skip test if no stream ID available
         end
       rescue => e
@@ -173,7 +174,7 @@ class TestLiveStream < Minitest::Test
           response.object&.success == true &&
           response.object&.data&.id
         else
-          puts "   Details: No stream ID available from previous test"
+          puts NO_STREAM_ID_DETAILS
           true # Skip test if no stream ID available
         end
       rescue => e
@@ -192,7 +193,7 @@ class TestLiveStream < Minitest::Test
           response.status_code == 200 &&
           response.object&.success == true
         else
-          puts "   Details: No stream ID available from previous test"
+          puts NO_STREAM_ID_DETAILS
           true # Skip test if no stream ID available
         end
       rescue => e
@@ -211,7 +212,7 @@ class TestLiveStream < Minitest::Test
           response.status_code == 200 &&
           response.object&.success == true
         else
-          puts "   Details: No stream ID available from previous test"
+          puts NO_STREAM_ID_DETAILS
           true # Skip test if no stream ID available
         end
       rescue => e
@@ -230,7 +231,7 @@ class TestLiveStream < Minitest::Test
           response.status_code == 200 &&
           response.object&.success == true
         else
-          puts "   Details: No stream ID available from previous test"
+          puts NO_STREAM_ID_DETAILS
           true # Skip test if no stream ID available
         end
       rescue => e

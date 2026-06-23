@@ -5,6 +5,7 @@
 # This script runs all available samples in the correct order
 
 require 'time'
+require 'fastpixapi'
 
 # Configuration
 USERNAME = ENV['FASTPIX_USERNAME'] || 'your_username_here'
@@ -35,12 +36,11 @@ def check_prerequisites
     puts "✅ Credentials configured"
   end
   
-  # Check if fastpixapi gem is available
-  begin
-    require 'fastpixapi'
+  # Check if fastpixapi gem is available (required at the top of the file)
+  if defined?(FastpixClient)
     puts "✅ FastPix API SDK gem loaded"
-  rescue LoadError => e
-    puts "❌ FastPix API SDK gem not found: #{e.message}"
+  else
+    puts "❌ FastPix API SDK gem not found"
     puts "   Install with: gem install fastpixapi"
     return false
   end
@@ -77,6 +77,35 @@ def run_sample(sample_name, sample_file)
     
     false
   end
+end
+
+# Run a single sample, updating results. Returns :stop to halt the run, else :continue.
+def run_one_sample(sample, index, total, results)
+  puts "🔄 Sample #{index + 1}/#{total}: #{sample[:name]}"
+
+  unless File.exist?(sample[:file])
+    puts "❌ Sample file not found: #{sample[:file]}"
+    results[:skipped] += 1
+    return :continue
+  end
+
+  if run_sample(sample[:name], sample[:file])
+    results[:passed] += 1
+    return :continue
+  end
+
+  results[:failed] += 1
+  # If it's a required sample, ask if we should continue
+  if sample[:required]
+    print "   This is a required sample. Continue with remaining samples? (y/n): "
+    response = gets.chomp.downcase
+    unless response == 'y' || response == 'yes'
+      puts "   Stopping execution due to required sample failure."
+      return :stop
+    end
+  end
+
+  :continue
 end
 
 # Main execution
@@ -152,31 +181,8 @@ def main
   
   # Run each sample
   samples.each_with_index do |sample, index|
-    puts "🔄 Sample #{index + 1}/#{samples.length}: #{sample[:name]}"
-    
-    if File.exist?(sample[:file])
-      success = run_sample(sample[:name], sample[:file])
-      
-      if success
-        results[:passed] += 1
-      else
-        results[:failed] += 1
-        
-        # If it's a required sample, ask if we should continue
-        if sample[:required]
-          print "   This is a required sample. Continue with remaining samples? (y/n): "
-          response = gets.chomp.downcase
-          unless response == 'y' || response == 'yes'
-            puts "   Stopping execution due to required sample failure."
-            break
-          end
-        end
-      end
-    else
-      puts "❌ Sample file not found: #{sample[:file]}"
-      results[:skipped] += 1
-    end
-    
+    break if run_one_sample(sample, index, samples.length, results) == :stop
+
     # Add a small delay between samples
     sleep(1) unless index == samples.length - 1
   end

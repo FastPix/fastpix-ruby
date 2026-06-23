@@ -85,27 +85,15 @@ module FastpixClient
         sig { params(other: T.untyped).returns(T::Boolean) }
         def ==(other)
           return false unless other.is_a? self.class
-          return false unless @id == other.id
-          return false unless @workspace_id == other.workspace_id
-          return false unless @stream_id == other.stream_id
-          return false unless @creator_id == other.creator_id
-          return false unless @status == other.status
-          return false unless @source_access == other.source_access
-          return false unless @playback_ids == other.playback_ids
-          return false unless @tracks == other.tracks
-          return false unless @mp4_support == other.mp4_support
-          return false unless @duration == other.duration
-          return false unless @created_at == other.created_at
-          return false unless @updated_at == other.updated_at
-          return false unless @thumbnail == other.thumbnail
-          return false unless @title == other.title
-          return false unless @max_resolution == other.max_resolution
-          return false unless @source_resolution == other.source_resolution
-          return false unless @generated_subtitles == other.generated_subtitles
-          return false unless @is_audio_only == other.is_audio_only
-          return false unless @subtitle_available == other.subtitle_available
-          return false unless @aspect_ratio == other.aspect_ratio
-          true
+
+          [@id, @workspace_id, @stream_id, @creator_id, @status,
+           @source_access, @playback_ids, @tracks, @mp4_support, @duration,
+           @created_at, @updated_at, @thumbnail, @title, @max_resolution,
+           @source_resolution, @generated_subtitles, @is_audio_only, @subtitle_available, @aspect_ratio] ==
+            [other.id, other.workspace_id, other.stream_id, other.creator_id, other.status,
+             other.source_access, other.playback_ids, other.tracks, other.mp4_support, other.duration,
+             other.created_at, other.updated_at, other.thumbnail, other.title, other.max_resolution,
+             other.source_resolution, other.generated_subtitles, other.is_audio_only, other.subtitle_available, other.aspect_ratio]
         end
       end
     end

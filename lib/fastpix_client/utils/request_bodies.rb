@@ -32,13 +32,9 @@ module FastpixClient
       request_val = request.send(request_field_name)
 
       request_metadata = T.let(nil, T.nilable(T::Array[T::Array[T.any(T::Array[T.nilable(String)], String)]]))
-      T.unsafe(request).fields.each do |f|
-        if f.name == request_field_name
-          request_metadata = f.metadata[:request]
-          break
-        end
-      end
-      raise StandardError, 'invalid request type' if request_metadata.nil?
+      matched_field = T.unsafe(request).fields.find { |f| f.name == request_field_name }
+      request_metadata = matched_field.metadata[:request] unless matched_field.nil?
+      raise ArgumentError, 'invalid request type' if request_metadata.nil?
 
       serialize_content_type(
         request_metadata.fetch(:media_type, 'application/octet-stream'), request_val
@@ -55,7 +51,7 @@ module FastpixClient
       return media_type, serialize_form_data(request), nil if media_type.match('^application\/x-www-form-urlencoded.*')
       return media_type, request, nil if request.is_a?(String) || request.is_a?(Array)
 
-      raise StandardError, "invalid request body type #{request.class} for mediaType #{media_type}"
+      raise ArgumentError, "invalid request body type #{request.class} for mediaType #{media_type}"
     end
   end
 end

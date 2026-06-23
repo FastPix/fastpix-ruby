@@ -23,54 +23,66 @@ module FastpixClient
       return params if obj.nil?
 
       if obj.respond_to? :fields
-        items = []
-        T.unsafe(obj).fields.each do |obj_field|
-          obj_field_name = get_field_name_lambda.call(obj_field)
-          next if obj_field_name == ''
-
-          val = obj.send(obj_field.name.to_sym)
-          next if val.nil?
-
-          if explode
-            params[obj_field_name] = [val_to_string(val)]
-          else
-            items.append("#{obj_field_name}#{delimiter}#{val_to_string(val)}")
-          end
-        end
-
-        params[field_name] = [items.join(delimiter)] if !items.empty?
+        _populate_form_from_object(params, field_name, explode, obj, delimiter, &get_field_name_lambda)
       elsif obj.is_a? Hash
-        items = []
-        obj.each do |key, value|
-          next if value.nil?
-
-          if explode
-            params[key] = val_to_string(value)
-          else
-            items.append("#{key}#{delimiter}#{val_to_string(value)}")
-          end
-        end
-        params[field_name] = [items.join(delimiter)] if !items.empty?
-
+        _populate_form_from_hash(params, field_name, explode, obj, delimiter)
       elsif obj.is_a? Array
-        items = []
-        obj.each do |value|
-          next if value.nil?
-
-          if explode
-            params[field_name] = [] if !params.key? field_name
-
-            params[field_name].append(val_to_string(value))
-          else
-            items.append(val_to_string(value))
-          end
-        end
-        params[field_name] = items.map(&:to_s).join(delimiter) if !items.empty?
-
+        _populate_form_from_array(params, field_name, explode, obj, delimiter)
       else
         params[field_name] = val_to_string(obj)
       end
       params
+    end
+
+    # Populates form params from a MetadataFields object (mutates `params`).
+    def self._populate_form_from_object(params, field_name, explode, obj, delimiter, &get_field_name_lambda)
+      items = []
+      T.unsafe(obj).fields.each do |obj_field|
+        obj_field_name = get_field_name_lambda.call(obj_field)
+        next if obj_field_name == ''
+
+        val = obj.send(obj_field.name.to_sym)
+        next if val.nil?
+
+        if explode
+          params[obj_field_name] = [val_to_string(val)]
+        else
+          items.append("#{obj_field_name}#{delimiter}#{val_to_string(val)}")
+        end
+      end
+      params[field_name] = [items.join(delimiter)] unless items.empty?
+    end
+
+    # Populates form params from a Hash (mutates `params`).
+    def self._populate_form_from_hash(params, field_name, explode, obj, delimiter)
+      items = []
+      obj.each do |key, value|
+        next if value.nil?
+
+        if explode
+          params[key] = val_to_string(value)
+        else
+          items.append("#{key}#{delimiter}#{val_to_string(value)}")
+        end
+      end
+      params[field_name] = [items.join(delimiter)] unless items.empty?
+    end
+
+    # Populates form params from an Array (mutates `params`).
+    def self._populate_form_from_array(params, field_name, explode, obj, delimiter)
+      items = []
+      obj.each do |value|
+        next if value.nil?
+
+        if explode
+          params[field_name] = [] unless params.key? field_name
+
+          params[field_name].append(val_to_string(value))
+        else
+          items.append(val_to_string(value))
+        end
+      end
+      params[field_name] = items.map(&:to_s).join(delimiter) unless items.empty?
     end
 
     sig { params(media_type: String, request: Object).returns([String, Object, T::Array[T::Array[T.any(T::Array[T.nilable(String)], String)]]]) }
@@ -83,73 +95,57 @@ module FastpixClient
         field_metadata = field.metadata[:multipart_form]
         next if field_metadata.nil?
 
-        if field_metadata[:file] == true
-          field_name = field_metadata[:field_name]
-          
-          # Handle arrays of files
-          if val.is_a? Array
-            val.each do |file_obj|
-              file_name = T.let('', String)
-              content = nil
-
-              T.must(file_obj).fields.each do |file_field|
-                file_metadata = file_field.metadata[:multipart_form]
-                next if file_metadata.nil?
-
-                if file_metadata[:content] == true
-                  content = T.let(file_obj.send(file_field.name), String)
-                else
-                  file_name = T.let(file_obj.send(file_field.name), String)
-                end
-              end
-              raise StandardError, 'invalid multipart/form-data file' if T.unsafe(file_name) == '' || T.unsafe(content).nil?
-
-              form.append([field_name, [file_name, content]])
-            end
-          else
-            # Handle single file
-            file_name = T.let('', String)
-            content = nil
-
-            T.must(val).fields.each do |file_field|
-              file_metadata = file_field.metadata[:multipart_form]
-              next if file_metadata.nil?
-
-              if file_metadata[:content] == true
-                content = T.let(val.send(file_field.name), String)
-              else
-                file_name = T.let(val.send(file_field.name), String)
-              end
-            end
-            raise StandardError, 'invalid multipart/form-data file' if T.unsafe(file_name) == '' || T.unsafe(content).nil?
-
-            form.append([field_name, [file_name, content]])
-          end
-        elsif field_metadata[:json] == true
-          to_append = [
-            field_metadata.fetch(:field_name, field.name), [
-              nil, ::Crystalline.to_json(val), 'application/json'
-            ]
-          ]
-          form.append(to_append)
-        else
-          field_name = field_metadata.fetch(
-            :field_name, field.name
-          )
-          if val.is_a? Array
-            val.each do |value|
-              next if value.nil?
-
-              form.append(
-                [field_name, [nil, val_to_string(value)]]
-              )
-            end
-          else
-            form.append([field_name, [nil, val_to_string(val)]])
-          end
-        end
+        _append_multipart_field(form, field, field_metadata, val)
       end
       [media_type, nil, form]
+    end
+
+    # Extracts [file_name, content] from a multipart file object, raising if invalid.
+    def self._extract_multipart_file(file_obj)
+      file_name = T.let('', String)
+      content = nil
+
+      T.must(file_obj).fields.each do |file_field|
+        file_metadata = file_field.metadata[:multipart_form]
+        next if file_metadata.nil?
+
+        if file_metadata[:content] == true
+          content = T.let(file_obj.send(file_field.name), String)
+        else
+          file_name = T.let(file_obj.send(file_field.name), String)
+        end
+      end
+      raise ArgumentError, 'invalid multipart/form-data file' if T.unsafe(file_name) == '' || T.unsafe(content).nil?
+
+      [file_name, content]
+    end
+
+    # Appends a single request field to the multipart form (mutates `form`).
+    def self._append_multipart_field(form, field, field_metadata, val)
+      if field_metadata[:file] == true
+        field_name = field_metadata[:field_name]
+        # Handle arrays of files and single files alike
+        if val.is_a? Array
+          val.each { |file_obj| form.append([field_name, _extract_multipart_file(file_obj)]) }
+        else
+          form.append([field_name, _extract_multipart_file(val)])
+        end
+      elsif field_metadata[:json] == true
+        form.append(
+          [field_metadata.fetch(:field_name, field.name), [nil, ::Crystalline.to_json(val), 'application/json']]
+        )
+      else
+        field_name = field_metadata.fetch(:field_name, field.name)
+        if val.is_a? Array
+          val.each do |value|
+            next if value.nil?
+
+            form.append([field_name, [nil, val_to_string(value)]])
+          end
+        else
+          form.append([field_name, [nil, val_to_string(val)]])
+        end
+      end
     end
 
 
@@ -188,7 +184,7 @@ module FastpixClient
                 )
               )
             else
-              raise StandardError, "Invalid form style for field #{field.name}"
+              raise ArgumentError, "Invalid form style for field #{field.name}"
             end
           end
         end
@@ -197,7 +193,7 @@ module FastpixClient
           form[key] = [val_to_string(value)]
         end
       else
-        raise StandardError, "Invalid request body type #{data.class}"
+        raise ArgumentError, "Invalid request body type #{data.class}"
       end
 
       form

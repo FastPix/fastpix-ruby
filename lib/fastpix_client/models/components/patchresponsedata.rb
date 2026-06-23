@@ -71,24 +71,15 @@ module FastpixClient
         sig { params(other: T.untyped).returns(T::Boolean) }
         def ==(other)
           return false unless other.is_a? self.class
-          return false unless @stream_id == other.stream_id
-          return false unless @stream_key == other.stream_key
-          return false unless @srt_secret == other.srt_secret
-          return false unless @trial == other.trial
-          return false unless @status == other.status
-          return false unless @max_resolution == other.max_resolution
-          return false unless @max_duration == other.max_duration
-          return false unless @created_at == other.created_at
-          return false unless @reconnect_window == other.reconnect_window
-          return false unless @enable_recording == other.enable_recording
-          return false unless @enable_dvr_mode == other.enable_dvr_mode
-          return false unless @media_policy == other.media_policy
-          return false unless @metadata == other.metadata
-          return false unless @low_latency == other.low_latency
-          return false unless @closed_captions == other.closed_captions
-          return false unless @playback_ids == other.playback_ids
-          return false unless @srt_playback_response == other.srt_playback_response
-          true
+
+          [@stream_id, @stream_key, @srt_secret, @trial, @status,
+           @max_resolution, @max_duration, @created_at, @reconnect_window, @enable_recording,
+           @enable_dvr_mode, @media_policy, @metadata, @low_latency, @closed_captions,
+           @playback_ids, @srt_playback_response] ==
+            [other.stream_id, other.stream_key, other.srt_secret, other.trial, other.status,
+             other.max_resolution, other.max_duration, other.created_at, other.reconnect_window, other.enable_recording,
+             other.enable_dvr_mode, other.media_policy, other.metadata, other.low_latency, other.closed_captions,
+             other.playback_ids, other.srt_playback_response]
         end
       end
     end

@@ -107,6 +107,7 @@ module FastpixClient
 
       sig { overridable.params(config: SDKConfiguration).returns(SDKConfiguration) }
       def sdk_init(config:)
+        _ = config
         Kernel.raise NotImplementedError.new
       end
     end
@@ -123,6 +124,7 @@ module FastpixClient
         ).returns(Faraday::Request)
       end
       def before_request(hook_ctx:, request:)
+        _ = [hook_ctx, request]
         Kernel.raise NotImplementedError.new
       end
     end
@@ -139,6 +141,7 @@ module FastpixClient
         ).returns(Faraday::Response)
       end
       def after_success(hook_ctx:, response:)
+        _ = [hook_ctx, response]
         Kernel.raise NotImplementedError.new
       end
     end
@@ -156,6 +159,7 @@ module FastpixClient
         ).returns(T.nilable(Faraday::Response))
       end
       def after_error(error:, hook_ctx:, response:)
+        _ = [error, hook_ctx, response]
         Kernel.raise NotImplementedError.new
       end
     end

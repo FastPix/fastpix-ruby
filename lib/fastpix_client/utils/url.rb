@@ -21,70 +21,93 @@ module FastpixClient
 
         f_name = param_metadata.fetch(:field_name, f.name)
         serialization = param_metadata.fetch(:serialization, '')
-        if serialization != ''
-          serialized_params = _get_serialized_params(param_metadata, f_name, param)
-          serialized_params.each do |k, v|
-            path = path.sub("{#{k}}", v.join(', '))
-          end
-        else
-          if param.is_a? Array
-            pp_vals = []
-            param.each do |pp_val|
-              pp_vals.append(pp_val.to_s)
-            end
-            path = path.sub("{#{param_metadata.fetch(:field_name, f.name)}}", pp_vals.join(','))
-          elsif param.is_a? Hash
-            pp_vals = []
-            param.each do |pp_key, pp_val|
-              value = val_to_string(pp_val)
-
-              if param_metadata.fetch(:explode, false)
-                pp_vals.append("#{pp_key}=#{value}")
-              else
-                pp_vals.append("#{pp_key},#{value}")
-              end
-            end
-            path = path.sub("{#{param_metadata.fetch(:field_name, f.name)}}", pp_vals.join(','))
-          elsif param.class.include?(::Crystalline::MetadataFields)
-            pp_vals = []
-            attrs = T.unsafe(param).fields.filter { |field| field.name && param.respond_to?(field.name.to_sym) }.map(&:name)
-            attrs.each do |attr|
-              field = T.unsafe(param).field(attr)
-
-              param_value_metadata = field.metadata[:path_param]
-
-              next if param_value_metadata.nil?
-
-              parm_name = param_value_metadata.fetch(:field_name, f.name)
-
-              param_field_val = param.send(attr)
-
-              if param_field_val.class.respond_to?(:enums)
-                param_field_val = param_field_val.serialize
-              elsif param_field_val.is_a? DateTime
-                param_field_val = param_field_val.strftime('%Y-%m-%dT%H:%M:%S.%NZ')
-              end
-              if !field.nil? && ::Crystalline::Utils.nilable?(field.type) && param_field_val.nil?
-                next
-              elsif param_metadata.fetch(:explode, false)
-                pp_vals.append("#{parm_name}=#{param_field_val}")
-              else
-                pp_vals.append("#{parm_name},#{param_field_val}")
-              end
-            end
-            path = path.sub("{#{param_metadata.fetch(:field_name, f.name)}}", pp_vals.join(','))
-          else
-            if param.class.respond_to?(:enums)
-              param = T.cast(param, T::Enum).serialize
-            elsif param.is_a? DateTime
-              param = param.strftime('%Y-%m-%dT%H:%M:%S.%NZ')
-            end
-            path = path.sub("{#{param_metadata.fetch(:field_name, f.name)}}", param.to_s)
-          end
-        end
+        path = _substitute_path_param(path, param_metadata, f, f_name, serialization, param)
       end
 
       server_url.delete_suffix('/') + path
+    end
+
+    # Substitutes a single path param into the path, returning the updated path.
+    def self._substitute_path_param(path, param_metadata, f, f_name, serialization, param)
+      if serialization != ''
+        serialized_params = _get_serialized_params(param_metadata, f_name, param)
+        serialized_params.each do |k, v|
+          path = path.sub("{#{k}}", v.join(', '))
+        end
+        return path
+      end
+
+      placeholder = "{#{param_metadata.fetch(:field_name, f.name)}}"
+      if param.is_a? Array
+        path.sub(placeholder, _path_param_from_array(param))
+      elsif param.is_a? Hash
+        path.sub(placeholder, _path_param_from_hash(param_metadata, param))
+      elsif param.class.include?(::Crystalline::MetadataFields)
+        path.sub(placeholder, _path_param_from_object(param_metadata, f, param))
+      else
+        path.sub(placeholder, _path_param_scalar(param))
+      end
+    end
+
+    def self._path_param_from_array(param)
+      pp_vals = []
+      param.each do |pp_val|
+        pp_vals.append(pp_val.to_s)
+      end
+      pp_vals.join(',')
+    end
+
+    def self._path_param_from_hash(param_metadata, param)
+      pp_vals = []
+      param.each do |pp_key, pp_val|
+        value = val_to_string(pp_val)
+
+        if param_metadata.fetch(:explode, false)
+          pp_vals.append("#{pp_key}=#{value}")
+        else
+          pp_vals.append("#{pp_key},#{value}")
+        end
+      end
+      pp_vals.join(',')
+    end
+
+    def self._path_param_from_object(param_metadata, f, param)
+      pp_vals = []
+      attrs = T.unsafe(param).fields.filter { |field| field.name && param.respond_to?(field.name.to_sym) }.map(&:name)
+      attrs.each do |attr|
+        field = T.unsafe(param).field(attr)
+
+        param_value_metadata = field.metadata[:path_param]
+
+        next if param_value_metadata.nil?
+
+        parm_name = param_value_metadata.fetch(:field_name, f.name)
+
+        param_field_val = param.send(attr)
+
+        if param_field_val.class.respond_to?(:enums)
+          param_field_val = param_field_val.serialize
+        elsif param_field_val.is_a? DateTime
+          param_field_val = param_field_val.strftime('%Y-%m-%dT%H:%M:%S.%NZ')
+        end
+        if !field.nil? && ::Crystalline::Utils.nilable?(field.type) && param_field_val.nil?
+          next
+        elsif param_metadata.fetch(:explode, false)
+          pp_vals.append("#{parm_name}=#{param_field_val}")
+        else
+          pp_vals.append("#{parm_name},#{param_field_val}")
+        end
+      end
+      pp_vals.join(',')
+    end
+
+    def self._path_param_scalar(param)
+      if param.class.respond_to?(:enums)
+        param = T.cast(param, T::Enum).serialize
+      elsif param.is_a? DateTime
+        param = param.strftime('%Y-%m-%dT%H:%M:%S.%NZ')
+      end
+      param.to_s
     end
 
     sig { params(url_with_params: String, params: T::Hash[Symbol, T.any(String, T::Enum)]).returns(String) }

@@ -512,130 +512,57 @@ module FastpixClient
         sig { params(other: T.untyped).returns(T::Boolean) }
         def ==(other)
           return false unless other.is_a? self.class
-          return false unless @beacon_domain == other.beacon_domain
-          return false unless @custom == other.custom
-          return false unless @exit_before_video_start == other.exit_before_video_start
-          return false unless @insert_timestamp == other.insert_timestamp
-          return false unless @ip_address == other.ip_address
-          return false unless @os_version == other.os_version
-          return false unless @player_autoplay_on == other.player_autoplay_on
-          return false unless @player_preload_on == other.player_preload_on
-          return false unless @player_remote_played == other.player_remote_played
-          return false unless @used_full_screen == other.used_full_screen
-          return false unless @video_startup_failed == other.video_startup_failed
-          return false unless @view_has_ad == other.view_has_ad
-          return false unless @view_has_error == other.view_has_error
-          return false unless @view_id == other.view_id
-          return false unless @workspace_id == other.workspace_id
-          return false unless @events == other.events
-          return false unless @asn_id == other.asn_id
-          return false unless @asn_name == other.asn_name
-          return false unless @average_bitrate == other.average_bitrate
-          return false unless @avg_downscaling == other.avg_downscaling
-          return false unless @avg_request_latency == other.avg_request_latency
-          return false unless @avg_request_throughput == other.avg_request_throughput
-          return false unless @avg_upscaling == other.avg_upscaling
-          return false unless @browser_engine == other.browser_engine
-          return false unless @browser_name == other.browser_name
-          return false unless @browser_version == other.browser_version
-          return false unless @buffer_count == other.buffer_count
-          return false unless @buffer_fill == other.buffer_fill
-          return false unless @buffer_frequency == other.buffer_frequency
-          return false unless @buffer_ratio == other.buffer_ratio
-          return false unless @cdn == other.cdn
-          return false unless @city == other.city
-          return false unless @connection_type == other.connection_type
-          return false unless @continent == other.continent
-          return false unless @country == other.country
-          return false unless @country_code == other.country_code
-          return false unless @device_manufacturer == other.device_manufacturer
-          return false unless @device_model == other.device_model
-          return false unless @device_name == other.device_name
-          return false unless @device_type == other.device_type
-          return false unless @drm_type == other.drm_type
-          return false unless @dropped_frame_count == other.dropped_frame_count
-          return false unless @error_code == other.error_code
-          return false unless @error_context == other.error_context
-          return false unless @error_id == other.error_id
-          return false unless @error_message == other.error_message
-          return false unless @experiment_name == other.experiment_name
-          return false unless @fp_api_version == other.fp_api_version
-          return false unless @fp_embed == other.fp_embed
-          return false unless @fp_embed_version == other.fp_embed_version
-          return false unless @fp_live_stream_id == other.fp_live_stream_id
-          return false unless @fp_playback_id == other.fp_playback_id
-          return false unless @fp_sdk == other.fp_sdk
-          return false unless @fp_sdk_version == other.fp_sdk_version
-          return false unless @fp_viewer_id == other.fp_viewer_id
-          return false unless @jump_latency == other.jump_latency
-          return false unless @latitude == other.latitude
-          return false unless @live_stream_latency == other.live_stream_latency
-          return false unless @longitude == other.longitude
-          return false unless @max_downscaling == other.max_downscaling
-          return false unless @max_request_latency == other.max_request_latency
-          return false unless @max_upscaling == other.max_upscaling
-          return false unless @media_id == other.media_id
-          return false unless @os_name == other.os_name
-          return false unless @page_context == other.page_context
-          return false unless @page_load_time == other.page_load_time
-          return false unless @playback_score == other.playback_score
-          return false unless @player_height == other.player_height
-          return false unless @player_initialization_time == other.player_initialization_time
-          return false unless @player_instance_id == other.player_instance_id
-          return false unless @player_language == other.player_language
-          return false unless @player_name == other.player_name
-          return false unless @player_poster == other.player_poster
-          return false unless @player_resolution == other.player_resolution
-          return false unless @player_software_name == other.player_software_name
-          return false unless @player_software_version == other.player_software_version
-          return false unless @player_source_domain == other.player_source_domain
-          return false unless @player_source_height == other.player_source_height
-          return false unless @player_source_width == other.player_source_width
-          return false unless @player_version == other.player_version
-          return false unless @player_view_count == other.player_view_count
-          return false unless @player_width == other.player_width
-          return false unless @property_id == other.property_id
-          return false unless @quality_of_experience_score == other.quality_of_experience_score
-          return false unless @region == other.region
-          return false unless @render_quality_score == other.render_quality_score
-          return false unless @session_id == other.session_id
-          return false unless @sign == other.sign
-          return false unless @stability_score == other.stability_score
-          return false unless @startup_score == other.startup_score
-          return false unless @sub_property_id == other.sub_property_id
-          return false unless @total_startup_time == other.total_startup_time
-          return false unless @updated_timestamp == other.updated_timestamp
-          return false unless @user_agent == other.user_agent
-          return false unless @video_content_type == other.video_content_type
-          return false unless @video_duration == other.video_duration
-          return false unless @video_encoding_variant == other.video_encoding_variant
-          return false unless @video_id == other.video_id
-          return false unless @video_language == other.video_language
-          return false unless @video_producer == other.video_producer
-          return false unless @video_resolution == other.video_resolution
-          return false unless @video_series == other.video_series
-          return false unless @video_source_domain == other.video_source_domain
-          return false unless @video_source_duration == other.video_source_duration
-          return false unless @video_source_hostname == other.video_source_hostname
-          return false unless @video_source_stream_type == other.video_source_stream_type
-          return false unless @video_source_type == other.video_source_type
-          return false unless @video_source_url == other.video_source_url
-          return false unless @video_startup_time == other.video_startup_time
-          return false unless @video_title == other.video_title
-          return false unless @video_variant_id == other.video_variant_id
-          return false unless @video_variant_name == other.video_variant_name
-          return false unless @view_end == other.view_end
-          return false unless @view_max_playhead_position == other.view_max_playhead_position
-          return false unless @view_page_url == other.view_page_url
-          return false unless @view_playing_time == other.view_playing_time
-          return false unless @view_seeked_count == other.view_seeked_count
-          return false unless @view_seeked_duration == other.view_seeked_duration
-          return false unless @view_session_id == other.view_session_id
-          return false unless @view_start == other.view_start
-          return false unless @view_total_content_playback_time == other.view_total_content_playback_time
-          return false unless @viewer_id == other.viewer_id
-          return false unless @watch_time == other.watch_time
-          true
+
+          [@beacon_domain, @custom, @exit_before_video_start, @insert_timestamp, @ip_address,
+           @os_version, @player_autoplay_on, @player_preload_on, @player_remote_played, @used_full_screen,
+           @video_startup_failed, @view_has_ad, @view_has_error, @view_id, @workspace_id,
+           @events, @asn_id, @asn_name, @average_bitrate, @avg_downscaling,
+           @avg_request_latency, @avg_request_throughput, @avg_upscaling, @browser_engine, @browser_name,
+           @browser_version, @buffer_count, @buffer_fill, @buffer_frequency, @buffer_ratio,
+           @cdn, @city, @connection_type, @continent, @country,
+           @country_code, @device_manufacturer, @device_model, @device_name, @device_type,
+           @drm_type, @dropped_frame_count, @error_code, @error_context, @error_id,
+           @error_message, @experiment_name, @fp_api_version, @fp_embed, @fp_embed_version,
+           @fp_live_stream_id, @fp_playback_id, @fp_sdk, @fp_sdk_version, @fp_viewer_id,
+           @jump_latency, @latitude, @live_stream_latency, @longitude, @max_downscaling,
+           @max_request_latency, @max_upscaling, @media_id, @os_name, @page_context,
+           @page_load_time, @playback_score, @player_height, @player_initialization_time, @player_instance_id,
+           @player_language, @player_name, @player_poster, @player_resolution, @player_software_name,
+           @player_software_version, @player_source_domain, @player_source_height, @player_source_width, @player_version,
+           @player_view_count, @player_width, @property_id, @quality_of_experience_score, @region,
+           @render_quality_score, @session_id, @sign, @stability_score, @startup_score,
+           @sub_property_id, @total_startup_time, @updated_timestamp, @user_agent, @video_content_type,
+           @video_duration, @video_encoding_variant, @video_id, @video_language, @video_producer,
+           @video_resolution, @video_series, @video_source_domain, @video_source_duration, @video_source_hostname,
+           @video_source_stream_type, @video_source_type, @video_source_url, @video_startup_time, @video_title,
+           @video_variant_id, @video_variant_name, @view_end, @view_max_playhead_position, @view_page_url,
+           @view_playing_time, @view_seeked_count, @view_seeked_duration, @view_session_id, @view_start,
+           @view_total_content_playback_time, @viewer_id, @watch_time] ==
+            [other.beacon_domain, other.custom, other.exit_before_video_start, other.insert_timestamp, other.ip_address,
+             other.os_version, other.player_autoplay_on, other.player_preload_on, other.player_remote_played, other.used_full_screen,
+             other.video_startup_failed, other.view_has_ad, other.view_has_error, other.view_id, other.workspace_id,
+             other.events, other.asn_id, other.asn_name, other.average_bitrate, other.avg_downscaling,
+             other.avg_request_latency, other.avg_request_throughput, other.avg_upscaling, other.browser_engine, other.browser_name,
+             other.browser_version, other.buffer_count, other.buffer_fill, other.buffer_frequency, other.buffer_ratio,
+             other.cdn, other.city, other.connection_type, other.continent, other.country,
+             other.country_code, other.device_manufacturer, other.device_model, other.device_name, other.device_type,
+             other.drm_type, other.dropped_frame_count, other.error_code, other.error_context, other.error_id,
+             other.error_message, other.experiment_name, other.fp_api_version, other.fp_embed, other.fp_embed_version,
+             other.fp_live_stream_id, other.fp_playback_id, other.fp_sdk, other.fp_sdk_version, other.fp_viewer_id,
+             other.jump_latency, other.latitude, other.live_stream_latency, other.longitude, other.max_downscaling,
+             other.max_request_latency, other.max_upscaling, other.media_id, other.os_name, other.page_context,
+             other.page_load_time, other.playback_score, other.player_height, other.player_initialization_time, other.player_instance_id,
+             other.player_language, other.player_name, other.player_poster, other.player_resolution, other.player_software_name,
+             other.player_software_version, other.player_source_domain, other.player_source_height, other.player_source_width, other.player_version,
+             other.player_view_count, other.player_width, other.property_id, other.quality_of_experience_score, other.region,
+             other.render_quality_score, other.session_id, other.sign, other.stability_score, other.startup_score,
+             other.sub_property_id, other.total_startup_time, other.updated_timestamp, other.user_agent, other.video_content_type,
+             other.video_duration, other.video_encoding_variant, other.video_id, other.video_language, other.video_producer,
+             other.video_resolution, other.video_series, other.video_source_domain, other.video_source_duration, other.video_source_hostname,
+             other.video_source_stream_type, other.video_source_type, other.video_source_url, other.video_startup_time, other.video_title,
+             other.video_variant_id, other.video_variant_name, other.view_end, other.view_max_playhead_position, other.view_page_url,
+             other.view_playing_time, other.view_seeked_count, other.view_seeked_duration, other.view_session_id, other.view_start,
+             other.view_total_content_playback_time, other.viewer_id, other.watch_time]
         end
 
         def to_dict

@@ -33,45 +33,55 @@ module FastpixClient
       return '' if obj.nil?
 
       if obj.respond_to? :fields
-        items = []
-        T.unsafe(obj).fields.each do |obj_field|
-          obj_param_metadata = obj_field.metadata[:header]
-          next if obj_param_metadata.nil?
-
-          obj_field_name = obj_param_metadata.fetch(:field_name, obj_field.name)
-          next if obj_field_name == ''
-
-          val = obj.send(obj_field.name)
-          next if val.nil?
-
-          if explode
-            items.append("#{obj_field_name}=#{val_to_string(val)}")
-          else
-            items.append(obj_field_name)
-            items.append(val_to_string(val))
-          end
-        end
-
-        items.join(',') if !items.empty?
+        _serialize_header_from_object(explode, obj)
       elsif obj.is_a? Hash
-        items = []
-        obj.each do |key, value|
-          next if value.nil?
-
-          if explode
-            items.append("#{key}=#{val_to_string(value)}")
-          else
-            items.append(key)
-            items.append(val_to_string(value))
-          end
-        end
-
-        items.join(',') if !items.empty?
+        _serialize_header_from_hash(explode, obj)
       elsif obj.is_a? Array
-        items = obj.filter { |v| !v.nil? }.map { |v| val_to_string(v) }.join(',')
+        obj.filter { |v| !v.nil? }.map { |v| val_to_string(v) }.join(',')
       else
         val_to_string(obj)
       end
+    end
+
+    # Serializes a MetadataFields object into a header string (nil when empty).
+    def self._serialize_header_from_object(explode, obj)
+      items = []
+      T.unsafe(obj).fields.each do |obj_field|
+        obj_param_metadata = obj_field.metadata[:header]
+        next if obj_param_metadata.nil?
+
+        obj_field_name = obj_param_metadata.fetch(:field_name, obj_field.name)
+        next if obj_field_name == ''
+
+        val = obj.send(obj_field.name)
+        next if val.nil?
+
+        if explode
+          items.append("#{obj_field_name}=#{val_to_string(val)}")
+        else
+          items.append(obj_field_name)
+          items.append(val_to_string(val))
+        end
+      end
+
+      items.join(',') unless items.empty?
+    end
+
+    # Serializes a Hash into a header string (nil when empty).
+    def self._serialize_header_from_hash(explode, obj)
+      items = []
+      obj.each do |key, value|
+        next if value.nil?
+
+        if explode
+          items.append("#{key}=#{val_to_string(value)}")
+        else
+          items.append(key)
+          items.append(val_to_string(value))
+        end
+      end
+
+      items.join(',') unless items.empty?
     end
   end
 end

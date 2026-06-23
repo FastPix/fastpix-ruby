@@ -154,7 +154,7 @@ Comprehensive Ruby SDK for FastPix platform integration with full API coverage.
 
 Upload, manage, and transform video content with comprehensive media management capabilities.
 
-For detailed documentation, see [FastPix Video on Demand Overview](https://fastpix.com/docs/get-started/overview).
+For detailed documentation, see [FastPix Video on Demand Overview](https://fastpix.com/docs/video-on-demand-api/overview).
 
 #### Input Video
 - [Create from URL](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/inputvideo/README.md#create_media) - Upload video content from external URL
@@ -210,7 +210,7 @@ For detailed documentation, see [FastPix Video on Demand Overview](https://fastp
 
 Stream, manage, and transform live video content with real-time broadcasting capabilities.
 
-For detailed documentation, see [FastPix Live Stream Overview](https://fastpix.com/docs/get-started/live-overview).
+For detailed documentation, see [FastPix Live Stream Overview](https://fastpix.com/docs/live-stream-api/overview).
 
 #### Start Live Stream
 - [Create Stream](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/startlivestream/README.md#create_new_stream) - Initialize new live streaming session
@@ -240,7 +240,8 @@ For detailed documentation, see [FastPix Live Stream Overview](https://fastpix.c
 
 Monitor video performance and quality with comprehensive analytics and real-time metrics.
 
-For detailed documentation, see [FastPix Video Data Overview](https://fastpix.com/docs/get-started/video-data-introduction).
+For detailed documentation, see [FastPix Video Data Overview](
+https://fastpix.com/docs/video-data-api/overview).
 
 #### Metrics
 - [List Breakdown Values](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/metrics/README.md#list_breakdown_values) - Get detailed breakdown of metrics by dimension

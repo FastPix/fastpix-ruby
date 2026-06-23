@@ -53,23 +53,17 @@ module FastpixClient
     def self.match_content_type(content_type, pattern)
       return true if content_type == pattern || ['*', '*/*'].include?(pattern)
 
-      pieces = content_type.split(';')
-      pieces.each do |piece|
-        return true if pattern == piece.strip
-      end
-
-      false
+      content_type.split(';').any? { |piece| pattern == piece.strip }
     end
 
     sig { params(status_code: Integer, status_codes: T::Array[String]).returns(T::Boolean) }
     def self.match_status_code(status_code, status_codes)
       return true if status_codes.include? 'default'
+
       status_code = status_code.to_s
-      status_codes.each do |code|
-        return true if code == status_code
-        return true if code.downcase.end_with?('xx') && status_code[0] == code[0]
+      status_codes.any? do |code|
+        code == status_code || (code.downcase.end_with?('xx') && status_code[0] == code[0])
       end
-      false
     end
 
     sig { params(optional: T::Boolean).returns(T.proc.params(s: String).returns(T.nilable(DateTime))) }
@@ -130,15 +124,7 @@ module FastpixClient
         if field.length == 2
           if field[0].nil?
             # Handle multiple values for the same field name (arrays)
-            if payload.key?(field_name)
-              # Convert to array if not already
-              unless payload[field_name].is_a?(Array)
-                payload[field_name] = [payload[field_name]]
-              end
-              payload[field_name] << field[1]
-            else
-              payload[field_name] = field[1]
-            end
+            _add_form_payload_value(payload, field_name, field[1])
           else
             # Handle file uploads
             file_part = Faraday::Multipart::FilePart.new(
@@ -146,32 +132,28 @@ module FastpixClient
               'application/octet-stream',
               field[0]
             )
-            
+
             # Handle multiple files for the same field name (arrays)
-            if payload.key?(field_name)
-              unless payload[field_name].is_a?(Array)
-                payload[field_name] = [payload[field_name]]
-              end
-              payload[field_name] << file_part
-            else
-              payload[field_name] = file_part
-            end
+            _add_form_payload_value(payload, field_name, file_part)
           end
         elsif field.length == 3
           param_part = Faraday::Multipart::ParamPart.new(field[1].to_json, field[2])
-          
+
           # Handle multiple values for the same field name (arrays)
-          if payload.key?(field_name)
-            unless payload[field_name].is_a?(Array)
-              payload[field_name] = [payload[field_name]]
-            end
-            payload[field_name] << param_part
-          else
-            payload[field_name] = param_part
-          end
+          _add_form_payload_value(payload, field_name, param_part)
         end
       end
       payload
+    end
+
+    # Stores a form value, converting to an array when the field name repeats.
+    def self._add_form_payload_value(payload, field_name, value)
+      if payload.key?(field_name)
+        payload[field_name] = [payload[field_name]] unless payload[field_name].is_a?(Array)
+        payload[field_name] << value
+      else
+        payload[field_name] = value
+      end
     end
 
     sig { params(param_name: Symbol, value: Object, param_type: String, gbls: T.nilable(T::Hash[Symbol, T::Hash[Symbol, T::Hash[Symbol, Object]]])).returns(Object) }

@@ -14,6 +14,54 @@ module FastpixClient
   extend T::Sig
   class InputVideo
     extend T::Sig
+
+    API_ERROR_OCCURRED = 'API error occurred'
+    CONTENT_TYPE_JSON = 'application/json'
+    UNKNOWN_CONTENT_TYPE_ERROR = 'Unknown content type received'
+
+    # Applies the SDK after-request hooks and ensures a usable response is present.
+    sig { params(http_response: T.nilable(Faraday::Response), error: T.nilable(StandardError), hook_ctx: SDKHooks::HookContext).returns(Faraday::Response) }
+    def apply_after_request_hooks(http_response, error, hook_ctx)
+      if http_response.nil? || Utils.error_status?(http_response.status)
+        http_response = @sdk_configuration.hooks.after_error(
+          error: error,
+          hook_ctx: SDKHooks::AfterErrorHookContext.new(
+            hook_ctx: hook_ctx
+          ),
+          response: http_response
+        )
+      else
+        http_response = @sdk_configuration.hooks.after_success(
+          hook_ctx: SDKHooks::AfterSuccessHookContext.new(
+            hook_ctx: hook_ctx
+          ),
+          response: http_response
+        )
+      end
+
+      if http_response.nil?
+        raise error unless error.nil?
+        raise ::FastpixClient::Models::Errors::EmptyResponseError, 'no response'
+      end
+
+      http_response
+    end
+    private :apply_after_request_hooks
+
+    # Encodes the request body based on its serialized content type.
+    sig { params(req_content_type: T.nilable(String), data: T.untyped, form: T.untyped).returns(T.untyped) }
+    def encode_request_body(req_content_type, data, form)
+      raise ArgumentError, 'request body is required' if data.nil? && form.nil?
+
+      if form
+        Utils.encode_form(form)
+      elsif Utils.match_content_type(req_content_type, 'application/x-www-form-urlencoded')
+        URI.encode_www_form(T.cast(data, T::Hash[Symbol, Object]))
+      else
+        data
+      end
+    end
+    private :encode_request_body
     
     # Operations for inputting and creating video media
 
@@ -93,16 +141,8 @@ module FastpixClient
       headers = T.cast(headers, T::Hash[String, String])
       req_content_type, data, form = Utils.serialize_request_body(request, false, false, :request, :json)
       headers['content-type'] = req_content_type
-      raise StandardError, 'request body is required' if data.nil? && form.nil?
-
-      if form
-        body = Utils.encode_form(form)
-      elsif Utils.match_content_type(req_content_type, 'application/x-www-form-urlencoded')
-        body = URI.encode_www_form(T.cast(data, T::Hash[Symbol, Object]))
-      else
-        body = data
-      end
-      headers['Accept'] = 'application/json'
+      body = encode_request_body(req_content_type, data, form)
+      headers['Accept'] = CONTENT_TYPE_JSON
       headers['user-agent'] = @sdk_configuration.user_agent
 
       security = @sdk_configuration.security_source&.call
@@ -142,32 +182,12 @@ module FastpixClient
       rescue StandardError => e
         error = e
       ensure
-        if http_response.nil? || Utils.error_status?(http_response.status)
-          http_response = @sdk_configuration.hooks.after_error(
-            error: error,
-            hook_ctx: SDKHooks::AfterErrorHookContext.new(
-              hook_ctx: hook_ctx
-            ),
-            response: http_response
-          )
-        else
-          http_response = @sdk_configuration.hooks.after_success(
-            hook_ctx: SDKHooks::AfterSuccessHookContext.new(
-              hook_ctx: hook_ctx
-            ),
-            response: http_response
-          )
-        end
-        
-        if http_response.nil?
-          raise error if !error.nil?
-          raise 'no response'
-        end
+        http_response = apply_after_request_hooks(http_response, error, hook_ctx)
       end
       
       content_type = http_response.headers.fetch('Content-Type', 'application/octet-stream')
       if Utils.match_status_code(http_response.status, ['201'])
-        if Utils.match_content_type(content_type, 'application/json')
+        if Utils.match_content_type(content_type, CONTENT_TYPE_JSON)
           http_response = @sdk_configuration.hooks.after_success(
             hook_ctx: SDKHooks::AfterSuccessHookContext.new(
               hook_ctx: hook_ctx
@@ -185,14 +205,14 @@ module FastpixClient
 
           return response
         else
-          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), 'Unknown content type received'
+          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), UNKNOWN_CONTENT_TYPE_ERROR
         end
       elsif Utils.match_status_code(http_response.status, ['4XX'])
-        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), 'API error occurred'
+        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), API_ERROR_OCCURRED
       elsif Utils.match_status_code(http_response.status, ['5XX'])
-        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), 'API error occurred'
+        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), API_ERROR_OCCURRED
       else
-        if Utils.match_content_type(content_type, 'application/json')
+        if Utils.match_content_type(content_type, CONTENT_TYPE_JSON)
           http_response = @sdk_configuration.hooks.after_success(
             hook_ctx: SDKHooks::AfterSuccessHookContext.new(
               hook_ctx: hook_ctx
@@ -210,7 +230,7 @@ module FastpixClient
 
           return response
         else
-          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), 'Unknown content type received'
+          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), UNKNOWN_CONTENT_TYPE_ERROR
         end
       end
     end
@@ -256,16 +276,8 @@ module FastpixClient
       headers = T.cast(headers, T::Hash[String, String])
       req_content_type, data, form = Utils.serialize_request_body(request, false, false, :request, :json)
       headers['content-type'] = req_content_type
-      raise StandardError, 'request body is required' if data.nil? && form.nil?
-
-      if form
-        body = Utils.encode_form(form)
-      elsif Utils.match_content_type(req_content_type, 'application/x-www-form-urlencoded')
-        body = URI.encode_www_form(T.cast(data, T::Hash[Symbol, Object]))
-      else
-        body = data
-      end
-      headers['Accept'] = 'application/json'
+      body = encode_request_body(req_content_type, data, form)
+      headers['Accept'] = CONTENT_TYPE_JSON
       headers['user-agent'] = @sdk_configuration.user_agent
 
       security = @sdk_configuration.security_source&.call
@@ -305,32 +317,12 @@ module FastpixClient
       rescue StandardError => e
         error = e
       ensure
-        if http_response.nil? || Utils.error_status?(http_response.status)
-          http_response = @sdk_configuration.hooks.after_error(
-            error: error,
-            hook_ctx: SDKHooks::AfterErrorHookContext.new(
-              hook_ctx: hook_ctx
-            ),
-            response: http_response
-          )
-        else
-          http_response = @sdk_configuration.hooks.after_success(
-            hook_ctx: SDKHooks::AfterSuccessHookContext.new(
-              hook_ctx: hook_ctx
-            ),
-            response: http_response
-          )
-        end
-        
-        if http_response.nil?
-          raise error if !error.nil?
-          raise 'no response'
-        end
+        http_response = apply_after_request_hooks(http_response, error, hook_ctx)
       end
       
       content_type = http_response.headers.fetch('Content-Type', 'application/octet-stream')
       if Utils.match_status_code(http_response.status, ['201'])
-        if Utils.match_content_type(content_type, 'application/json')
+        if Utils.match_content_type(content_type, CONTENT_TYPE_JSON)
           http_response = @sdk_configuration.hooks.after_success(
             hook_ctx: SDKHooks::AfterSuccessHookContext.new(
               hook_ctx: hook_ctx
@@ -348,14 +340,14 @@ module FastpixClient
 
           return response
         else
-          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), 'Unknown content type received'
+          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), UNKNOWN_CONTENT_TYPE_ERROR
         end
       elsif Utils.match_status_code(http_response.status, ['4XX'])
-        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), 'API error occurred'
+        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), API_ERROR_OCCURRED
       elsif Utils.match_status_code(http_response.status, ['5XX'])
-        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), 'API error occurred'
+        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), API_ERROR_OCCURRED
       else
-        if Utils.match_content_type(content_type, 'application/json')
+        if Utils.match_content_type(content_type, CONTENT_TYPE_JSON)
           http_response = @sdk_configuration.hooks.after_success(
             hook_ctx: SDKHooks::AfterSuccessHookContext.new(
               hook_ctx: hook_ctx
@@ -373,7 +365,7 @@ module FastpixClient
 
           return response
         else
-          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), 'Unknown content type received'
+          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), UNKNOWN_CONTENT_TYPE_ERROR
         end
       end
     end

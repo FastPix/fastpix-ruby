@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'fastpixapi'
 require_relative '../config/fastpix_config'
 
+SUCCESS_CONTEXT = 'when the request is successful'
+
 RSpec.describe FastpixApiSDK::Playback do
   let(:sdk_config) do
     FastpixApiSDK::SDKConfiguration.new(
@@ -39,7 +41,7 @@ RSpec.describe FastpixApiSDK::Playback do
   end
 
   describe '#create_playback_id_of_stream' do
-    context 'when the request is successful' do
+    context SUCCESS_CONTEXT do
       it 'creates a playback ID for a stream' do
         # First, get a stream ID from the live stream
         manage_live_stream = FastpixApiSDK::ManageLiveStream.new(sdk_config)
@@ -62,7 +64,7 @@ RSpec.describe FastpixApiSDK::Playback do
   end
 
   describe '#get_live_stream_playback_id' do
-    context 'when the request is successful' do
+    context SUCCESS_CONTEXT do
       it 'retrieves a playback ID for a stream' do
         # First, get a stream ID and create a playback ID
         manage_live_stream = FastpixApiSDK::ManageLiveStream.new(sdk_config)
@@ -87,7 +89,7 @@ RSpec.describe FastpixApiSDK::Playback do
   end
 
   describe '#create_media_playback_id' do
-    context 'when the request is successful' do
+    context SUCCESS_CONTEXT do
       it 'creates a playback ID for a media asset' do
         begin
           # First, get a media ID from the media list
@@ -132,7 +134,7 @@ RSpec.describe FastpixApiSDK::Playback do
   end
 
   describe '#delete_media_playback_id' do
-    context 'when the request is successful' do
+    context SUCCESS_CONTEXT do
       it 'deletes a playback ID for a stream' do
         manage_live_stream = FastpixApiSDK::ManageLiveStream.new(sdk_config)
         all_streams_response = manage_live_stream.get_all_streams

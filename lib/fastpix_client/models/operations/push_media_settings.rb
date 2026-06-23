@@ -89,26 +89,15 @@ module FastpixClient
         sig { params(other: T.untyped).returns(T::Boolean) }
         def ==(other)
           return false unless other.is_a? self.class
-          return false unless @start_time == other.start_time
-          return false unless @end_time == other.end_time
-          return false unless @inputs == other.inputs
-          return false unless @metadata == other.metadata
-          return false unless @drm_configuration_id == other.drm_configuration_id
-          return false unless @title == other.title
-          return false unless @creator_id == other.creator_id
-          return false unless @subtitles == other.subtitles
-          return false unless @optimize_audio == other.optimize_audio
-          return false unless @source_access == other.source_access
-          return false unless @mp4_support == other.mp4_support
-          return false unless @summary == other.summary
-          return false unless @chapters == other.chapters
-          return false unless @named_entities == other.named_entities
-          return false unless @moderation == other.moderation
-          return false unless @access_restrictions == other.access_restrictions
-          return false unless @access_policy == other.access_policy
-          return false unless @max_resolution == other.max_resolution
-          return false unless @media_quality == other.media_quality
-          true
+
+          [@start_time, @end_time, @inputs, @metadata, @drm_configuration_id,
+           @title, @creator_id, @subtitles, @optimize_audio, @source_access,
+           @mp4_support, @summary, @chapters, @named_entities, @moderation,
+           @access_restrictions, @access_policy, @max_resolution, @media_quality] ==
+            [other.start_time, other.end_time, other.inputs, other.metadata, other.drm_configuration_id,
+             other.title, other.creator_id, other.subtitles, other.optimize_audio, other.source_access,
+             other.mp4_support, other.summary, other.chapters, other.named_entities, other.moderation,
+             other.access_restrictions, other.access_policy, other.max_resolution, other.media_quality]
         end
       end
     end

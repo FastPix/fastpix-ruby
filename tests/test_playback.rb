@@ -19,70 +19,13 @@ class TestPlayback < Minitest::Test
       begin
         # First, try to get a media ID from list
         list_response = @sdk.manage_videos.list_media(limit: 1)
-        
-        if list_response.status_code == 200 && 
+
+        if list_response.status_code == 200 &&
            list_response.object&.data&.any? &&
            list_response.object.data.first&.id
-          
-          media_id = list_response.object.data.first.id
-          @test_media_id = media_id
-          
-          request_body = @models::Operations::CreateMediaPlaybackIdRequestBody.new(
-            access_policy: @models::Components::AccessPolicy::PUBLIC
-          )
-          
-          response = @sdk.playback.create_media_playback_id(
-            media_id: media_id,
-            request_body: request_body
-          )
-          
-          if response.status_code == 201 &&
-             response.object&.success == true &&
-             response.object&.data&.playback_id
-            @test_playback_id = response.object.data.playback_id
-            true
-          else
-            false
-          end
+          create_playback_id_for(list_response.object.data.first.id)
         else
-          # Create a new media if none exists
-          create_request = @models::Components::CreateMediaRequest.new(
-            inputs: [
-              @models::Components::VideoInput.new(
-                type: 'video',
-                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-              )
-            ],
-            access_policy: @models::Components::CreateMediaRequestAccessPolicy::PUBLIC
-          )
-          
-          create_response = @sdk.input_video.create_media(request: create_request)
-          if create_response.status_code == 201 && create_response.object&.data&.any?
-            media_id = create_response.object.data.first.id
-            @test_media_id = media_id
-            puts "   Details: Created media with ID: #{media_id}"
-            
-            request_body = @models::Operations::CreateMediaPlaybackIdRequestBody.new(
-              access_policy: @models::Components::AccessPolicy::PUBLIC
-            )
-            
-            response = @sdk.playback.create_media_playback_id(
-              media_id: media_id,
-              request_body: request_body
-            )
-            
-            if response.status_code == 201 &&
-               response.object&.success == true &&
-               response.object&.data&.playback_id
-              @test_playback_id = response.object.data.playback_id
-              true
-            else
-              false
-            end
-          else
-            puts "   Details: Media creation failed - Status: #{create_response.status_code}, Response: #{create_response.object&.inspect}"
-            true # Skip test if no media available
-          end
+          create_media_then_playback_id
         end
       rescue => e
         puts "   Details: #{e.message}"
@@ -90,6 +33,52 @@ class TestPlayback < Minitest::Test
         e.is_a?(::FastpixApiSDK::Models::Errors::ValidationErrorResponse) ? true : false
       end
     end
+  end
+
+  # Creates a playback id for the given media id; returns true on success.
+  def create_playback_id_for(media_id)
+    @test_media_id = media_id
+
+    request_body = @models::Operations::CreateMediaPlaybackIdRequestBody.new(
+      access_policy: @models::Components::AccessPolicy::PUBLIC
+    )
+
+    response = @sdk.playback.create_media_playback_id(
+      media_id: media_id,
+      request_body: request_body
+    )
+
+    if response.status_code == 201 &&
+       response.object&.success == true &&
+       response.object&.data&.playback_id
+      @test_playback_id = response.object.data.playback_id
+      true
+    else
+      false
+    end
+  end
+
+  # Creates a new media, then a playback id for it. Skips (true) if creation fails.
+  def create_media_then_playback_id
+    create_request = @models::Components::CreateMediaRequest.new(
+      inputs: [
+        @models::Components::VideoInput.new(
+          type: 'video',
+          url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+        )
+      ],
+      access_policy: @models::Components::CreateMediaRequestAccessPolicy::PUBLIC
+    )
+
+    create_response = @sdk.input_video.create_media(request: create_request)
+    unless create_response.status_code == 201 && create_response.object&.data&.any?
+      puts "   Details: Media creation failed - Status: #{create_response.status_code}, Response: #{create_response.object&.inspect}"
+      return true # Skip test if no media available
+    end
+
+    media_id = create_response.object.data.first.id
+    puts "   Details: Created media with ID: #{media_id}"
+    create_playback_id_for(media_id)
   end
 
   def test_get_playback_id

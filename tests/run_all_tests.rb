@@ -2,6 +2,13 @@
 # frozen_string_literal: true
 
 require_relative 'test_helper'
+require_relative 'test_input_video'
+require_relative 'test_manage_videos'
+require_relative 'test_playback'
+require_relative 'test_live_stream'
+require_relative 'test_playlist'
+require_relative 'test_drm'
+require_relative 'test_analytics'
 
 # Parse command line arguments
 if ARGV.length != 2
@@ -38,7 +45,6 @@ test_classes.each do |test_info|
   FastpixTestHelper.print_section_header(test_info[:name])
   
   begin
-    require_relative test_info[:file]
     test_class = Object.const_get(test_info[:class_name])
     
     # Set credentials as class variables
