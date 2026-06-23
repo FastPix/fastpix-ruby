@@ -1,4 +1,4 @@
- 
+
 {
   "operations": {
     "list-media": {
@@ -10,27 +10,27 @@
     },
     "list-live-clips": {
       "pathParams": {
-        "livestreamId": "5874e71e3738f1bc5f569874d43e99fa"
+        "livestreamId": "your-livestream-id"
       }
     },
     "get-media": {
       "pathParams": {
-        "mediaId": "836f8e89-b756-4d8a-9aaf-0ed949e43ec1"
+        "mediaId": "your-media-id"
       }
     },
     "get-media-summary": {
       "pathParams": {
-        "mediaId": "836f8e89-b756-4d8a-9aaf-0ed949e43ec1"
+        "mediaId": "your-media-id"
       }
     },
     "retrieveMediaInputInfo": {
       "pathParams": {
-        "mediaId": "836f8e89-b756-4d8a-9aaf-0ed949e43ec1"
+        "mediaId": "your-media-id"
       }
     },
     "list-playback-ids": {
       "pathParams": {
-        "mediaId": "836f8e89-b756-4d8a-9aaf-0ed949e43ec1"
+        "mediaId": "your-media-id"
       }
     },
     "list-uploads": {
@@ -42,7 +42,7 @@
     },
     "get-media-clips": {
       "pathParams": {
-        "mediaId": "836f8e89-b756-4d8a-9aaf-0ed949e43ec1"
+        "mediaId": "your-media-id"
       }
     },
     "get-all-playlists": {
@@ -53,13 +53,13 @@
     },
     "get-playback-id": {
       "pathParams": {
-        "mediaId": "836f8e89-b756-4d8a-9aaf-0ed949e43ec1",
-        "playbackId": "82af62f9-64e8-4fe6-b72b-1ccc42d9874e"
+        "mediaId": "your-media-id",
+        "playbackId": "your-playback-id"
       }
     },
     "get-playlist-by-id": {
       "pathParams": {
-        "playlistId": "cfe5cee9-e5b9-45c9-be4b-f76f71b53c80"
+        "playlistId": "your-playlist-id"
       }
     },
     "getDrmConfiguration": {
@@ -82,24 +82,24 @@
     },
     "get-live-stream-by-id": {
       "pathParams": {
-        "streamId": "5874e71e3738f1bc5f569874d43e99fa"
+        "streamId": "your-stream-id"
       }
     },
     "get-live-stream-viewer-count-by-id": {
       "pathParams": {
-        "streamId": "5874e71e3738f1bc5f569874d43e99fa"
+        "streamId": "your-stream-id"
       }
     },
     "get-live-stream-playback-id": {
       "pathParams": {
-        "streamId": "5874e71e3738f1bc5f569874d43e99fa",
-        "playbackId": "db91f971-101b-47d6-8901-efffc86a10e9"
+        "streamId": "your-stream-id",
+        "playbackId": "your-playback-id"
       }
     },
     "get-specific-simulcast-of-stream": {
       "pathParams": {
-        "streamId": "5874e71e3738f1bc5f569874d43e99fa",
-        "simulcastId": "8de51e8b2c420d89491b562b113d210f"
+        "streamId": "your-stream-id",
+        "simulcastId": "your-simulcast-id"
       }
     },
     "list_signing_keys": {
@@ -110,7 +110,7 @@
     },
     "get-signing_key_by_id": {
       "pathParams": {
-        "signingKeyId": "04cf0f41-fd03-4c14-a30a-26f201624061"
+        "signingKeyId": "your-signing-key-id"
       }
     },
     "list_video_views": {
@@ -122,7 +122,7 @@
     },
     "get_video_view_details": {
       "pathParams": {
-        "viewId": "5d4c6560-58d6-45f9-9f1e-5b95eb116adc"
+        "viewId": "your-view-id"
       }
     },
     "list_by_top_content": {
@@ -178,5 +178,4 @@
     }
   }
 }
- 
- 
+
