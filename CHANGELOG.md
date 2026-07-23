@@ -2,6 +2,72 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.4]
+
+Aligns the media response models with the FastPix API's `mp4Support` field, which
+now returns a list of generated MP4 renditions instead of a single string.
+
+> **Note**
+>
+> This release changes a response model. Code that read `mp4Support` as a string
+> on `1.1.3` needs updating — see the migration note below.
+
+### Changed
+
+- **BREAKING: `mp4Support` on media responses is now an array of rendition
+  objects** instead of a single string enum. The API returns one entry per
+  generated rendition, each with its own generation status:
+
+  ```json
+  "mp4Support": [
+    { "type": "capped_4k", "status": "ready", "height": 1080, "width": 1920, "ext": "mp4" },
+    { "type": "audioOnly", "status": "ready", "ext": "m4a" }
+  ]
+  ```
+
+  Affected response models: `Media`, `GetAllMediaResponse`, `GetMediaResponse`,
+  `SourceAccessMedia`, `UpdateMedia`, and `LiveMediaClips`. Each gains a
+  corresponding item model (`MediaMp4Support`, `GetAllMediaResponseMp4Support`,
+  and so on) exposing `type`, `status`, `height`, `width`, and `ext`.
+
+  **Migration** — replace a direct string comparison:
+
+  ```ruby
+  # 1.1.3
+  media.mp4_support == FastpixClient::Models::Components::MediaMp4Support::CAPPED_4K
+
+  # 1.1.4
+  media.mp4_support&.any? { |r| r.type == 'capped_4k' && r.status == 'ready' }
+  ```
+
+- **Request payloads are unchanged.** `mp4Support` remains a string enum on
+  `CreateMediaRequest`, on the direct-upload `pushMediaSettings`, and on the
+  `PATCH /on-demand/{mediaId}/update-mp4Support` request body, with the same
+  accepted values as before.
+
+### Added
+
+- `optimizeAudio` on the media response models (`Media`, `GetAllMediaResponse`,
+  `GetMediaResponse`, `SourceAccessMedia`, `UpdateMedia`), reflecting a field the
+  API already returns.
+- `optimizeAudio` declared in `fastpixapi.yaml` on `Media`, `CreateMediaResponse`,
+  and `DirectUploadResponse`, so the field is no longer dropped when the SDK is
+  regenerated from the spec.
+
+### Fixed
+
+- Corrected the `mp4Support` documentation, which still described and illustrated
+  the field as a string: the field comments on all six response models, and the
+  response examples in `docs/models/operations/getmediaresponse.md` and
+  `docs/models/operations/updatedmp4supportresponse.md`.
+
+### Changed (internal)
+
+- **SDK version bump: `1.1.3` → `1.1.4`.** Updated internal identifiers:
+  - `@sdk_version` constant — now reports `1.1.4`.
+  - `User-Agent` header — outbound requests now identify as
+    `fastpixapi-ruby 1.1.4`.
+
 ## [1.1.3]
 
 A maintenance release focused on internal code quality (SonarCloud), security

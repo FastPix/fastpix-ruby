@@ -36,6 +36,8 @@ class FastpixClient::Models::Components::UpdateMedia
   def moderation=(str_); end
   def subtitle_available(); end
   def subtitle_available=(str_); end
+  def optimize_audio(); end
+  def optimize_audio=(str_); end
   def duration(); end
   def duration=(str_); end
   def aspect_ratio(); end

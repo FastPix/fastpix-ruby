@@ -28,13 +28,8 @@ module FastpixClient
         field :playback_ids, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::PlaybackId)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('playbackIds') } }
         # A media consists of different media tracks, like video, audio, and subtitle, all combined.
         field :tracks, Crystalline::Nilable.new(Crystalline::Array.new(Crystalline::Union.new(Models::Components::VideoTrack, Models::Components::AudioTrack, Models::Components::SubtitleTrack))), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('tracks') } }
-        # Determines the type of MP4 support for the media.
-        # - **none**: Disables MP4 support.
-        # - **capped_4k**: Enables MP4 downloads with resolutions up to 4K.
-        # - **audioOnly**: Provides an MP4 stream containing only the audio.
-        # - **audioOnly,capped_4k**: Enables both MP4 video downloads (up to 4K) and an audio-only stream.
-        # 
-        field :mp4_support, Crystalline::Nilable.new(Models::Components::LiveMediaClipsMp4Support), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mp4Support'), 'decoder': Utils.enum_from_string(Models::Components::LiveMediaClipsMp4Support, true) } }
+        # The MP4 renditions generated for the media. Present only when MP4 support is enabled.
+        field :mp4_support, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::LiveMediaClipsMp4Support)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mp4Support') } }
         # The length of the media in seconds, with a maximum allowed duration of 12 hours per individual media.
         field :duration, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('duration') } }
         # Time the media was created, defined as a localDateTime (UTC Time).
@@ -58,7 +53,7 @@ module FastpixClient
         # The aspect ratio of a video is a value that describes the relative shape of a video based on its width and height.
         field :aspect_ratio, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('aspectRatio') } }
 
-        sig { params(id: T.nilable(::String), workspace_id: T.nilable(::String), stream_id: T.nilable(::String), creator_id: T.nilable(::String), status: T.nilable(Models::Components::LiveMediaClipsStatus), source_access: T.nilable(T::Boolean), playback_ids: T.nilable(T::Array[Models::Components::PlaybackId]), tracks: T.nilable(T::Array[T.any(Models::Components::VideoTrack, Models::Components::AudioTrack, Models::Components::SubtitleTrack)]), mp4_support: T.nilable(Models::Components::LiveMediaClipsMp4Support), duration: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), thumbnail: T.nilable(::String), title: T.nilable(::String), max_resolution: T.nilable(Models::Components::LiveMediaClipsMaxResolution), source_resolution: T.nilable(Models::Components::LiveMediaClipsSourceResolution), generated_subtitles: T.nilable(T::Array[Models::Components::TracksSubtitles]), is_audio_only: T.nilable(T::Boolean), subtitle_available: T.nilable(T::Boolean), aspect_ratio: T.nilable(::String)).void }
+        sig { params(id: T.nilable(::String), workspace_id: T.nilable(::String), stream_id: T.nilable(::String), creator_id: T.nilable(::String), status: T.nilable(Models::Components::LiveMediaClipsStatus), source_access: T.nilable(T::Boolean), playback_ids: T.nilable(T::Array[Models::Components::PlaybackId]), tracks: T.nilable(T::Array[T.any(Models::Components::VideoTrack, Models::Components::AudioTrack, Models::Components::SubtitleTrack)]), mp4_support: T.nilable(T::Array[Models::Components::LiveMediaClipsMp4Support]), duration: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), thumbnail: T.nilable(::String), title: T.nilable(::String), max_resolution: T.nilable(Models::Components::LiveMediaClipsMaxResolution), source_resolution: T.nilable(Models::Components::LiveMediaClipsSourceResolution), generated_subtitles: T.nilable(T::Array[Models::Components::TracksSubtitles]), is_audio_only: T.nilable(T::Boolean), subtitle_available: T.nilable(T::Boolean), aspect_ratio: T.nilable(::String)).void }
         def initialize(id: nil, workspace_id: nil, stream_id: nil, creator_id: nil, status: nil, source_access: nil, playback_ids: nil, tracks: nil, mp4_support: nil, duration: nil, created_at: nil, updated_at: nil, thumbnail: nil, title: nil, max_resolution: Models::Components::LiveMediaClipsMaxResolution::ONE_THOUSAND_AND_EIGHTYP, source_resolution: Models::Components::LiveMediaClipsSourceResolution::ONE_THOUSAND_AND_EIGHTYP, generated_subtitles: nil, is_audio_only: nil, subtitle_available: nil, aspect_ratio: nil)
           @id = id
           @workspace_id = workspace_id

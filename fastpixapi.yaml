@@ -1892,7 +1892,15 @@ paths:
                     maxResolution: 1080p
                     sourceResolution: 1080p
                     status: ready
-                    mp4Support: capped_4k
+                    mp4Support:
+                      - type: capped_4k
+                        status: ready
+                        height: 1080
+                        width: 1920
+                        ext: mp4
+                      - type: audioOnly
+                        status: ready
+                        ext: m4a
                     sourceAccess: true
                     playbackIds:
                       - id: cf41c9f7-ece3-4efe-8d31-c6e000dc422b
@@ -7223,11 +7231,17 @@ components:
                 example: 480p
                 enum:
                   - 2160p
+                  - "2160"
                   - 1440p
+                  - "1440"
                   - 1080p
+                  - "1080"
                   - 720p
+                  - "720"
                   - 480p
+                  - "480"
                   - 360p
+                  - "360"
                 description: The actual resolution of the uploaded media.
               status:
                 type: string
@@ -7422,25 +7436,71 @@ components:
           default: 1080p
           enum:
             - 2160p
+            - "2160"
             - 1440p
+            - "1440"
             - 1080p
+            - "1080"
             - 720p
+            - "720"
             - 480p
+            - "480"
             - 360p
+            - "360"
           description: The actual resolution of the uploaded media. This represents the native quality of the source media.
         status:
           type: string
           example: preparing
           description: Determines the media's status, which can be one of the possible values.
         mp4Support:
-          type: string
-          example: capped_4k
-          enum:
-            - none
-            - capped_4k
-            - audioOnly
-            - audioOnly,capped_4k
-          description: "Determines the type of MP4 support for the media.   - **none**: Disables MP4 support.   - **capped_4k**: Enables MP4 downloads with resolutions up to 4K.   - **audioOnly**: Provides an MP4 stream containing only the audio.   - **audioOnly,capped_4k**: Enables both MP4 video downloads (up to 4K) and an audio-only stream."
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: capped_4k
+                enum:
+                  - capped_4k
+                  - audioOnly
+                description: The MP4 rendition type. `capped_4k` is a downloadable MP4 video capped at 4K resolution, `audioOnly` is a downloadable m4a audio-only file.
+              status:
+                type: string
+                example: ready
+                enum:
+                  - preparing
+                  - ready
+                  - failed
+                description: Generation status of this MP4 rendition.
+              height:
+                type: integer
+                nullable: true
+                example: 1080
+                description: Pixel height of the rendition. Omitted for the `audioOnly` type.
+              width:
+                type: integer
+                nullable: true
+                example: 1920
+                description: Pixel width of the rendition. Omitted for the `audioOnly` type.
+              ext:
+                type: string
+                example: mp4
+                enum:
+                  - mp4
+                  - m4a
+                description: File extension of the downloadable rendition.
+          example:
+            - type: capped_4k
+              status: ready
+              height: 1080
+              width: 1920
+              ext: mp4
+            - type: audioOnly
+              status: ready
+              ext: m4a
+          description: |
+            A list of MP4 renditions generated for the media when MP4 support is requested. Each entry represents one downloadable rendition (for example, a capped-4K video file or an audio-only m4a file) along with its generation status. Omitted when no MP4 support has been requested.
         sourceAccess:
           type: boolean
           example: true
@@ -7463,6 +7523,12 @@ components:
           type: string
           example: 30/1
           description: Frame rate quantifies the speed at which frames are displayed per second. It represents the range of frames available for a specific track. If the frame rate of the input file is indeterminable, it will be indicated by a value of -1.
+        optimizeAudio:
+          type: boolean
+          nullable: true
+          example: false
+          description: |
+            Indicates whether the quality and volume of the audio track were enhanced during processing. This is available for pre-recorded content only.
         aspectRatio:
           type: string
           example: "16:9"
@@ -8024,6 +8090,11 @@ components:
             - 480p
             - 360p
           description: The maximum resolution tier determines the highest quality your media will be available in.
+        optimizeAudio:
+          type: boolean
+          example: false
+          description: |
+            Enhance the quality and volume of the audio track. This is available for pre-recorded content only.
     TrackSubtitlesGenerateRequest:
       required:
         - languageName
@@ -8310,6 +8381,11 @@ components:
           example:
             key1: value1
           description: 'You can search for videos with specific key value pairs using metadata, when you tag a video in "key" : "value" pairs. Dynamic Metadata allows you to define a key that allows any value pair. You can have maximum of 255 characters and upto 10 entries are allowed.'
+        optimizeAudio:
+          type: boolean
+          example: false
+          description: |
+            Enhance the quality and volume of the audio track. This is available for pre-recorded content only.
     BadRequest:
       type: object
       properties:

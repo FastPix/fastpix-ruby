@@ -161,11 +161,11 @@ FASTPIX_USERNAME=... FASTPIX_PASSWORD=... ruby tests/validate_get_endpoints.rb
 ### Latest consolidated results
 
 <!-- BEGIN GET_ENDPOINTS_CONSOLIDATED -->
-Last generated: 2026-06-20T06:26:53Z
+Last generated: 2026-07-23T12:45:58Z
 
 - **Total GET endpoints**: 30
-- **PASS**: 25
-- **FAIL**: 5
+- **PASS**: 26
+- **FAIL**: 4
 - **SKIP**: 0
 
 | Endpoint | OperationId | OpenAPI valid | SDK parse | Missing in SDK (present in API) | Missing in API (present in SDK) | Empty arrays omitted by SDK | Status |
@@ -184,7 +184,7 @@ Last generated: 2026-06-20T06:26:53Z
 | `/on-demand/drm-configurations` | `getDrmConfiguration` | ✅ | ❌ | None | None | None | ❌ FAIL |
 | `/on-demand/drm-configurations/{drmConfigurationId}` | `getDrmConfigurationById` | ✅ | ❌ | None | None | None | ❌ FAIL |
 | `/live/streams` | `get-all-streams` | ✅ | ✅ | None | None | None | ✅ PASS |
-| `/live/streams/{streamId}/viewer-count` | `get-live-stream-viewer-count-by-id` | ✅ | ❌ | None | None | None | ❌ FAIL |
+| `/live/streams/{streamId}/viewer-count` | `get-live-stream-viewer-count-by-id` | ✅ | ✅ | None | None | None | ✅ PASS |
 | `/live/streams/{streamId}` | `get-live-stream-by-id` | ✅ | ✅ | None | None | None | ✅ PASS |
 | `/live/streams/{streamId}/playback-ids/{playbackId}` | `get-live-stream-playback-id` | ✅ | ✅ | None | None | None | ✅ PASS |
 | `/live/streams/{streamId}/simulcast/{simulcastId}` | `get-specific-simulcast-of-stream` | ✅ | ✅ | None | None | None | ✅ PASS |
