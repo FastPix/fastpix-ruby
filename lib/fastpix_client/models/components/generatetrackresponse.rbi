@@ -18,4 +18,6 @@ class FastpixClient::Models::Components::GenerateTrackResponse
   def language_name=(str_); end
   def metadata(); end
   def metadata=(str_); end
+  def title(); end
+  def title=(str_); end
 end

@@ -19,12 +19,15 @@ module FastpixClient
         field :language_name, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageName') } }
         # Language code for content localization
         field :language_code, Crystalline::Nilable.new(Models::Components::LanguageCode), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageCode'), 'decoder': Utils.enum_from_string(Models::Components::LanguageCode, true) } }
+        # Title of the track.
+        field :title, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('title') } }
 
-        sig { params(metadata: T.nilable(T::Hash[Symbol, ::String]), language_name: T.nilable(::String), language_code: T.nilable(Models::Components::LanguageCode)).void }
-        def initialize(metadata: nil, language_name: 'English', language_code: Models::Components::LanguageCode::EN_US)
+        sig { params(metadata: T.nilable(T::Hash[Symbol, ::String]), language_name: T.nilable(::String), language_code: T.nilable(Models::Components::LanguageCode), title: T.nilable(::String)).void }
+        def initialize(metadata: nil, language_name: 'English', language_code: Models::Components::LanguageCode::EN_US, title: nil)
           @metadata = metadata
           @language_name = language_name
           @language_code = language_code
+          @title = title
         end
 
         sig { params(other: T.untyped).returns(T::Boolean) }
@@ -33,6 +36,7 @@ module FastpixClient
           return false unless @metadata == other.metadata
           return false unless @language_name == other.language_name
           return false unless @language_code == other.language_code
+          return false unless @title == other.title
           true
         end
       end

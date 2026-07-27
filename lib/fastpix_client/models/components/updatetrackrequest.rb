@@ -18,12 +18,15 @@ module FastpixClient
         field :language_code, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageCode') } }
         # The full name of the language corresponding to the `languageCode`.
         field :language_name, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageName') } }
+        # Title of the track.
+        field :title, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('title') } }
 
-        sig { params(url: T.nilable(::String), language_code: T.nilable(::String), language_name: T.nilable(::String)).void }
-        def initialize(url: 'http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/thrust.vtt', language_code: 'fr', language_name: 'French')
+        sig { params(url: T.nilable(::String), language_code: T.nilable(::String), language_name: T.nilable(::String), title: T.nilable(::String)).void }
+        def initialize(url: 'http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/thrust.vtt', language_code: 'fr', language_name: 'French', title: nil)
           @url = url
           @language_code = language_code
           @language_name = language_name
+          @title = title
         end
 
         sig { params(other: T.untyped).returns(T::Boolean) }
@@ -32,6 +35,7 @@ module FastpixClient
           return false unless @url == other.url
           return false unless @language_code == other.language_code
           return false unless @language_name == other.language_name
+          return false unless @title == other.title
           true
         end
       end

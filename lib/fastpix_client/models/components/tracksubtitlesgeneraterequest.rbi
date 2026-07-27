@@ -14,4 +14,6 @@ class FastpixClient::Models::Components::TrackSubtitlesGenerateRequest
   def language_name=(str_); end
   def language_code(); end
   def language_code=(str_); end
+  def title(); end
+  def title=(str_); end
 end

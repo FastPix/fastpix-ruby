@@ -24,14 +24,17 @@ module FastpixClient
         # You can search for videos with specific key value pairs using metadata, when you tag a video in "key" : "value" pairs. Dynamic metadata allows you to define a key that allows any value pair. You can have maximum of 255 characters and upto 10 entries are allowed.
         # 
         field :metadata, Crystalline::Nilable.new(Crystalline::Hash.new(Symbol, ::String)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('metadata') } }
+        # Title of the track.
+        field :title, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('title') } }
 
-        sig { params(id: T.nilable(::String), type: T.nilable(Models::Components::GenerateTrackResponseType), language_code: T.nilable(Models::Components::GenerateTrackResponseLanguageCode), language_name: T.nilable(::String), metadata: T.nilable(T::Hash[Symbol, ::String])).void }
-        def initialize(id: nil, type: nil, language_code: nil, language_name: nil, metadata: nil)
+        sig { params(id: T.nilable(::String), type: T.nilable(Models::Components::GenerateTrackResponseType), language_code: T.nilable(Models::Components::GenerateTrackResponseLanguageCode), language_name: T.nilable(::String), metadata: T.nilable(T::Hash[Symbol, ::String]), title: T.nilable(::String)).void }
+        def initialize(id: nil, type: nil, language_code: nil, language_name: nil, metadata: nil, title: nil)
           @id = id
           @type = type
           @language_code = language_code
           @language_name = language_name
           @metadata = metadata
+          @title = title
         end
 
         sig { params(other: T.untyped).returns(T::Boolean) }
@@ -42,6 +45,7 @@ module FastpixClient
           return false unless @language_code == other.language_code
           return false unless @language_name == other.language_name
           return false unless @metadata == other.metadata
+          return false unless @title == other.title
           true
         end
       end
