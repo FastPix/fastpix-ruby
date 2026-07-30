@@ -4,7 +4,11 @@ $LOAD_PATH.push File.expand_path('lib', __dir__)
 
 Gem::Specification.new do |s|
   s.name        = 'fastpixapi'
+<<<<<<< HEAD
   s.version     = '1.1.4'
+=======
+  s.version     = '1.1.3'
+>>>>>>> origin/main
   s.platform    = Gem::Platform::RUBY
   s.licenses    = ['Apache-2.0']
   s.summary     = 'Ruby client SDK for FastPix API'

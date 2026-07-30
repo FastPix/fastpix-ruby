@@ -2,6 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
+<<<<<<< HEAD
 ## [1.1.4]
 
 Aligns the media response models with the FastPix API's `mp4Support` field, which
@@ -68,6 +69,8 @@ now returns a list of generated MP4 renditions instead of a single string.
   - `User-Agent` header — outbound requests now identify as
     `fastpixapi-ruby 1.1.4`.
 
+=======
+>>>>>>> origin/main
 ## [1.1.3]
 
 A maintenance release focused on internal code quality (SonarCloud), security
