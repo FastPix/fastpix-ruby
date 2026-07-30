@@ -108,7 +108,7 @@ module FastpixClient
       #   * **field:** The grouping field value based on the groupBy parameter. 
       # 
       # 
-      # Related guide: <a href="https://fastpix.com/docs/concepts/what-video-data-do-we-capture">Understand data definitions</a>
+      # Related guide: <a href="https://fastpix.com/docs/video-data/understand-data-definitions">Understand data definitions</a>
       # 
       url, params = @sdk_configuration.get_server_details
       base_url = Utils.template_url(url, params)
@@ -244,7 +244,7 @@ module FastpixClient
       #   * **globalValue:** A global metric value that reflects the overall performance of the specified metric across the entire dataset for the given timespan. This value is not affected by specific filters. 
       # 
       # 
-      #   Related guide: <a href="https://fastpix.com/docs/concepts/what-video-data-do-we-capture">Understand data definitions</a>
+      #   Related guide: <a href="https://fastpix.com/docs/video-data/understand-data-definitions">Understand data definitions</a>
       # 
       request = Models::Operations::ListOverallValuesRequest.new(
         metric_id: metric_id,
@@ -496,7 +496,7 @@ module FastpixClient
       #   3. You Receive a response containing the comparison values for the specified metrics across the selected dimensions. 
       # 
       # 
-      #   Related guide: <a href="https://fastpix.com/docs/working-with-video-data/explore-the-dashboard#compare-metrics">Compare metrics in dashboard</a>
+      #    Related guide: <a href="https://fastpix.com/docs/video-data/explore-the-dashboard#compare-metrics">Compare metrics in dashboard</a>
       # 
       request = Models::Operations::ListComparisonValuesRequest.new(
         timespan: timespan,

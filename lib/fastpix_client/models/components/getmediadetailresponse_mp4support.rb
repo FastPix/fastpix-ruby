@@ -7,8 +7,8 @@
 module FastpixClient
   module Models
     module Components
-      # GetMediaResponseMp4Support - One MP4 rendition generated for the media when MP4 support is requested.
-      class GetMediaResponseMp4Support
+      # GetMediaDetailResponseMp4Support - One MP4 rendition generated for the media when MP4 support is requested.
+      class GetMediaDetailResponseMp4Support
         extend T::Sig
         include Crystalline::MetadataFields
 

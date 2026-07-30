@@ -101,7 +101,7 @@ module FastpixClient
       autoload :GetLiveStreamViewerCountByIdResponse, 'fastpix_client/models/operations/get_live_stream_viewer_count_by_id_response.rb'
       autoload :GetMediaResponseBody, 'fastpix_client/models/operations/get_media_responsebody.rb'
       autoload :GetMediaClipsResponse, 'fastpix_client/models/operations/get_media_clips_response.rb'
-      autoload :GetMediaResponse, 'fastpix_client/models/operations/get_media_response.rb'
+      autoload :GetMediaDetailResponse, 'fastpix_client/models/operations/get_media_detail_response.rb'
       autoload :GetMediaSummaryResponseBody, 'fastpix_client/models/operations/get_media_summary_responsebody.rb'
       autoload :GetMediaSummaryResponse, 'fastpix_client/models/operations/get_media_summary_response.rb'
       autoload :GetPlaybackIdResponseBody, 'fastpix_client/models/operations/get_playback_id_responsebody.rb'

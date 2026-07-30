@@ -1,4 +1,4 @@
-# GetMediaResponseStatus
+# GetMediaDetailResponseStatus
 
 Determines the media's status, which can be one of the possible values.
 

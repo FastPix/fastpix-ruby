@@ -7,8 +7,8 @@
 module FastpixClient
   module Models
     module Components
-      # GetMediaResponseStatus - Determines the media's status, which can be one of the possible values.
-      class GetMediaResponseStatus < T::Enum
+      # GetMediaDetailResponseStatus - Determines the media's status, which can be one of the possible values.
+      class GetMediaDetailResponseStatus < T::Enum
 
 
         enums do

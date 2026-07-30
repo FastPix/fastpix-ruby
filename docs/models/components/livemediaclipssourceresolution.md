@@ -17,3 +17,5 @@ The actual resolution of the uploaded media. This represents the native quality 
 | `SEVEN_HUNDRED_AND_TWENTY`             | 720                                    |
 | `FOUR_HUNDRED_AND_EIGHTYP`             | 480p                                   |
 | `FOUR_HUNDRED_AND_EIGHTY`              | 480                                    |
+ `THREE_HUNDRED_AND_SIXTYP`              | 360p                                  |
+| `THREE_HUNDRED_AND_SIXTY`              | 360                                    |

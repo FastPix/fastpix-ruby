@@ -15,9 +15,9 @@ module FastpixClient
         # Demonstrates whether the request is successful or not.
         field :success, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('success') } }
 
-        field :data, Crystalline::Nilable.new(Models::Components::GetMediaResponse), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('data') } }
+        field :data, Crystalline::Nilable.new(Models::Components::GetMediaDetailResponse), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('data') } }
 
-        sig { params(success: T.nilable(T::Boolean), data: T.nilable(Models::Components::GetMediaResponse)).void }
+        sig { params(success: T.nilable(T::Boolean), data: T.nilable(Models::Components::GetMediaDetailResponse)).void }
         def initialize(success: nil, data: nil)
           @success = success
           @data = data

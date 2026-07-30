@@ -1,4 +1,4 @@
-# GetMediaResponse
+# GetMediaDetailResponse
 
 
 ## Fields

@@ -8,7 +8,7 @@ module FastpixClient
   module Models
     module Components
 
-      class GetMediaResponseTrack
+      class GetMediaDetailResponseTrack
         extend T::Sig
         include Crystalline::MetadataFields
 

@@ -1,4 +1,4 @@
-# GetMediaResponseMediaQuality
+# GetMediaDetailResponseMediaQuality
 
 The quality tier applied to the media.
 

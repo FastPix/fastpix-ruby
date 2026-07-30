@@ -2,12 +2,12 @@
 # frozen_string_literal: true
 
 
-class FastpixClient::Models::Components::GetMediaResponse
+class FastpixClient::Models::Components::GetMediaDetailResponse
   extend ::Crystalline::MetadataFields::ClassMethods
 end
 
 
-class FastpixClient::Models::Components::GetMediaResponse
+class FastpixClient::Models::Components::GetMediaDetailResponse
   def id(); end
   def id=(str_); end
   def source_media_id(); end

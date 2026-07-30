@@ -8,7 +8,7 @@ module FastpixClient
   module Models
     module Components
 
-      class GetMediaResponse
+      class GetMediaDetailResponse
         extend T::Sig
         include Crystalline::MetadataFields
 
@@ -21,13 +21,13 @@ module FastpixClient
         # The ID of the livestream for which the clips were created.
         field :stream_id, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('streamId') } }
         # The quality tier applied to the media.
-        field :media_quality, Crystalline::Nilable.new(Models::Components::GetMediaResponseMediaQuality), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mediaQuality'), 'decoder': Utils.enum_from_string(Models::Components::GetMediaResponseMediaQuality, true) } }
+        field :media_quality, Crystalline::Nilable.new(Models::Components::GetMediaDetailResponseMediaQuality), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mediaQuality'), 'decoder': Utils.enum_from_string(Models::Components::GetMediaDetailResponseMediaQuality, true) } }
         # The unique identifier of the user who created this media.
         field :creator_id, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('creatorId') } }
         # Determines the media's status, which can be one of the possible values.
-        field :status, Crystalline::Nilable.new(Models::Components::GetMediaResponseStatus), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('status'), 'decoder': Utils.enum_from_string(Models::Components::GetMediaResponseStatus, true) } }
+        field :status, Crystalline::Nilable.new(Models::Components::GetMediaDetailResponseStatus), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('status'), 'decoder': Utils.enum_from_string(Models::Components::GetMediaDetailResponseStatus, true) } }
         # The MP4 renditions generated for the media. Present only when MP4 support is enabled.
-        field :mp4_support, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::GetMediaResponseMp4Support)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mp4Support') } }
+        field :mp4_support, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::GetMediaDetailResponseMp4Support)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mp4Support') } }
         # A collection of Playback ID objects utilized for crafting HLS playback URLs.
         field :playback_ids, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::PlaybackId)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('playbackIds') } }
         # A media consists of different media tracks, like video, audio, and subtitle, all combined.
@@ -56,9 +56,9 @@ module FastpixClient
         # Title of the media file.
         field :title, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('title') } }
         # The maximum resolution specified by the user for the media.
-        field :max_resolution, Crystalline::Nilable.new(Models::Components::GetMediaResponseMaxResolution), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('maxResolution'), 'decoder': Utils.enum_from_string(Models::Components::GetMediaResponseMaxResolution, true) } }
+        field :max_resolution, Crystalline::Nilable.new(Models::Components::GetMediaDetailResponseMaxResolution), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('maxResolution'), 'decoder': Utils.enum_from_string(Models::Components::GetMediaDetailResponseMaxResolution, true) } }
         # The actual resolution of the uploaded media. This represents the native quality of the source media.
-        field :source_resolution, Crystalline::Nilable.new(Models::Components::GetMediaResponseSourceResolution), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('sourceResolution'), 'decoder': Utils.enum_from_string(Models::Components::GetMediaResponseSourceResolution, true) } }
+        field :source_resolution, Crystalline::Nilable.new(Models::Components::GetMediaDetailResponseSourceResolution), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('sourceResolution'), 'decoder': Utils.enum_from_string(Models::Components::GetMediaDetailResponseSourceResolution, true) } }
         # The sourceAccess parameter determines whether the original media file is accessible. Set to true to enable access or false to restrict it.
         field :source_access, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('sourceAccess') } }
         # List of generated subtitle tracks associated with the media.
@@ -72,8 +72,8 @@ module FastpixClient
         # The aspect ratio of a video is a value that describes the relative shape of a video based on its width and height.
         field :aspect_ratio, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('aspectRatio') } }
 
-        sig { params(id: T.nilable(::String), source_media_id: T.nilable(::String), workspace_id: T.nilable(::String), stream_id: T.nilable(::String), media_quality: T.nilable(Models::Components::GetMediaResponseMediaQuality), creator_id: T.nilable(::String), status: T.nilable(Models::Components::GetMediaResponseStatus), mp4_support: T.nilable(T::Array[Models::Components::GetMediaResponseMp4Support]), playback_ids: T.nilable(T::Array[Models::Components::PlaybackId]), tracks: T.nilable(T::Array[T.any(Models::Components::VideoTrack, Models::Components::AudioTrack, Models::Components::SubtitleTrack)]), summary: T.nilable(Models::Components::AiSummaryRecord), chapters: T.nilable(Models::Components::AiResponseRecord), named_entities: T.nilable(Models::Components::AiResponseRecord), moderation: T.nilable(Models::Components::AiResponseRecord), duration: T.nilable(::String), frame_rate: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), thumbnail: T.nilable(::String), metadata: T.nilable(T::Hash[Symbol, ::String]), title: T.nilable(::String), max_resolution: T.nilable(Models::Components::GetMediaResponseMaxResolution), source_resolution: T.nilable(Models::Components::GetMediaResponseSourceResolution), source_access: T.nilable(T::Boolean), generated_subtitles: T.nilable(T::Array[Models::Components::TracksSubtitles]), is_audio_only: T.nilable(T::Boolean), subtitle_available: T.nilable(T::Boolean), optimize_audio: T.nilable(T::Boolean), aspect_ratio: T.nilable(::String)).void }
-        def initialize(id: nil, source_media_id: nil, workspace_id: nil, stream_id: nil, media_quality: nil, creator_id: nil, status: nil, mp4_support: nil, playback_ids: nil, tracks: nil, summary: nil, chapters: nil, named_entities: nil, moderation: nil, duration: nil, frame_rate: nil, created_at: nil, updated_at: nil, thumbnail: nil, metadata: nil, title: nil, max_resolution: Models::Components::GetMediaResponseMaxResolution::ONE_THOUSAND_AND_EIGHTYP, source_resolution: Models::Components::GetMediaResponseSourceResolution::ONE_THOUSAND_AND_EIGHTYP, source_access: nil, generated_subtitles: nil, is_audio_only: nil, subtitle_available: nil, optimize_audio: nil, aspect_ratio: nil)
+        sig { params(id: T.nilable(::String), source_media_id: T.nilable(::String), workspace_id: T.nilable(::String), stream_id: T.nilable(::String), media_quality: T.nilable(Models::Components::GetMediaDetailResponseMediaQuality), creator_id: T.nilable(::String), status: T.nilable(Models::Components::GetMediaDetailResponseStatus), mp4_support: T.nilable(T::Array[Models::Components::GetMediaDetailResponseMp4Support]), playback_ids: T.nilable(T::Array[Models::Components::PlaybackId]), tracks: T.nilable(T::Array[T.any(Models::Components::VideoTrack, Models::Components::AudioTrack, Models::Components::SubtitleTrack)]), summary: T.nilable(Models::Components::AiSummaryRecord), chapters: T.nilable(Models::Components::AiResponseRecord), named_entities: T.nilable(Models::Components::AiResponseRecord), moderation: T.nilable(Models::Components::AiResponseRecord), duration: T.nilable(::String), frame_rate: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), thumbnail: T.nilable(::String), metadata: T.nilable(T::Hash[Symbol, ::String]), title: T.nilable(::String), max_resolution: T.nilable(Models::Components::GetMediaDetailResponseMaxResolution), source_resolution: T.nilable(Models::Components::GetMediaDetailResponseSourceResolution), source_access: T.nilable(T::Boolean), generated_subtitles: T.nilable(T::Array[Models::Components::TracksSubtitles]), is_audio_only: T.nilable(T::Boolean), subtitle_available: T.nilable(T::Boolean), optimize_audio: T.nilable(T::Boolean), aspect_ratio: T.nilable(::String)).void }
+        def initialize(id: nil, source_media_id: nil, workspace_id: nil, stream_id: nil, media_quality: nil, creator_id: nil, status: nil, mp4_support: nil, playback_ids: nil, tracks: nil, summary: nil, chapters: nil, named_entities: nil, moderation: nil, duration: nil, frame_rate: nil, created_at: nil, updated_at: nil, thumbnail: nil, metadata: nil, title: nil, max_resolution: Models::Components::GetMediaDetailResponseMaxResolution::ONE_THOUSAND_AND_EIGHTYP, source_resolution: Models::Components::GetMediaDetailResponseSourceResolution::ONE_THOUSAND_AND_EIGHTYP, source_access: nil, generated_subtitles: nil, is_audio_only: nil, subtitle_available: nil, optimize_audio: nil, aspect_ratio: nil)
           @id = id
           @source_media_id = source_media_id
           @workspace_id = workspace_id

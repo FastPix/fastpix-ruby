@@ -8,7 +8,7 @@ module FastpixClient
   module Models
     module Operations
 
-      class GetMediaResponse
+      class GetMediaDetailResponse
         extend T::Sig
         include Crystalline::MetadataFields
 
