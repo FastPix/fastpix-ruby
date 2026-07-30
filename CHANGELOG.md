@@ -2,75 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
-<<<<<<< HEAD
 ## [1.1.4]
 
-Aligns the media response models with the FastPix API's `mp4Support` field, which
-now returns a list of generated MP4 renditions instead of a single string.
+Aligns the media models with the FastPix API. Contains three breaking changes.
 
-> **Note**
->
-> This release changes a response model. Code that read `mp4Support` as a string
-> on `1.1.3` needs updating — see the migration note below.
+### Breaking
 
-### Changed
-
-- **BREAKING: `mp4Support` on media responses is now an array of rendition
-  objects** instead of a single string enum. The API returns one entry per
-  generated rendition, each with its own generation status:
-
-  ```json
-  "mp4Support": [
-    { "type": "capped_4k", "status": "ready", "height": 1080, "width": 1920, "ext": "mp4" },
-    { "type": "audioOnly", "status": "ready", "ext": "m4a" }
-  ]
-  ```
-
-  Affected response models: `Media`, `GetAllMediaResponse`, `GetMediaResponse`,
-  `SourceAccessMedia`, `UpdateMedia`, and `LiveMediaClips`. Each gains a
-  corresponding item model (`MediaMp4Support`, `GetAllMediaResponseMp4Support`,
-  and so on) exposing `type`, `status`, `height`, `width`, and `ext`.
-
-  **Migration** — replace a direct string comparison:
+- **`mp4Support` on media responses is now an array of rendition objects**
+  instead of a single string enum — one entry per rendition, each with `type`,
+  `status`, `height`, `width` and `ext`. Request payloads are unchanged.
 
   ```ruby
-  # 1.1.3
-  media.mp4_support == FastpixClient::Models::Components::MediaMp4Support::CAPPED_4K
-
-  # 1.1.4
+  # 1.1.3: media.mp4_support == Models::Components::MediaMp4Support::CAPPED_4K
+  # 1.1.4:
   media.mp4_support&.any? { |r| r.type == 'capped_4k' && r.status == 'ready' }
   ```
 
-- **Request payloads are unchanged.** `mp4Support` remains a string enum on
-  `CreateMediaRequest`, on the direct-upload `pushMediaSettings`, and on the
-  `PATCH /on-demand/{mediaId}/update-mp4Support` request body, with the same
-  accepted values as before.
+- **`url` removed from `UpdateTrackRequest`.** A track's file can no longer be
+  changed on update, only its language and title. Passing `url:` now raises
+  `ArgumentError`.
+
+- **`Components::GetMediaResponse` renamed to `GetMediaDetailResponse`**, with
+  its six satellite models. Operation classes are unchanged — `get_media` still
+  returns `Operations::GetMediaResponse`.
 
 ### Added
 
-- `optimizeAudio` on the media response models (`Media`, `GetAllMediaResponse`,
-  `GetMediaResponse`, `SourceAccessMedia`, `UpdateMedia`), reflecting a field the
-  API already returns.
-- `optimizeAudio` declared in `fastpixapi.yaml` on `Media`, `CreateMediaResponse`,
-  and `DirectUploadResponse`, so the field is no longer dropped when the SDK is
-  regenerated from the spec.
+- `title` on all ten track models, request and response alike.
+- `optimizeAudio` on the six media response models, and in `fastpixapi.yaml` so
+  it survives regeneration.
+- `360p` and `360` accepted on `sourceResolution`; a 360p asset previously raised
+  on decode.
 
 ### Fixed
 
-- Corrected the `mp4Support` documentation, which still described and illustrated
-  the field as a string: the field comments on all six response models, and the
-  response examples in `docs/models/operations/getmediaresponse.md` and
-  `docs/models/operations/updatedmp4supportresponse.md`.
+- **`ManageLiveStream` failed to load** — a malformed doc comment left the file
+  unparseable, so all eight live stream operations raised on first access.
+  Introduced and fixed within this cycle; `1.1.3` is unaffected.
+- `mp4Support` documentation and examples still described the field as a string.
 
-### Changed (internal)
+### Internal
 
-- **SDK version bump: `1.1.3` → `1.1.4`.** Updated internal identifiers:
-  - `@sdk_version` constant — now reports `1.1.4`.
-  - `User-Agent` header — outbound requests now identify as
-    `fastpixapi-ruby 1.1.4`.
+- Version bump `1.1.3` -> `1.1.4` (`@sdk_version`, `User-Agent`).
 
-=======
->>>>>>> origin/main
 ## [1.1.3]
 
 A maintenance release focused on internal code quality (SonarCloud), security

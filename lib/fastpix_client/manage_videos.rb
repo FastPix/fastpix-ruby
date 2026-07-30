@@ -227,7 +227,7 @@ module FastpixClient
       # Suppose you’re hosting a live gaming event and want to showcase key moments from the stream — such as top plays or final match highlights. You can use this endpoint to fetch all clips generated from that livestream, display them in your dashboard, or use them for post-event editing and sharing.
       # 
       # 
-      # Related guide: <a href="https://fastpix.com/docs/edit-and-transform-live-stream/clip-moments-from-a-live-stream">Instant live clipping</a>
+      # Related guide: <a href="https://fastpix.com/docs/live-streaming/clip-moments-from-a-live-stream">Instant live clipping</a>
       # 
       request = Models::Operations::ListLiveClipsRequest.new(
         livestream_id: livestream_id,
@@ -340,7 +340,7 @@ module FastpixClient
     end
 
 
-    sig { params(media_id: ::String, timeout_ms: T.nilable(Integer)).returns(Models::Operations::GetMediaDetailResponse) }
+    sig { params(media_id: ::String, timeout_ms: T.nilable(Integer)).returns(Models::Operations::GetMediaResponse) }
     def get_media(media_id:, timeout_ms: nil)
       # get_media - Get a media by ID
       # By calling this endpoint, you can retrieve detailed information about a specific media item, including its current `status` and a `playbackId`. This is particularly useful for retrieving specific media details when managing large content libraries. 
@@ -427,7 +427,7 @@ module FastpixClient
           )
           response_data = http_response.env.response_body
           obj = Crystalline.unmarshal_json(JSON.parse(response_data), Models::Operations::GetMediaResponseBody)
-          response = Models::Operations::GetMediaDetailResponse.new(
+          response = Models::Operations::GetMediaResponse.new(
             status_code: http_response.status,
             content_type: content_type,
             raw_response: http_response,
@@ -452,7 +452,7 @@ module FastpixClient
           )
           response_data = http_response.env.response_body
           obj = Crystalline.unmarshal_json(JSON.parse(response_data), Models::Components::DefaultError)
-          response = Models::Operations::GetMediaDetailResponse.new(
+          response = Models::Operations::GetMediaResponse.new(
             status_code: http_response.status,
             content_type: content_type,
             raw_response: http_response,
@@ -737,11 +737,11 @@ module FastpixClient
       # 
       # #### Webhook events
       # 
-      # 1. After successfully adding a track, your system must receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediatrackcreated">video.media.track.created</a>.
+      # 1. After successfully adding a track, your system must receive the webhook event <a href="https://fastpix.com/docs/webhooks/transform-media-events#videomediatrackcreated">video.media.track.created</a>.
       # 
-      # 2. Once the track is processed and ready, you must receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediatrackready">video.media.track.ready</a>.
+      # 2. Once the track is processed and ready, you must receive the webhook event <a href="https://fastpix.com/docs/webhooks/transform-media-events#videomediatrackready">video.media.track.ready</a>.
       # 
-      # 3. Finally, an update event <a href="https://fastpix.com/docs/vod-events/media-events#videomediaupdated">video.media.updated</a> must notify your system about the media's updated status.
+      # 3. Finally, an update event <a href="https://fastpix.com/docs/webhooks/media-events#videomediaupdated">video.media.updated</a> must notify your system about the media's updated status.
       # 
       # 
       # #### Example
@@ -1001,11 +1001,11 @@ module FastpixClient
       # 
       # After updating a track, your system must receive webhook notifications:
       # 
-      # 1. After successfully updating a track, your system must receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediatrackupdated">video.media.track.updated</a>.
+      # 1. After successfully updating a track, your system must receive the webhook event <a href="https://fastpix.com/docs/webhooks/transform-media-events#videomediatrackupdated">video.media.track.updated</a>.
       # 
-      # 2. Once the new track is processed and ready, you must receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediatrackready">video.media.track.ready</a>.
+      # 2. Once the new track is processed and ready, you must receive the webhook event <a href="https://fastpix.com/docs/webhooks/transform-media-events#videomediatrackready">video.media.track.ready</a>.
       # 
-      # 3. Once the media file is updated with the new track details, a <a href="https://fastpix.com/docs/vod-events/media-events#videomediaupdated">video.media.updated</a> event must be triggered.
+      # 3. Once the media file is updated with the new track details, a <a href="https://fastpix.com/docs/webhooks/media-events#videomediaupdated">video.media.updated</a> event must be triggered.
       # 
       # 
       # #### Example
@@ -1279,11 +1279,11 @@ module FastpixClient
       # 
       # #### Webhook Events
       # 
-      # 1. After the subtitle track is generated and ready, you receive the webhook event <a href="https://fastpix.com/docs/vod-events/transform-media-events#videomediasubtitlegeneratedready">video.media.subtitle.generated.ready</a>.
+      # 1. After the subtitle track is generated and ready, you receive the webhook event <a href="https://fastpix.com/docs/webhooks/transform-media-events#videomediasubtitlegeneratedready">video.media.subtitle.generated</a>.
       # 
-      # 2. Finally the <a href="https://fastpix.com/docs/vod-events/media-events#videomediaupdated">video.media.updated</a> event notifies your system about the media’s updated status.
+      # 2. Finally the <a href="https://fastpix.com/docs/webhooks/media-events#videomediaupdated">video.media.updated</a> event notifies your system about the media’s updated status.
       # 
-      # </br> Related guide: <a href="https://fastpix.com/docs/manage-audio-and-subtitle-tracks/generate-subtitles-automatically">Add auto-generated subtitles</a>
+      # </br> Related guide: <a href="https://fastpix.com/docs/video-on-demand/generate-subtitles-automatically">Add auto-generated subtitles</a>
       # 
       request = Models::Operations::GenerateSubtitleTrackRequest.new(
         media_id: media_id,

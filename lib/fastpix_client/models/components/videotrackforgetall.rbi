@@ -18,4 +18,6 @@ class FastpixClient::Models::Components::VideoTrackForGetAll
   def height=(str_); end
   def status(); end
   def status=(str_); end
+  def title(); end
+  def title=(str_); end
 end

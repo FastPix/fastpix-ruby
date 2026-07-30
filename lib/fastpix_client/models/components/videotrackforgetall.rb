@@ -22,14 +22,17 @@ module FastpixClient
         field :height, Crystalline::Nilable.new(::Float), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('height') } }
         # Indicates the current state of the track. 'available' means the track has been processed successfully and is ready to be used or played.
         field :status, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('status') } }
+        # Title of the track.
+        field :title, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('title') } }
 
-        sig { params(id: T.nilable(::String), type: T.nilable(::String), width: T.nilable(::Float), height: T.nilable(::Float), status: T.nilable(::String)).void }
-        def initialize(id: nil, type: nil, width: nil, height: nil, status: nil)
+        sig { params(id: T.nilable(::String), type: T.nilable(::String), width: T.nilable(::Float), height: T.nilable(::Float), status: T.nilable(::String), title: T.nilable(::String)).void }
+        def initialize(id: nil, type: nil, width: nil, height: nil, status: nil, title: nil)
           @id = id
           @type = type
           @width = width
           @height = height
           @status = status
+          @title = title
         end
 
         sig { params(other: T.untyped).returns(T::Boolean) }
@@ -40,6 +43,7 @@ module FastpixClient
           return false unless @width == other.width
           return false unless @height == other.height
           return false unless @status == other.status
+          return false unless @title == other.title
           true
         end
       end

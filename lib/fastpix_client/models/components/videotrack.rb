@@ -24,15 +24,18 @@ module FastpixClient
         field :frame_rate, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('frameRate') } }
         # Indicates the current state of the track. 'available' means the track has been processed successfully and is ready to be used or played.
         field :status, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('status') } }
+        # Title of the track.
+        field :title, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('title') } }
 
-        sig { params(id: T.nilable(::String), type: T.nilable(::String), width: T.nilable(::Float), height: T.nilable(::Float), frame_rate: T.nilable(::String), status: T.nilable(::String)).void }
-        def initialize(id: nil, type: nil, width: nil, height: nil, frame_rate: nil, status: nil)
+        sig { params(id: T.nilable(::String), type: T.nilable(::String), width: T.nilable(::Float), height: T.nilable(::Float), frame_rate: T.nilable(::String), status: T.nilable(::String), title: T.nilable(::String)).void }
+        def initialize(id: nil, type: nil, width: nil, height: nil, frame_rate: nil, status: nil, title: nil)
           @id = id
           @type = type
           @width = width
           @height = height
           @frame_rate = frame_rate
           @status = status
+          @title = title
         end
 
         sig { params(other: T.untyped).returns(T::Boolean) }
@@ -44,6 +47,7 @@ module FastpixClient
           return false unless @height == other.height
           return false unless @frame_rate == other.frame_rate
           return false unless @status == other.status
+          return false unless @title == other.title
           true
         end
       end

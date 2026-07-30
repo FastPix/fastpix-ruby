@@ -101,20 +101,12 @@ module FastpixClient
 
           [@thumbnail, @id, @workspace_id, @media_quality, @status,
            @mp4_support, @source_access, @playback_ids, @tracks, @summary,
-<<<<<<< HEAD
            @chapters, @named_entities, @moderation, @subtitle_available, @optimize_audio, @duration,
-=======
-           @chapters, @named_entities, @moderation, @subtitle_available, @duration,
->>>>>>> origin/main
            @aspect_ratio, @created_at, @updated_at, @metadata, @creator_id,
            @title, @max_resolution, @source_resolution, @generated_subtitles, @is_audio_only] ==
             [other.thumbnail, other.id, other.workspace_id, other.media_quality, other.status,
              other.mp4_support, other.source_access, other.playback_ids, other.tracks, other.summary,
-<<<<<<< HEAD
              other.chapters, other.named_entities, other.moderation, other.subtitle_available, other.optimize_audio, other.duration,
-=======
-             other.chapters, other.named_entities, other.moderation, other.subtitle_available, other.duration,
->>>>>>> origin/main
              other.aspect_ratio, other.created_at, other.updated_at, other.metadata, other.creator_id,
              other.title, other.max_resolution, other.source_resolution, other.generated_subtitles, other.is_audio_only]
         end

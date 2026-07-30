@@ -46,6 +46,8 @@ class FastpixClient::Models::Components::LiveMediaClips
   def is_audio_only=(str_); end
   def subtitle_available(); end
   def subtitle_available=(str_); end
+  def optimize_audio(); end
+  def optimize_audio=(str_); end
   def aspect_ratio(); end
   def aspect_ratio=(str_); end
 end

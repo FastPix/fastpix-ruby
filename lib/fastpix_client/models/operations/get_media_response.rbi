@@ -2,12 +2,12 @@
 # frozen_string_literal: true
 
 
-class FastpixClient::Models::Operations::GetMediaDetailResponse
+class FastpixClient::Models::Operations::GetMediaResponse
   extend ::Crystalline::MetadataFields::ClassMethods
 end
 
 
-class FastpixClient::Models::Operations::GetMediaDetailResponse
+class FastpixClient::Models::Operations::GetMediaResponse
   def content_type(); end
   def content_type=(str_); end
   def status_code(); end

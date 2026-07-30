@@ -571,8 +571,9 @@ module FastpixClient
       #  A host realizes they need to extend the reconnect window for their live stream in case they lose connection temporarily during the event. Or suppose during a multi-day online conference, the event organizers need to update the stream title to reflect the next day"s session while keeping the same stream ID for continuity. 
       # 
       # 
-  Related guide: <a href="https://fastpix.com/docs/live-streaming/create-and-manage-live-streams#delete-a-stream">Manage streams</a>      # 
-      #  
+      #   Related guide: <a href="https://fastpix.com/docs/live-streaming/create-and-manage-live-streams#delete-a-stream">Manage streams</a>
+      #
+      #
       request = Models::Operations::UpdateLiveStreamRequest.new(
         stream_id: stream_id,
         body: body

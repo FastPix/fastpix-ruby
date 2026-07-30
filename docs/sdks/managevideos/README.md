@@ -201,7 +201,7 @@ end
 
 ### Response
 
-**[T.nilable(Models::Operations::GetMediaDetailResponse)](../../models/operations/getmediadetailresponse.md)**
+**[T.nilable(Models::Operations::GetMediaResponse)](../../models/operations/getmediaresponse.md)**
 
 ### Errors
 

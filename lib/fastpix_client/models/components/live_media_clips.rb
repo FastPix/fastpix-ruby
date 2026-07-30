@@ -50,11 +50,13 @@ module FastpixClient
         field :is_audio_only, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('isAudioOnly') } }
         # Indicates whether subtitles are available for the media.
         field :subtitle_available, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('subtitleAvailable') } }
+        # Whether the audio track of the media has been volume-normalized.
+        field :optimize_audio, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('optimizeAudio') } }
         # The aspect ratio of a video is a value that describes the relative shape of a video based on its width and height.
         field :aspect_ratio, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('aspectRatio') } }
 
-        sig { params(id: T.nilable(::String), workspace_id: T.nilable(::String), stream_id: T.nilable(::String), creator_id: T.nilable(::String), status: T.nilable(Models::Components::LiveMediaClipsStatus), source_access: T.nilable(T::Boolean), playback_ids: T.nilable(T::Array[Models::Components::PlaybackId]), tracks: T.nilable(T::Array[T.any(Models::Components::VideoTrack, Models::Components::AudioTrack, Models::Components::SubtitleTrack)]), mp4_support: T.nilable(T::Array[Models::Components::LiveMediaClipsMp4Support]), duration: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), thumbnail: T.nilable(::String), title: T.nilable(::String), max_resolution: T.nilable(Models::Components::LiveMediaClipsMaxResolution), source_resolution: T.nilable(Models::Components::LiveMediaClipsSourceResolution), generated_subtitles: T.nilable(T::Array[Models::Components::TracksSubtitles]), is_audio_only: T.nilable(T::Boolean), subtitle_available: T.nilable(T::Boolean), aspect_ratio: T.nilable(::String)).void }
-        def initialize(id: nil, workspace_id: nil, stream_id: nil, creator_id: nil, status: nil, source_access: nil, playback_ids: nil, tracks: nil, mp4_support: nil, duration: nil, created_at: nil, updated_at: nil, thumbnail: nil, title: nil, max_resolution: Models::Components::LiveMediaClipsMaxResolution::ONE_THOUSAND_AND_EIGHTYP, source_resolution: Models::Components::LiveMediaClipsSourceResolution::ONE_THOUSAND_AND_EIGHTYP, generated_subtitles: nil, is_audio_only: nil, subtitle_available: nil, aspect_ratio: nil)
+        sig { params(id: T.nilable(::String), workspace_id: T.nilable(::String), stream_id: T.nilable(::String), creator_id: T.nilable(::String), status: T.nilable(Models::Components::LiveMediaClipsStatus), source_access: T.nilable(T::Boolean), playback_ids: T.nilable(T::Array[Models::Components::PlaybackId]), tracks: T.nilable(T::Array[T.any(Models::Components::VideoTrack, Models::Components::AudioTrack, Models::Components::SubtitleTrack)]), mp4_support: T.nilable(T::Array[Models::Components::LiveMediaClipsMp4Support]), duration: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), thumbnail: T.nilable(::String), title: T.nilable(::String), max_resolution: T.nilable(Models::Components::LiveMediaClipsMaxResolution), source_resolution: T.nilable(Models::Components::LiveMediaClipsSourceResolution), generated_subtitles: T.nilable(T::Array[Models::Components::TracksSubtitles]), is_audio_only: T.nilable(T::Boolean), subtitle_available: T.nilable(T::Boolean), optimize_audio: T.nilable(T::Boolean), aspect_ratio: T.nilable(::String)).void }
+        def initialize(id: nil, workspace_id: nil, stream_id: nil, creator_id: nil, status: nil, source_access: nil, playback_ids: nil, tracks: nil, mp4_support: nil, duration: nil, created_at: nil, updated_at: nil, thumbnail: nil, title: nil, max_resolution: Models::Components::LiveMediaClipsMaxResolution::ONE_THOUSAND_AND_EIGHTYP, source_resolution: Models::Components::LiveMediaClipsSourceResolution::ONE_THOUSAND_AND_EIGHTYP, generated_subtitles: nil, is_audio_only: nil, subtitle_available: nil, optimize_audio: nil, aspect_ratio: nil)
           @id = id
           @workspace_id = workspace_id
           @stream_id = stream_id
@@ -74,6 +76,7 @@ module FastpixClient
           @generated_subtitles = generated_subtitles
           @is_audio_only = is_audio_only
           @subtitle_available = subtitle_available
+          @optimize_audio = optimize_audio
           @aspect_ratio = aspect_ratio
         end
 
@@ -84,11 +87,11 @@ module FastpixClient
           [@id, @workspace_id, @stream_id, @creator_id, @status,
            @source_access, @playback_ids, @tracks, @mp4_support, @duration,
            @created_at, @updated_at, @thumbnail, @title, @max_resolution,
-           @source_resolution, @generated_subtitles, @is_audio_only, @subtitle_available, @aspect_ratio] ==
+           @source_resolution, @generated_subtitles, @is_audio_only, @subtitle_available, @optimize_audio, @aspect_ratio] ==
             [other.id, other.workspace_id, other.stream_id, other.creator_id, other.status,
              other.source_access, other.playback_ids, other.tracks, other.mp4_support, other.duration,
              other.created_at, other.updated_at, other.thumbnail, other.title, other.max_resolution,
-             other.source_resolution, other.generated_subtitles, other.is_audio_only, other.subtitle_available, other.aspect_ratio]
+             other.source_resolution, other.generated_subtitles, other.is_audio_only, other.subtitle_available, other.optimize_audio, other.aspect_ratio]
         end
       end
     end
