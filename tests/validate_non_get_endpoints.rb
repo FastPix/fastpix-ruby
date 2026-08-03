@@ -598,12 +598,34 @@ def preview(text)
   text.length > MAX_PREVIEW_CHARS ? "#{text[0...MAX_PREVIEW_CHARS]}\n... [truncated]" : text
 end
 
+# Rewrites `value`'s hash keys to follow `reference`'s ordering so the .raw.json
+# and .sdk.json artifacts line up side by side. The SDK serializes its models
+# with keys sorted alphabetically, which makes a visual diff against the raw API
+# response needlessly hard to read. Keys absent from the reference keep their
+# original relative order and are appended last.
+def reorder_like(reference, value)
+  case value
+  when Hash
+    return value unless reference.is_a?(Hash)
+
+    ordered = {}
+    reference.each_key { |k| ordered[k] = reorder_like(reference[k], value[k]) if value.key?(k) }
+    value.each { |k, v| ordered[k] = reorder_like(nil, v) unless ordered.key?(k) }
+    ordered
+  when Array
+    ref_items = reference.is_a?(Array) ? reference : []
+    value.each_with_index.map { |item, i| reorder_like(ref_items[i] || ref_items.first, item) }
+  else
+    value
+  end
+end
+
 def write_artifacts(operation_id, raw_body, sdk_value)
   dir = File.join(TESTS_DIR, ARTIFACTS_DIRNAME)
   FileUtils.mkdir_p(dir)
   slug = safe_slug(operation_id)
   File.write(File.join(dir, "#{slug}.raw.json"), JSON.pretty_generate(raw_body))
-  File.write(File.join(dir, "#{slug}.sdk.json"), JSON.pretty_generate(sdk_value))
+  File.write(File.join(dir, "#{slug}.sdk.json"), JSON.pretty_generate(reorder_like(raw_body, sdk_value)))
 end
 
 def write_report(results, ctx)

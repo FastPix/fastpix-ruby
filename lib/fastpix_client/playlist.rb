@@ -101,7 +101,8 @@ module FastpixClient
       # - **Manual:** Creates an empty playlist without any initial media items. Use this mode for manual curation, where you add items later in a user-defined sequence.
       # - **Smart:** Auto-populates the playlist at creation time based on the filter criteria (for example, a video creation date range) that you provide in the request.
       # 
-      # For more details, see <a href="https://fastpix.com/docs/playback-and-delivery/create-and-manage-playlists">Create and manage playlist</a>.
+      # For more details, see <a href="https://fastpix.com/docs/video-on-demand/create-and-manage-playlists">Create and manage playlist</a>.
+
       # 
       # #### How it works 
       # 

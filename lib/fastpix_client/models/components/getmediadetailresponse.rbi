@@ -2,12 +2,12 @@
 # frozen_string_literal: true
 
 
-class FastpixClient::Models::Components::GetMediaResponse
+class FastpixClient::Models::Components::GetMediaDetailResponse
   extend ::Crystalline::MetadataFields::ClassMethods
 end
 
 
-class FastpixClient::Models::Components::GetMediaResponse
+class FastpixClient::Models::Components::GetMediaDetailResponse
   def id(); end
   def id=(str_); end
   def source_media_id(); end
@@ -62,6 +62,8 @@ class FastpixClient::Models::Components::GetMediaResponse
   def is_audio_only=(str_); end
   def subtitle_available(); end
   def subtitle_available=(str_); end
+  def optimize_audio(); end
+  def optimize_audio=(str_); end
   def aspect_ratio(); end
   def aspect_ratio=(str_); end
 end

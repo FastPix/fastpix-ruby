@@ -1,18 +1,14 @@
-# GetMediaResponseMp4Support
+# GetMediaDetailResponseMp4Support
 
-Determines the type of MP4 support for the media.
-- **none**: Disables MP4 support.
-- **capped_4k**: Enables MP4 downloads with resolutions up to 4K.
-- **audioOnly**: Provides an MP4 stream containing only the audio.
-- **audioOnly,capped_4k**: Enables both MP4 video downloads (up to 4K) and an audio-only stream.
+One MP4 rendition generated for the media when MP4 support is requested.
 
 
+## Fields
 
-## Values
-
-| Name                   | Value                  |
-| ---------------------- | ---------------------- |
-| `NONE`                 | none                   |
-| `CAPPED_4K`            | capped_4k              |
-| `AUDIO_ONLY`           | audioOnly              |
-| `AUDIO_ONLY_CAPPED_4K` | audioOnly,capped_4k    |
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `type` | *T.nilable(::String)* | :heavy_minus_sign: | The MP4 rendition type. `capped_4k` is a downloadable MP4 video capped at 4K resolution, `audioOnly` is a downloadable m4a audio-only file. |
+| `status` | *T.nilable(::String)* | :heavy_minus_sign: | Generation status of this MP4 rendition. One of `preparing`, `ready`, or `failed`. |
+| `height` | *T.nilable(::Integer)* | :heavy_minus_sign: | Pixel height of the rendition. Omitted for the `audioOnly` type. |
+| `width` | *T.nilable(::Integer)* | :heavy_minus_sign: | Pixel width of the rendition. Omitted for the `audioOnly` type. |
+| `ext` | *T.nilable(::String)* | :heavy_minus_sign: | File extension of the downloadable rendition. |

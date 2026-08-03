@@ -18,4 +18,6 @@ class FastpixClient::Models::Components::AddTrackResponse
   def language_code=(str_); end
   def language_name(); end
   def language_name=(str_); end
+  def title(); end
+  def title=(str_); end
 end

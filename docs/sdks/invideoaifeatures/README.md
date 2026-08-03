@@ -21,7 +21,7 @@ This endpoint allows you to generate the summary for an existing media.
 3. Include the `summaryLength` parameter, specify the desired length of the summary in words (for example, 120 words), this determines how concise or detailed the summary will be. If no specific summary length is provided, the default length will be 100 words.
 4. The response includes the updated media data and confirmation of the changes applied.
 
-You can use the <a href="https://fastpix.com/docs/ai-events/in-video-ai-events#videomediaaisummaryready">video.mediaAI.summary.ready</a> webhook event to track and notify about the summary generation.
+You can use the <a href="https://fastpix.com/docs/webhooks/in-video-ai-events#videomediaaisummaryready">video.mediaAI.summary.ready</a> webhook event to track and notify about the summary generation.
 
 
 
@@ -29,7 +29,7 @@ You can use the <a href="https://fastpix.com/docs/ai-events/in-video-ai-events#v
 
 **Use case**: This is particularly useful when a user uploads a video and later chooses to generate a summary without needing to re-upload the video.
 
-Related guide: <a href="https://fastpix.com/docs/video-intelligence/generate-a-video-summary">Video summary</a>
+Related guide: <a href="https://fastpix.com/docs/in-video-ai/generate-a-video-summary">Video summary</a>
 
 
 ### Example Usage
@@ -87,12 +87,11 @@ This endpoint enables you to generate chapters for an existing media file.
 2. Include the `chapters` parameter in the request body to enable.
 3. The response contains the updated media data, confirming the changes made.
 
-You can use the <a href="https://fastpix.com/docs/ai-events/in-video-ai-events#videomediaaichaptersready">video.mediaAI.chapters.ready</a> webhook event to track and notify about the chapters generation.
+You can use the <a href="https://fastpix.com/docs/webhooks/in-video-ai-events#videomediaaichaptersready">video.mediaAI.chapters.ready</a> webhook event to track and notify about the chapters generation.
 
 **Use case:** This is particularly useful when a user uploads a video and later decides to enable chapters without re-uploading the entire video.
 
-Related guide: <a href="https://fastpix.com/docs/video-intelligence/generate-video-chapters">Video chapters</a>
-
+Related guide: <a href="https://fastpix.com/docs/in-video-ai/generate-video-chapters">Video chapters</a>
 
 ### Example Usage
 
@@ -152,11 +151,11 @@ Named Entity Recognition (NER) is a fundamental natural language processing (NLP
 2. Include the `namedEntities` parameter in the request body to enable.
 3. Receive a response containing the updated media data, confirming the changes made.
 
-You can use the <a href="https://fastpix.com/docs/ai-events/in-video-ai-events#videomediaainamedentitiesready">video.mediaAI.named-entities.ready</a> webhook event to track and notify about the named entities extraction.
+You can use the <a href="https://fastpix.com/docs/webhooks/in-video-ai-events#videomediaainamedentitiesready">video.mediaAI.named-entities.ready</a> webhook event to track and notify about the named entities extraction.
 
 **Use case:** If a user uploads a video and later decides to enable named entity extraction without re-uploading the entire video.
 
-Related guide: <a href="https://fastpix.com/docs/video-intelligence/extract-named-entities-from-a-video">Named entities</a>
+Related guide: <a href="https://fastpix.com/docs/in-video-ai/extract-named-entities-from-a-video">Named entities</a>
 
 
 ### Example Usage
@@ -214,11 +213,12 @@ This endpoint enables moderation features, such as NSFW and profanity filtering,
 2. Include the `moderation` object and provide the requried `type` parameter in the request body to specify the media type (for example, video/audio/av).
 4. The response contains the updated media data, confirming the changes made.
 
-You can use the <a href="https://fastpix.com/docs/ai-events/in-video-ai-events#videomediaaimoderationready">video.mediaAI.moderation.ready</a> webhook event to track and notify about the detected moderation results.
+You can use the <a href="https://fastpix.com/docs/webhooks/in-video-ai-events#videomediaaimoderationready">video.mediaAI.moderation.ready</a> webhook event to track and notify about the detected moderation results.
 
 **Use case:** This is particularly useful when a user uploads a video and later decides to enable moderation detection without the need to re-upload it.
 
-Related guide: <a href="https://fastpix.com/docs/video-intelligence/detect-nsfw-content-and-profanity">Moderate NSFW & Profanity</a>
+Related guide: <a href="https://fastpix.com/docs/in-video-ai/detect-nsfw-content-and-profanity">Moderate NSFW & Profanity</a>
+
 
 
 ### Example Usage

@@ -161,11 +161,11 @@ FASTPIX_USERNAME=... FASTPIX_PASSWORD=... ruby tests/validate_get_endpoints.rb
 ### Latest consolidated results
 
 <!-- BEGIN GET_ENDPOINTS_CONSOLIDATED -->
-Last generated: 2026-06-20T06:26:53Z
+Last generated: 2026-07-29T12:56:29Z
 
 - **Total GET endpoints**: 30
-- **PASS**: 25
-- **FAIL**: 5
+- **PASS**: 26
+- **FAIL**: 4
 - **SKIP**: 0
 
 | Endpoint | OperationId | OpenAPI valid | SDK parse | Missing in SDK (present in API) | Missing in API (present in SDK) | Empty arrays omitted by SDK | Status |

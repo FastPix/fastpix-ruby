@@ -20,4 +20,6 @@ class FastpixClient::Models::Components::VideoTrack
   def frame_rate=(str_); end
   def status(); end
   def status=(str_); end
+  def title(); end
+  def title=(str_); end
 end

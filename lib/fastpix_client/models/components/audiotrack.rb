@@ -18,6 +18,8 @@ module FastpixClient
         field :type, Crystalline::Nilable.new(Models::Components::AudioTrackType), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('type'), 'decoder': Utils.enum_from_string(Models::Components::AudioTrackType, true) } }
         # Indicates the current state of the track. 'available' means the track has been processed successfully and is ready to be used or played.
         field :status, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('status') } }
+        # Title of the track.
+        field :title, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('title') } }
         # Name of the language in which the subtitles will be generated.
         # 
         field :language_name, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageName') } }
@@ -25,11 +27,12 @@ module FastpixClient
         # 
         field :language_code, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageCode') } }
 
-        sig { params(id: T.nilable(::String), type: T.nilable(Models::Components::AudioTrackType), status: T.nilable(::String), language_name: T.nilable(::String), language_code: T.nilable(::String)).void }
-        def initialize(id: nil, type: nil, status: nil, language_name: nil, language_code: nil)
+        sig { params(id: T.nilable(::String), type: T.nilable(Models::Components::AudioTrackType), status: T.nilable(::String), title: T.nilable(::String), language_name: T.nilable(::String), language_code: T.nilable(::String)).void }
+        def initialize(id: nil, type: nil, status: nil, title: nil, language_name: nil, language_code: nil)
           @id = id
           @type = type
           @status = status
+          @title = title
           @language_name = language_name
           @language_code = language_code
         end
@@ -40,6 +43,7 @@ module FastpixClient
           return false unless @id == other.id
           return false unless @type == other.type
           return false unless @status == other.status
+          return false unless @title == other.title
           return false unless @language_name == other.language_name
           return false unless @language_code == other.language_code
           true

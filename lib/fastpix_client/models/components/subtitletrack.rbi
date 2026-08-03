@@ -14,6 +14,8 @@ class FastpixClient::Models::Components::SubtitleTrack
   def type=(str_); end
   def status(); end
   def status=(str_); end
+  def title(); end
+  def title=(str_); end
   def language_name(); end
   def language_name=(str_); end
   def language_code(); end

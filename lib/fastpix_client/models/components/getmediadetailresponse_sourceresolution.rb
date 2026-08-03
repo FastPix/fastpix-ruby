@@ -7,8 +7,8 @@
 module FastpixClient
   module Models
     module Components
-      # GetMediaResponseSourceResolution - The actual resolution of the uploaded media. This represents the native quality of the source media.
-      class GetMediaResponseSourceResolution < T::Enum
+      # GetMediaDetailResponseSourceResolution - The actual resolution of the uploaded media. This represents the native quality of the source media.
+      class GetMediaDetailResponseSourceResolution < T::Enum
 
 
         enums do
@@ -22,6 +22,8 @@ module FastpixClient
           SEVEN_HUNDRED_AND_TWENTY = new('720')
           FOUR_HUNDRED_AND_EIGHTYP = new('480p')
           FOUR_HUNDRED_AND_EIGHTY = new('480')
+          THREE_HUNDRED_AND_SIXTYP = new('360p')
+          THREE_HUNDRED_AND_SIXTY = new('360')
         end
       end
     end

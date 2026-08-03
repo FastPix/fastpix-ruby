@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.4]
+
+Aligns the media models with the FastPix API. Contains three breaking changes.
+
+### Breaking
+
+- **`mp4Support` on media responses is now an array of rendition objects**
+  instead of a single string enum — one entry per rendition, each with `type`,
+  `status`, `height`, `width` and `ext`. Request payloads are unchanged.
+
+  ```ruby
+  # 1.1.3: media.mp4_support == Models::Components::MediaMp4Support::CAPPED_4K
+  # 1.1.4:
+  media.mp4_support&.any? { |r| r.type == 'capped_4k' && r.status == 'ready' }
+  ```
+
+- **`url` removed from `UpdateTrackRequest`.** A track's file can no longer be
+  changed on update, only its language and title. Passing `url:` now raises
+  `ArgumentError`.
+
+- **`Components::GetMediaResponse` renamed to `GetMediaDetailResponse`**, with
+  its six satellite models. Operation classes are unchanged — `get_media` still
+  returns `Operations::GetMediaResponse`.
+
+### Added
+
+- `title` on all ten track models, request and response alike.
+- `optimizeAudio` on the six media response models, and in `fastpixapi.yaml` so
+  it survives regeneration.
+- `360p` and `360` accepted on `sourceResolution`; a 360p asset previously raised
+  on decode.
+
+### Fixed
+
+- **`ManageLiveStream` failed to load** — a malformed doc comment left the file
+  unparseable, so all eight live stream operations raised on first access.
+  Introduced and fixed within this cycle; `1.1.3` is unaffected.
+- `mp4Support` documentation and examples still described the field as a string.
+
+### Internal
+
+- Version bump `1.1.3` -> `1.1.4` (`@sdk_version`, `User-Agent`).
+
 ## [1.1.3]
 
 A maintenance release focused on internal code quality (SonarCloud), security

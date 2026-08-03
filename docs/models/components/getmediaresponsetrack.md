@@ -1,2 +1,2 @@
-# GetMediaResponseTrack
+# GetMediaDetailResponseTrack
 

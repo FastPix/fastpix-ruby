@@ -17,7 +17,6 @@ module FastpixClient
           ONE_THOUSAND_AND_EIGHTYP = new('1080p')
           SEVEN_HUNDRED_AND_TWENTYP = new('720p')
           FOUR_HUNDRED_AND_EIGHTYP = new('480p')
-          THREE_HUNDRED_AND_SIXTYP = new('360p')
         end
       end
     end

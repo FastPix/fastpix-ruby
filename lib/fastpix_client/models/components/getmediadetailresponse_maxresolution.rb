@@ -7,8 +7,8 @@
 module FastpixClient
   module Models
     module Components
-      # GetMediaResponseMaxResolution - The maximum resolution specified by the user for the media.
-      class GetMediaResponseMaxResolution < T::Enum
+      # GetMediaDetailResponseMaxResolution - The maximum resolution specified by the user for the media.
+      class GetMediaDetailResponseMaxResolution < T::Enum
 
 
         enums do

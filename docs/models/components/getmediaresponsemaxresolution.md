@@ -1,4 +1,4 @@
-# GetMediaResponseMaxResolution
+# GetMediaDetailResponseMaxResolution
 
 The maximum resolution specified by the user for the media.
 

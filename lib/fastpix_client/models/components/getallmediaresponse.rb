@@ -26,13 +26,8 @@ module FastpixClient
         field :creator_id, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('creatorId') } }
         # Determines the media's status, which can be one of the possible values.
         field :status, Crystalline::Nilable.new(Models::Components::GetAllMediaResponseStatus), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('status'), 'decoder': Utils.enum_from_string(Models::Components::GetAllMediaResponseStatus, true) } }
-        # Determines the type of MP4 support for the media.
-        # - **none**: Disables MP4 support.
-        # - **capped_4k**: Enables MP4 downloads with resolutions up to 4K.
-        # - **audioOnly**: Provides an MP4 stream containing only the audio.
-        # - **audioOnly,capped_4k**: Enables both MP4 video downloads (up to 4K) and an audio-only stream.
-        # 
-        field :mp4_support, Crystalline::Nilable.new(Models::Components::GetAllMediaResponseMp4Support), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mp4Support'), 'decoder': Utils.enum_from_string(Models::Components::GetAllMediaResponseMp4Support, true) } }
+        # The MP4 renditions generated for the media. Present only when MP4 support is enabled.
+        field :mp4_support, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::GetAllMediaResponseMp4Support)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mp4Support') } }
         # A collection of Playback ID objects utilized for crafting HLS playback URLs.
         field :playback_ids, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::PlaybackId)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('playbackIds') } }
         # A media consists of different media tracks, like video, audio, and subtitle, all combined.
@@ -72,11 +67,13 @@ module FastpixClient
         field :is_audio_only, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('isAudioOnly') } }
         # Indicates whether subtitles are available for the media.
         field :subtitle_available, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('subtitleAvailable') } }
+        # Enhance the quality and volume of the audio track. This is available for pre-recorded content only.
+        field :optimize_audio, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('optimizeAudio') } }
         # The aspect ratio of a video is a value that describes the relative shape of a video based on its width and height.
         field :aspect_ratio, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('aspectRatio') } }
 
-        sig { params(id: T.nilable(::String), source_media_id: T.nilable(::String), workspace_id: T.nilable(::String), stream_id: T.nilable(::String), media_quality: T.nilable(Models::Components::GetAllMediaResponseMediaQuality), creator_id: T.nilable(::String), status: T.nilable(Models::Components::GetAllMediaResponseStatus), mp4_support: T.nilable(Models::Components::GetAllMediaResponseMp4Support), playback_ids: T.nilable(T::Array[Models::Components::PlaybackId]), tracks: T.nilable(T::Array[T.any(Models::Components::VideoTrackForGetAll, Models::Components::AudioTrack, Models::Components::SubtitleTrack)]), summary: T.nilable(Models::Components::AiSummaryRecord), chapters: T.nilable(Models::Components::AiResponseRecord), named_entities: T.nilable(Models::Components::AiResponseRecord), moderation: T.nilable(Models::Components::AiResponseRecord), duration: T.nilable(::String), frame_rate: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), thumbnail: T.nilable(::String), metadata: T.nilable(T::Hash[Symbol, ::String]), title: T.nilable(::String), max_resolution: T.nilable(Models::Components::GetAllMediaResponseMaxResolution), source_resolution: T.nilable(Models::Components::GetAllMediaResponseSourceResolution), source_access: T.nilable(T::Boolean), generated_subtitles: T.nilable(T::Array[Models::Components::TracksSubtitles]), is_audio_only: T.nilable(T::Boolean), subtitle_available: T.nilable(T::Boolean), aspect_ratio: T.nilable(::String)).void }
-        def initialize(id: nil, source_media_id: nil, workspace_id: nil, stream_id: nil, media_quality: nil, creator_id: nil, status: nil, mp4_support: nil, playback_ids: nil, tracks: nil, summary: nil, chapters: nil, named_entities: nil, moderation: nil, duration: nil, frame_rate: nil, created_at: nil, updated_at: nil, thumbnail: nil, metadata: nil, title: nil, max_resolution: Models::Components::GetAllMediaResponseMaxResolution::ONE_THOUSAND_AND_EIGHTYP, source_resolution: Models::Components::GetAllMediaResponseSourceResolution::ONE_THOUSAND_AND_EIGHTYP, source_access: nil, generated_subtitles: nil, is_audio_only: nil, subtitle_available: nil, aspect_ratio: nil)
+        sig { params(id: T.nilable(::String), source_media_id: T.nilable(::String), workspace_id: T.nilable(::String), stream_id: T.nilable(::String), media_quality: T.nilable(Models::Components::GetAllMediaResponseMediaQuality), creator_id: T.nilable(::String), status: T.nilable(Models::Components::GetAllMediaResponseStatus), mp4_support: T.nilable(T::Array[Models::Components::GetAllMediaResponseMp4Support]), playback_ids: T.nilable(T::Array[Models::Components::PlaybackId]), tracks: T.nilable(T::Array[T.any(Models::Components::VideoTrackForGetAll, Models::Components::AudioTrack, Models::Components::SubtitleTrack)]), summary: T.nilable(Models::Components::AiSummaryRecord), chapters: T.nilable(Models::Components::AiResponseRecord), named_entities: T.nilable(Models::Components::AiResponseRecord), moderation: T.nilable(Models::Components::AiResponseRecord), duration: T.nilable(::String), frame_rate: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), thumbnail: T.nilable(::String), metadata: T.nilable(T::Hash[Symbol, ::String]), title: T.nilable(::String), max_resolution: T.nilable(Models::Components::GetAllMediaResponseMaxResolution), source_resolution: T.nilable(Models::Components::GetAllMediaResponseSourceResolution), source_access: T.nilable(T::Boolean), generated_subtitles: T.nilable(T::Array[Models::Components::TracksSubtitles]), is_audio_only: T.nilable(T::Boolean), subtitle_available: T.nilable(T::Boolean), optimize_audio: T.nilable(T::Boolean), aspect_ratio: T.nilable(::String)).void }
+        def initialize(id: nil, source_media_id: nil, workspace_id: nil, stream_id: nil, media_quality: nil, creator_id: nil, status: nil, mp4_support: nil, playback_ids: nil, tracks: nil, summary: nil, chapters: nil, named_entities: nil, moderation: nil, duration: nil, frame_rate: nil, created_at: nil, updated_at: nil, thumbnail: nil, metadata: nil, title: nil, max_resolution: Models::Components::GetAllMediaResponseMaxResolution::ONE_THOUSAND_AND_EIGHTYP, source_resolution: Models::Components::GetAllMediaResponseSourceResolution::ONE_THOUSAND_AND_EIGHTYP, source_access: nil, generated_subtitles: nil, is_audio_only: nil, subtitle_available: nil, optimize_audio: nil, aspect_ratio: nil)
           @id = id
           @source_media_id = source_media_id
           @workspace_id = workspace_id
@@ -104,6 +101,7 @@ module FastpixClient
           @generated_subtitles = generated_subtitles
           @is_audio_only = is_audio_only
           @subtitle_available = subtitle_available
+          @optimize_audio = optimize_audio
           @aspect_ratio = aspect_ratio
         end
 
@@ -116,13 +114,13 @@ module FastpixClient
            @summary, @chapters, @named_entities, @moderation, @duration,
            @frame_rate, @created_at, @updated_at, @thumbnail, @metadata,
            @title, @max_resolution, @source_resolution, @source_access, @generated_subtitles,
-           @is_audio_only, @subtitle_available, @aspect_ratio] ==
+           @is_audio_only, @subtitle_available, @optimize_audio, @aspect_ratio] ==
             [other.id, other.source_media_id, other.workspace_id, other.stream_id, other.media_quality,
              other.creator_id, other.status, other.mp4_support, other.playback_ids, other.tracks,
              other.summary, other.chapters, other.named_entities, other.moderation, other.duration,
              other.frame_rate, other.created_at, other.updated_at, other.thumbnail, other.metadata,
              other.title, other.max_resolution, other.source_resolution, other.source_access, other.generated_subtitles,
-             other.is_audio_only, other.subtitle_available, other.aspect_ratio]
+             other.is_audio_only, other.subtitle_available, other.optimize_audio, other.aspect_ratio]
         end
       end
     end

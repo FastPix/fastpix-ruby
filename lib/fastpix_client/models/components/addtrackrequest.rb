@@ -20,13 +20,16 @@ module FastpixClient
         field :language_code, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageCode') } }
         # The full name of the language corresponding to the `languageCode`.
         field :language_name, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageName') } }
+        # Title of the track.
+        field :title, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('title') } }
 
-        sig { params(url: T.nilable(::String), type: T.nilable(Models::Components::AddTrackRequestType), language_code: T.nilable(::String), language_name: T.nilable(::String)).void }
-        def initialize(url: 'https://static.fastpix.com/music-1.mp3', type: Models::Components::AddTrackRequestType::AUDIO, language_code: 'it', language_name: 'Italian')
+        sig { params(url: T.nilable(::String), type: T.nilable(Models::Components::AddTrackRequestType), language_code: T.nilable(::String), language_name: T.nilable(::String), title: T.nilable(::String)).void }
+        def initialize(url: 'https://static.fastpix.com/music-1.mp3', type: Models::Components::AddTrackRequestType::AUDIO, language_code: 'it', language_name: 'Italian', title: nil)
           @url = url
           @type = type
           @language_code = language_code
           @language_name = language_name
+          @title = title
         end
 
         sig { params(other: T.untyped).returns(T::Boolean) }
@@ -36,6 +39,7 @@ module FastpixClient
           return false unless @type == other.type
           return false unless @language_code == other.language_code
           return false unless @language_name == other.language_name
+          return false unless @title == other.title
           true
         end
       end

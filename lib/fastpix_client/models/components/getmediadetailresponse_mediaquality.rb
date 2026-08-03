@@ -7,8 +7,8 @@
 module FastpixClient
   module Models
     module Components
-      # GetMediaResponseMediaQuality - The quality tier applied to the media.
-      class GetMediaResponseMediaQuality < T::Enum
+      # GetMediaDetailResponseMediaQuality - The quality tier applied to the media.
+      class GetMediaDetailResponseMediaQuality < T::Enum
 
 
         enums do
