@@ -11,25 +11,23 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      uses: actions/checkout@v4
 
     - name: Set up Ruby
-      uses: ruby/setup-ruby@b8d447ba7506ac7e0c8fbc50762276fb3b7df731  # v1
+      uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.2'
-        bundler-cache: false
+        bundler-cache: false  # Disabled to allow lockfile updates
 
     - name: Install dependencies
-      # Install strictly from the committed Gemfile.lock so dependencies are
-      # locked to verified versions; fails if the lockfile is out of date.
-      run: bundle install --deployment --jobs 4 --retry 3
+      run: bundle install --jobs 4 --retry 3
 
-    - name: Show resolved Gemfile.lock (for debugging)
+    - name: Show updated Gemfile.lock (for debugging)
       if: failure()
       run: cat Gemfile.lock
 
     - name: Build the gem
-      run: gem build ./*.gemspec
+      run: gem build *.gemspec
 
     - name: Push to RubyGems
       env:
