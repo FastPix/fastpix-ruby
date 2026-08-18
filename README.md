@@ -1,6 +1,17 @@
 # FastPix Ruby SDK
 
+[![Gem version](https://img.shields.io/gem/v/fastpixapi)](https://rubygems.org/gems/fastpixapi)
+[![Gem downloads](https://img.shields.io/gem/dt/fastpixapi)](https://rubygems.org/gems/fastpixapi)
+[![license](https://img.shields.io/github/license/FastPix/fastpix-ruby)](https://github.com/FastPix/fastpix-ruby/blob/main/LICENSE)
+[![Ruby 3.2+](https://img.shields.io/badge/Ruby-3.2%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
+
 A robust, type-safe Ruby SDK designed for seamless integration with the FastPix API platform.
+
+The FastPix Ruby SDK is a type-safe Ruby client for the FastPix video API. From any Ruby 3.2+ app you can upload and manage videos, run live streams and simulcasts, create and secure playback IDs, manage playlists and signing keys, pull video analytics (views, metrics, dimensions, and errors), and drive in-video AI features such as subtitles, chapters, summaries, and content moderation.
+
+**Works with:** Ruby 3.2+ · Bundler / RubyGems (`fastpixapi`) · Rails, Sinatra, or plain Ruby · Faraday HTTP
+
+📖 **Docs:** https://fastpix.com/docs/language-sdks/ruby-sdk &nbsp;·&nbsp; 🚀 **Free account:** https://dashboard.fastpix.com
 
 
 
@@ -47,6 +58,8 @@ export FASTPIX_PASSWORD="your-secret-key"
   * [Available Resources and Operations](#available-resources-and-operations)
   * [Error Handling](#error-handling)
   * [Server Selection](#server-selection)
+  * [FAQ](#faq)
+  * [Which FastPix SDK should I use?](#which-fastpix-sdk-should-i-use)
   * [Development](#development)
 
 ## Setup
@@ -356,7 +369,55 @@ rescue StandardError
 end
 ```
 
-# Development
+## FAQ
+
+**How do I install the FastPix Ruby SDK?**
+Add `gem 'fastpixapi'` to your Gemfile and run `bundle install`, or run `gem install fastpixapi`. See [Setup](#setup) and [Installation](#installation).
+
+**How do I authenticate the SDK?**
+FastPix uses Basic Auth: pass your access token as `username` and your secret key as `password` in `Models::Components::Security` when constructing the client. See [Initialization](#initialization).
+
+**How do I upload a video in Ruby?**
+Create media from a URL or a direct upload through `s.input_video`, for example `s.input_video.create_media(request: req)`. See [Example Usage](#example-usage) and [Available Resources and Operations](#available-resources-and-operations).
+
+**How do I start a live stream?**
+Use the Live API resources to create and manage streams, simulcasts, and live playback IDs. See [Available Resources and Operations](#available-resources-and-operations).
+
+**How do I get video analytics and metrics in Ruby?**
+The Video Data API exposes metrics, views, dimensions, and errors for quality-of-experience monitoring. See [Available Resources and Operations](#available-resources-and-operations).
+
+**How do I handle API errors?**
+Rescue `FastpixClient::Models::Errors::APIError`, which exposes the message, status code, body, and raw response. See [Error Handling](#error-handling).
+
+**How do I change the API base URL?**
+Pass a `server_url` when constructing the client. See [Server Selection](#server-selection).
+
+**Which Ruby versions are supported?**
+Ruby 3.2 and above. See [Prerequisites](#prerequisites).
+
+**Is the SDK production-ready?**
+The SDK is currently in beta; pin your gem to a specific version to avoid breaking changes between releases. See [Maturity](#maturity).
+
+**Is the SDK typed?**
+Yes - it is a type-safe client generated from the FastPix API specification. See [Development](#development).
+
+## Which FastPix SDK should I use?
+
+FastPix publishes a server SDK for every major backend language, each generated from the same API specification:
+
+| Language | Repo | Install |
+|---|---|---|
+| **Ruby** (this repo) | [fastpix-ruby](https://github.com/FastPix/fastpix-ruby) | `gem install fastpixapi` |
+| Node.js / TypeScript | [node-sdk](https://github.com/FastPix/node-sdk) | `npm install @fastpix/fastpix-node` |
+| Python | [fastpix-python](https://github.com/FastPix/fastpix-python) | `pip install fastpix-python` |
+| PHP | [fastpix-php](https://github.com/FastPix/fastpix-php) | `composer require fastpix/sdk` |
+| Go | [fastpix-go](https://github.com/FastPix/fastpix-go) | `go get github.com/FastPix/fastpix-go` |
+| Java | [fastpix-java](https://github.com/FastPix/fastpix-java) | `io.fastpix:sdk` (Maven/Gradle) |
+| C# / .NET | [fastpix-sdk-csharp](https://github.com/FastPix/fastpix-sdk-csharp) | `dotnet add package Fastpix` |
+
+To upload and play the media these SDKs create, use the FastPix browser libraries: [web-uploads-sdk](https://github.com/FastPix/web-uploads-sdk), [react-web-uploader](https://github.com/FastPix/react-web-uploader), and [web-player-component](https://github.com/FastPix/web-player-component). Browse everything in the [FastPix organization](https://github.com/orgs/FastPix/repositories).
+
+## Development
 
 This Ruby SDK is programmatically generated from our API specifications. Any manual modifications to internal files may be overwritten during subsequent generation cycles.
 
