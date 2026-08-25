@@ -1,0 +1,4 @@
+.env
+rails-example/tmp/
+rails-example/log/
+rails-example/.bundle/
