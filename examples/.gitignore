@@ -2,3 +2,5 @@
 rails-example/tmp/
 rails-example/log/
 rails-example/.bundle/
+rails-example/vendor/
+rails-example/Gemfile.lock
