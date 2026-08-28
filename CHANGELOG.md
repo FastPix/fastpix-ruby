@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.5]
+
+### Changed
+- Licence updated to Apache-2.0.
+
 ## [1.1.4]
 
 Aligns the media models with the FastPix API. Contains three breaking changes.
