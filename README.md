@@ -5,159 +5,404 @@
 [![license](https://img.shields.io/github/license/FastPix/fastpix-ruby)](https://github.com/FastPix/fastpix-ruby/blob/main/LICENSE)
 [![Ruby 3.2+](https://img.shields.io/badge/Ruby-3.2%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
 
-A robust, type-safe Ruby SDK designed for seamless integration with the FastPix API platform.
+A robust, type-safe Ruby SDK for integrating Ruby applications with the FastPix video API.
 
-The FastPix Ruby SDK is a type-safe Ruby client for the FastPix video API. From any Ruby 3.2+ app you can upload and manage videos, run live streams and simulcasts, create and secure playback IDs, manage playlists and signing keys, pull video analytics (views, metrics, dimensions, and errors), and drive in-video AI features such as subtitles, chapters, summaries, and content moderation.
+The FastPix Ruby SDK lets you upload and manage on-demand video, create and manage live streams, create playback IDs, manage playlists and signing keys, retrieve video analytics, and use in-video AI capabilities.
 
-**Works with:** Ruby 3.2+ · Bundler / RubyGems (`fastpixapi`) · Rails, Sinatra, or plain Ruby · Faraday HTTP
+**Works with:** Ruby 3.2+ · Bundler · RubyGems · FastPix API
 
-📖 **Docs:** https://fastpix.com/docs/language-sdks/ruby-sdk &nbsp;·&nbsp; 🚀 **Free account:** https://dashboard.fastpix.com
+📖 **Docs:** https://fastpix.com/docs/language-sdks/ruby-sdk
+🚀 **Free account:** https://dashboard.fastpix.com
 
+## Jump to
 
+Skip straight to a section without scrolling:
 
-## Introduction
+| Get started | API reference | Help & more |
+|---|---|---|
+| [Start here](#start-here) | [Available resources & operations](#available-resources-and-operations) | [FAQ](#faq) |
+| [Before you begin](#before-you-begin) | [Media workflow](#understand-the-media-workflow) | [Which SDK?](#which-fastpix-sdk-should-i-use) |
+| [Install the SDK](#install-the-sdk) | [Error handling](#error-handling) | [Development](#development) |
+| [Create your first media](#create-your-first-media) | [Server selection](#server-selection) | [Maturity](#maturity) |
+| [Verify your integration](#verify-your-integration) | [Examples](https://github.com/FastPix/fastpix-ruby/tree/main/examples) | [Detailed usage](#detailed-usage) |
 
-The FastPix Ruby SDK simplifies integration with the FastPix platform. It provides a clean, typed interface for secure and efficient communication with the FastPix API, enabling easy management of media uploads, live streaming, on‑demand content, playlists, video analytics, and signing keys for secure access and token management. It is intended for use with Ruby 3.2 and above.
+## Start here
 
-## Prerequisites
+If you are using the FastPix Ruby SDK for the first time, follow these steps in order:
 
-### Environment and Version Support
+1. [Check your Ruby version](#check-your-ruby-version)
+2. [Install the SDK](#install-the-sdk)
+3. [Configure authentication](#configure-authentication)
+4. [Initialize the FastPix client](#initialize-the-fastpix-client)
+5. [Create your first media](#create-your-first-media)
+6. [Verify your integration](#verify-your-integration)
+7. [Understand the media workflow](#understand-the-media-workflow)
+8. [Explore the available APIs](#available-resources-and-operations)
+
+Do not skip the verification steps. If a Ruby, dependency, or authentication problem occurs, fix it before continuing to the next API operation.
+
+---
+
+## Before you begin
+
+To use the FastPix Ruby SDK, make sure you have:
+
+- Ruby 3.2 or later.
+- Bundler.
+- Internet access.
+- A FastPix account.
+- A FastPix Access Token.
+- A FastPix Secret Key.
+
+### Environment and version support
 
 | Requirement | Version | Description |
-|---|---:|---|
+| --- | --- | --- |
 | Ruby | `3.2+` | Core runtime environment |
-| Bundler | `Latest` | Dependency management |
-| Internet | `Required` | API communication and authentication |
+| Bundler | Latest | Dependency management |
+| Internet | Required | API communication and authentication |
+| FastPix account | Required | Required for API credentials |
 
-> Pro Tip: We recommend using Ruby 3.2+ for optimal performance and the latest language features.
+The SDK is intended for Ruby 3.2 and later.
 
-### Getting Started with FastPix
+### Authentication
 
-To get started with the FastPix Ruby SDK, ensure you have the following:
+FastPix uses HTTP Basic Authentication.
 
-- The FastPix APIs are authenticated using a **Username** and a **Password**. You must generate these credentials to use the SDK.
-- Follow the steps in the [Authentication with Basic Auth](https://fastpix.com/docs/getting-started/activate-your-account) guide to obtain your credentials.
+| SDK value | FastPix credential |
+| --- | --- |
+| `username` | Access Token |
+| `password` | Secret Key |
 
-### Environment Variables (Optional)
+Follow the [Authentication with Basic Auth](https://fastpix.com/docs/getting-started/activate-your-account) guide to obtain your credentials.
 
-Configure your FastPix credentials using environment variables for enhanced security and convenience:
+For local development, set your credentials as environment variables:
 
 ```bash
-# Set your FastPix credentials
 export FASTPIX_USERNAME="your-access-token"
 export FASTPIX_PASSWORD="your-secret-key"
 ```
 
-> Security Note: Never commit your credentials to version control. Use environment variables or secure credential management systems.
+Never commit credentials to source control. Use environment variables or a secure credential-management system.
 
-## Table of Contents
+---
 
-* [FastPix Ruby SDK](#fastpix-ruby-sdk)
-  * [Setup](#setup)
-  * [Example Usage](#example-usage)
-  * [Available Resources and Operations](#available-resources-and-operations)
-  * [Error Handling](#error-handling)
-  * [Server Selection](#server-selection)
-  * [FAQ](#faq)
-  * [Which FastPix SDK should I use?](#which-fastpix-sdk-should-i-use)
-  * [Development](#development)
+## Check your Ruby version
 
-## Setup
-
-### Installation
-
-Install the FastPix Ruby SDK using Bundler. Add to your `Gemfile`:
-
-```ruby
-gem 'fastpixapi'
-```
-
-Then run:
+Before installing the SDK, verify that your Ruby version meets the minimum requirement:
 
 ```bash
-bundle install
+ruby -v
 ```
 
-Or install the gem directly:
+You can also run this check programmatically:
+
+```bash
+ruby -e 'v = RUBY_VERSION.split(".").map(&:to_i); abort("Ruby 3.2+ is required. Found #{RUBY_VERSION}") if v < [3,2,0]; puts "Ruby #{RUBY_VERSION} OK"'
+```
+
+If the command prints:
+
+```text
+Ruby 3.2+ is required...
+```
+
+install a supported Ruby version before continuing.
+
+### macOS with Homebrew
+
+If you use Homebrew on Apple Silicon:
+
+```bash
+brew install ruby
+```
+
+Add the Homebrew Ruby installation to your `PATH`:
+
+```bash
+echo 'export PATH="/opt/homebrew/opt/ruby/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Verify that your shell is using the Homebrew Ruby:
+
+```bash
+which ruby
+ruby -v
+```
+
+The `which ruby` command should return a path under:
+
+```text
+/opt/homebrew/opt/ruby/bin/ruby
+```
+
+> **Note:** macOS may include an older system Ruby. Installing a newer Ruby does not automatically make it the default `ruby` command.
+
+### Check Bundler
+
+Verify that Bundler is available:
+
+```bash
+bundle -v
+```
+
+If Bundler is not installed:
+
+```bash
+gem install bundler
+```
+
+Verify the installation:
+
+```bash
+bundle -v
+```
+
+---
+
+## Install the SDK
+
+The FastPix Ruby SDK is distributed as the `fastpixapi` RubyGem.
+
+### Install with Bundler
+
+For an existing Ruby project, add the SDK to your project:
+
+```bash
+bundle add fastpixapi
+```
+
+Then verify that Ruby can load the SDK:
+
+```bash
+bundle exec ruby -e 'require "fastpixapi"; puts "FastPix Ruby SDK loaded successfully"'
+```
+
+### Install with RubyGems
+
+If you are not using Bundler:
 
 ```bash
 gem install fastpixapi
 ```
 
-### Imports
+Verify the installation:
 
-Require the SDK and use the client namespace:
-
-```ruby
-require 'json'
-require 'fastpixapi'
-
-Models = ::FastpixClient::Models
+```bash
+ruby -e 'require "fastpixapi"; puts "FastPix Ruby SDK loaded successfully"'
 ```
 
-### Initialization
+You can also check the installed gem:
 
-Initialize the FastPix SDK with your credentials:
-
-```ruby
-require 'fastpixapi'
-
-Models = ::FastpixClient::Models
-s = ::FastpixClient::Fastpixapi.new(
-  security: Models::Components::Security.new(
-    username: 'your-access-token',
-    password: 'your-secret-key'
-  )
-)
+```bash
+gem list '^fastpixapi$'
 ```
 
-Or using environment variables:
+---
 
-```ruby
-require 'fastpixapi'
+## Configure authentication
 
-Models = ::FastpixClient::Models
-s = ::FastpixClient::Fastpixapi.new(
-  security: Models::Components::Security.new(
-    username: ENV['FASTPIX_USERNAME'],  # Your Access Token
-    password: ENV['FASTPIX_PASSWORD']  # Your Secret Key
-  )
-)
+FastPix uses Basic Authentication. Set your Access Token and Secret Key as environment variables so they stay out of your source code:
+
+```bash
+export FASTPIX_USERNAME="your-access-token"
+export FASTPIX_PASSWORD="your-secret-key"
 ```
 
-## Example Usage
+Confirm that both variables are set without displaying their values:
 
-```ruby
-require 'json'
-require 'fastpixapi'
+```bash
+[ -n "$FASTPIX_USERNAME" ] && echo "Access Token: set" || echo "Access Token: missing"
+[ -n "$FASTPIX_PASSWORD" ] && echo "Secret Key: set" || echo "Secret Key: missing"
+```
+
+You can also validate both variables with Ruby:
+
+```bash
+ruby -e 'abort("FASTPIX_USERNAME is not set") if ENV["FASTPIX_USERNAME"].to_s.empty?; abort("FASTPIX_PASSWORD is not set") if ENV["FASTPIX_PASSWORD"].to_s.empty?; puts "FastPix credentials are configured"'
+```
+
+> **Security:** Never print, commit, or hard-code your Access Token or Secret Key.
+
+---
+
+## Initialize the FastPix client
+
+Create a project directory, then initialize the client and create your first media:
+
+```bash
+mkdir fastpix-ruby-demo
+cd fastpix-ruby-demo
+```
+
+---
+
+## Create your first media
+
+The easiest way to verify your integration is to create media from a publicly accessible video URL.
+
+FastPix provides a sample video:
+
+```text
+https://static.fastpix.com/fp-sample-video.mp4
+```
+
+Create an `example.rb` file:
+
+```bash
+cat > example.rb <<'RUBY'
+require "json"
+require "fastpixapi"
 
 Models = ::FastpixClient::Models
-s = ::FastpixClient::Fastpixapi.new(
+
+client = ::FastpixClient::Fastpixapi.new(
   security: Models::Components::Security.new(
-    username: 'your-access-token',
-    password: 'your-secret-key'
+    username: ENV.fetch("FASTPIX_USERNAME"),
+    password: ENV.fetch("FASTPIX_PASSWORD")
   )
 )
 
-req = Models::Components::CreateMediaRequest.new(
+request = Models::Components::CreateMediaRequest.new(
   inputs: [
     Models::Components::PullVideoInput.new(
-      type: 'video',
-      url: 'https://static.fastpix.com/fp-sample-video.mp4',
-    ),
+      type: "video",
+      url: "https://static.fastpix.com/fp-sample-video.mp4"
+    )
   ],
-  metadata: { 'key1' => 'value1' },
+  metadata: {
+    "source" => "fastpix-ruby-readme"
+  }
 )
 
 begin
-  res = s.input_video.create_media(request: req)
-  puts JSON.pretty_generate(JSON.parse(res.raw_response.body))
+  response = client.input_video.create_media(request: request)
+
+  puts JSON.pretty_generate(
+    JSON.parse(response.raw_response.body)
+  )
 rescue FastpixClient::Models::Errors::APIError => e
-  puts JSON.pretty_generate(JSON.parse(e.body))
-rescue StandardError
-  puts res.raw_response.body.to_s if defined?(res) && res&.raw_response
+  warn "FastPix API request failed"
+  warn "Status: #{e.status_code}"
+  warn "Message: #{e.message}"
+  warn "Body: #{e.body}"
+  exit 1
 end
+RUBY
 ```
+
+Run the example:
+
+```bash
+bundle exec ruby example.rb
+```
+
+If you installed the SDK with `gem install`, run:
+
+```bash
+ruby example.rb
+```
+
+> **More examples:** For additional runnable examples, see the [`examples/`](https://github.com/FastPix/fastpix-ruby/tree/main/examples) directory in this repository.
+
+---
+
+## Verify your integration
+
+A successful request returns a response containing the newly created media resource.
+
+A successful response contains:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "..."
+  }
+}
+```
+
+The `data.id` value is the unique media ID assigned to the media.
+
+For an automated verification, use this version of the example:
+
+```bash
+cat > verify.rb <<'RUBY'
+require "json"
+require "fastpixapi"
+
+Models = ::FastpixClient::Models
+
+abort("FASTPIX_USERNAME is not set") if ENV["FASTPIX_USERNAME"].to_s.empty?
+abort("FASTPIX_PASSWORD is not set") if ENV["FASTPIX_PASSWORD"].to_s.empty?
+
+client = ::FastpixClient::Fastpixapi.new(
+  security: Models::Components::Security.new(
+    username: ENV.fetch("FASTPIX_USERNAME"),
+    password: ENV.fetch("FASTPIX_PASSWORD")
+  )
+)
+
+request = Models::Components::CreateMediaRequest.new(
+  inputs: [
+    Models::Components::PullVideoInput.new(
+      type: "video",
+      url: "https://static.fastpix.com/fp-sample-video.mp4"
+    )
+  ],
+  metadata: {
+    "source" => "fastpix-ruby-readme"
+  }
+)
+
+begin
+  response = client.input_video.create_media(request: request)
+  body = JSON.parse(response.raw_response.body)
+
+  abort("FastPix API returned success=false") unless body["success"]
+
+  media_id = body.dig("data", "id")
+  abort("FastPix API response did not contain data.id") unless media_id
+
+  puts "Media created successfully"
+  puts "Media ID: #{media_id}"
+rescue FastpixClient::Models::Errors::APIError => e
+  warn "FastPix API request failed"
+  warn "Status: #{e.status_code}"
+  warn "Message: #{e.message}"
+  warn "Body: #{e.body}"
+  exit 1
+end
+RUBY
+```
+
+Run it:
+
+```bash
+bundle exec ruby verify.rb
+```
+
+Expected output:
+
+```text
+Media created successfully
+Media ID: <media-id>
+```
+
+If you see this output, your Ruby environment, SDK installation, credentials, and connection to the FastPix API are working.
+
+## Understand the media workflow
+
+Creating media is usually the first step in a FastPix on-demand video workflow. You create the media, poll it until processing finishes, then create a playback ID to play it.
+
+![FastPix media workflow: create media returns a media ID, you retrieve and poll the media until it is ready, then create a playback ID and play the video.](https://static.fastpix.com/ruby-media-workflow.png)
+
+The **media ID** identifies the media resource in subsequent API calls.
+
+A **playback ID** provides access to the media for playback.
+
+For more information about the video-on-demand workflow, see the [FastPix Video on Demand documentation](https://fastpix.com/docs).
 
 ## Available Resources and Operations
 
@@ -372,13 +617,13 @@ end
 ## FAQ
 
 **How do I install the FastPix Ruby SDK?**
-Add `gem 'fastpixapi'` to your Gemfile and run `bundle install`, or run `gem install fastpixapi`. See [Setup](#setup) and [Installation](#installation).
+Add `gem 'fastpixapi'` to your Gemfile and run `bundle install`, or run `gem install fastpixapi`. See [Install the SDK](#install-the-sdk).
 
 **How do I authenticate the SDK?**
-FastPix uses Basic Auth: pass your access token as `username` and your secret key as `password` in `Models::Components::Security` when constructing the client. See [Initialization](#initialization).
+FastPix uses Basic Auth: pass your access token as `username` and your secret key as `password` in `Models::Components::Security` when constructing the client. See [Initialize the FastPix client](#initialize-the-fastpix-client).
 
 **How do I upload a video in Ruby?**
-Create media from a URL or a direct upload through `s.input_video`, for example `s.input_video.create_media(request: req)`. See [Example Usage](#example-usage) and [Available Resources and Operations](#available-resources-and-operations).
+Create media from a URL or a direct upload through `s.input_video`, for example `s.input_video.create_media(request: req)`. See [Create your first media](#create-your-first-media) and [Available Resources and Operations](#available-resources-and-operations).
 
 **How do I start a live stream?**
 Use the Live API resources to create and manage streams, simulcasts, and live playback IDs. See [Available Resources and Operations](#available-resources-and-operations).
@@ -393,7 +638,7 @@ Rescue `FastpixClient::Models::Errors::APIError`, which exposes the message, sta
 Pass a `server_url` when constructing the client. See [Server Selection](#server-selection).
 
 **Which Ruby versions are supported?**
-Ruby 3.2 and above. See [Prerequisites](#prerequisites).
+Ruby 3.2 and above. See [Before you begin](#before-you-begin).
 
 **Is the SDK production-ready?**
 The SDK is currently in beta; pin your gem to a specific version to avoid breaking changes between releases. See [Maturity](#maturity).
