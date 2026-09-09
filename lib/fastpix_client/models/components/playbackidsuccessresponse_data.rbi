@@ -12,4 +12,6 @@ class FastpixClient::Models::Components::PlaybackIdSuccessResponseData
   def id=(str_); end
   def access_policy(); end
   def access_policy=(str_); end
+  def access_restrictions(); end
+  def access_restrictions=(str_); end
 end

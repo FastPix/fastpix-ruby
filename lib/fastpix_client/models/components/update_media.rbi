@@ -39,7 +39,7 @@ class FastpixClient::Models::Components::UpdateMedia
   def optimize_audio(); end
   def optimize_audio=(str_); end
   def duration(); end
-  def duration=(str_); end
+  def duration=(float_); end
   def aspect_ratio(); end
   def aspect_ratio=(str_); end
   def created_at(); end

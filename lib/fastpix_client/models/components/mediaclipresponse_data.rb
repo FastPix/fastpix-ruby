@@ -15,7 +15,7 @@ module FastpixClient
         # The unique identifier assigned to the media by FastPix.
         field :id, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('id') } }
         # Duration of the media in HH:MM:SS format.
-        field :duration, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('duration') } }
+        field :duration, Crystalline::Nilable.new(::Float), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('duration') } }
         # The current processing status of the media.
         field :status, Crystalline::Nilable.new(Models::Components::MediaClipResponseStatus), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('status'), 'decoder': Utils.enum_from_string(Models::Components::MediaClipResponseStatus, true) } }
         # A video thumbnail that acts as a preview image for the video.
@@ -25,7 +25,7 @@ module FastpixClient
 
         field :playback_ids, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::MediaClipResponsePlaybackId)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('playbackIds') } }
 
-        sig { params(id: T.nilable(::String), duration: T.nilable(::String), status: T.nilable(Models::Components::MediaClipResponseStatus), thumbnail: T.nilable(::String), created_at: T.nilable(::DateTime), playback_ids: T.nilable(T::Array[Models::Components::MediaClipResponsePlaybackId])).void }
+        sig { params(id: T.nilable(::String), duration: T.nilable(::Float), status: T.nilable(Models::Components::MediaClipResponseStatus), thumbnail: T.nilable(::String), created_at: T.nilable(::DateTime), playback_ids: T.nilable(T::Array[Models::Components::MediaClipResponsePlaybackId])).void }
         def initialize(id: nil, duration: nil, status: nil, thumbnail: nil, created_at: nil, playback_ids: nil)
           @id = id
           @duration = duration

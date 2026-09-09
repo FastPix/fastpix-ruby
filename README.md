@@ -229,6 +229,8 @@ For detailed documentation, see [FastPix Live Stream Overview](https://fastpix.c
 - [Create Playback ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/liveplayback/README.md#create_playback_id_of_stream) - Generate secure live playback access
 - [Delete Playback ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/liveplayback/README.md#delete_playback_id_of_stream) - Revoke live playback access
 - [Get Playback ID](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/liveplayback/README.md#get_live_stream_playback_id) - Retrieve live playback configuration
+- [Update Domain Restrictions](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/liveplayback/README.md#update_live_stream_domain_restrictions) - Restrict live playback by domain
+- [Update User-Agent Restrictions](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/liveplayback/README.md#update_live_stream_user_agent_restrictions) - Restrict live playback by user agent
 
 #### Simulcast Stream
 - [Create Simulcast](https://github.com/FastPix/fastpix-ruby/blob/main/docs/sdks/simulcaststream/README.md#create_simulcast_of_stream) - Set up multi-platform streaming

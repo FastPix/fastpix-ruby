@@ -52,6 +52,7 @@ req = Models::Components::CreateLiveStreamRequest.new(
     metadata: {
       "livestream_name": 'fastpix_livestream',
     },
+    enable_recording: true,
   ),
 )
 

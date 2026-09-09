@@ -53,6 +53,8 @@ module Crystalline
           # rubocop:enable Lint/SuppressedException
           return value
         elsif field_type.to_s == 'Float'
+          raise TypeError, "Cannot convert #{value.inspect} to Float. The value is of type #{value.class}" unless value.is_a?(::Numeric)
+
           return value.to_f
 
         end

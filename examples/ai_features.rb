@@ -11,7 +11,7 @@ require 'json'
 Models = ::FastpixClient::Models
 Ops = Models::Operations
 
-media_id = ENV['FASTPIX_MEDIA_ID']
+media_id = ENV.fetch('FASTPIX_MEDIA_ID', nil)
 if media_id.nil? || media_id.empty?
   abort 'Set FASTPIX_MEDIA_ID to a ready media id first (see the comment at the top).'
 end

@@ -34,7 +34,6 @@
 
 require 'json'
 require 'yaml'
-require 'set'
 require 'base64'
 require 'fileutils'
 require 'net/http'
@@ -78,15 +77,11 @@ SDK_VALIDATE_TAG = 'sdk-validate'
 def resolve_spec_path
   return ENV.fetch('FASTPIX_SPEC', nil) if ENV.fetch('FASTPIX_SPEC', nil) && File.exist?(ENV.fetch('FASTPIX_SPEC', nil))
 
-  candidates = [
-    File.join(ROOT_DIR, 'fastpixapi.yaml'),
-    File.join(ROOT_DIR, 'fastpix.yaml'),
-    File.join(ROOT_DIR, 'openapi.yaml')
-  ]
+  candidates = [File.join(ROOT_DIR, 'openapi.yaml')]
   found = candidates.find { |p| File.exist?(p) }
   return found unless found.nil?
 
-  raise SpecNotFoundError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
+  raise SpecNotFoundError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(', ')}"
 end
 
 def load_openapi_spec
@@ -346,9 +341,7 @@ def invoke_sdk(operation_id, request, base_url, username, password)
   res = invoke_sdk_create_ops(operation_id, g, s)
   res = invoke_sdk_update_ops(operation_id, g, s) if res == :unhandled
   res = invoke_sdk_delete_ops(operation_id, g, s) if res == :unhandled
-  if res == :unhandled
-    return { ok: false, error: { 'name' => 'SDKMappingError', 'message' => "No Ruby SDK mapping for #{operation_id}" } }
-  end
+  return { ok: false, error: { 'name' => 'SDKMappingError', 'message' => "No Ruby SDK mapping for #{operation_id}" } } if res == :unhandled
 
   {
     ok: true,
@@ -376,7 +369,7 @@ def invoke_sdk_create_ops(operation_id, g, s)
   when OP_CREATE_STREAM
     s.start_live_stream.create_new_stream(request: C::CreateLiveStreamRequest.new(
       playback_settings: C::PlaybackSettings.new,
-      input_media_settings: C::InputMediaSettings.new(metadata: { 'name' => SDK_VALIDATE_TAG })
+      input_media_settings: C::InputMediaSettings.new(metadata: { 'name' => SDK_VALIDATE_TAG }, enable_recording: false)
     ))
   when OP_CREATE_MEDIA_PLAYBACK_ID
     s.playback.create_media_playback_id(body: O::CreateMediaPlaybackIdRequestBody.new(access_policy: C::AccessPolicy::PUBLIC), media_id: g['mediaId'])
@@ -385,7 +378,12 @@ def invoke_sdk_create_ops(operation_id, g, s)
   when OP_GENERATE_SUBTITLE
     s.manage_videos.generate_subtitle_track(body: C::TrackSubtitlesGenerateRequest.new, media_id: g['mediaId'], track_id: g['trackId'])
   when OP_CREATE_STREAM_PLAYBACK
-    s.live_playback.create_playback_id_of_stream(body: C::PlaybackIdRequest.new, stream_id: g['streamId'])
+    s.live_playback.create_playback_id_of_stream(body: C::PlaybackIdRequest.new(
+      access_restrictions: C::PlaybackIdAccessRestrictions.new(
+        domains: C::PlaybackIdDomains.new(default_policy: C::PolicyAction::DENY, allow: ['example.com'], deny: []),
+        user_agents: C::PlaybackIdUserAgents.new(default_policy: C::PolicyAction::ALLOW, allow: [], deny: [])
+      )
+    ), stream_id: g['streamId'])
   when OP_CREATE_SIMULCAST
     s.simulcast_stream.create_simulcast_of_stream(body: C::SimulcastRequest.new(url: 'rtmp://example.com/live', stream_key: "sk-#{Time.now.to_i}"), stream_id: g['streamId'])
   when OP_DIRECT_UPLOAD
@@ -418,6 +416,10 @@ def invoke_sdk_update_ops(operation_id, g, s)
     s.playback.update_domain_restrictions(body: O::UpdateDomainRestrictionsRequestBody.new(allow: ['example.com']), media_id: g['mediaId'], playback_id: g['playbackId'])
   when 'update-user-agent-restrictions'
     s.playback.update_user_agent_restrictions(body: O::UpdateUserAgentRestrictionsRequestBody.new(allow: ['Mozilla']), media_id: g['mediaId'], playback_id: g['playbackId'])
+  when 'update-live-stream-domain-restrictions'
+    s.live_playback.update_live_stream_domain_restrictions(body: O::UpdateLiveStreamDomainRestrictionsRequestBody.new(allow: ['example.com']), stream_id: g['streamId'], playback_id: g['playbackId'])
+  when 'update-live-stream-user-agent-restrictions'
+    s.live_playback.update_live_stream_user_agent_restrictions(body: O::UpdateLiveStreamUserAgentRestrictionsRequestBody.new(allow: ['Mozilla']), stream_id: g['streamId'], playback_id: g['playbackId'])
   when 'update-a-playlist'
     s.playlist.update_a_playlist(body: C::UpdatePlaylistRequest.new(name: 'SDK Validate Updated', description: 'updated by validator'), playlist_id: g['playlistId'])
   when 'add-media-to-playlist'
@@ -535,7 +537,10 @@ STEPS = [
   { op: 'create_signing_key', phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:signingKeyId] = v&.dig('data', 'id') } },
   { op: OP_CREATE_PLAYLIST, phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:playlistId] = v&.dig('data', 'id') } },
   { op: OP_CREATE_STREAM, phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:streamId] = v&.dig('data', 'streamId') || v&.dig('data', 'id') } },
-  { op: OP_CREATE_MEDIA, phase: 'CREATE', request: ->(_c) { {} }, capture: ->(v, c) { c[:mediaId] = v&.dig('data', 'id'); c[:mediaPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id') } },
+  { op: OP_CREATE_MEDIA, phase: 'CREATE', request: ->(_c) { {} }, capture: lambda { |v, c|
+    c[:mediaId] = v&.dig('data', 'id')
+    c[:mediaPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id')
+  } },
   { op: OP_CREATE_MEDIA_PLAYBACK_ID, phase: 'CREATE', needs: %i[mediaId], request: ->(c) { { 'mediaId' => c[:mediaId] } }, capture: ->(v, c) { c[:createdPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id') || v&.dig('data', 'id') } },
   { op: OP_ADD_MEDIA_TRACK, phase: 'CREATE', needs: %i[mediaId], request: ->(c) { { 'mediaId' => c[:mediaId] } }, capture: ->(v, c) { c[:trackId] = v&.dig('data', 'id') } },
   { op: OP_CREATE_STREAM_PLAYBACK, phase: 'CREATE', needs: %i[streamId], request: ->(c) { { 'streamId' => c[:streamId] } }, capture: ->(v, c) { c[:streamPlaybackId] = v&.dig('data', 'playbackIds', 0, 'id') || v&.dig('data', 'id') } },
@@ -554,6 +559,8 @@ STEPS = [
   { op: 'update-media-track', phase: 'UPDATE', needs: %i[mediaId trackId], request: ->(c) { { 'mediaId' => c[:mediaId], 'trackId' => c[:trackId] } } },
   { op: 'update-domain-restrictions', phase: 'UPDATE', needs: %i[mediaId mediaPlaybackId], retry_on: 'not ready for updates', request: ->(c) { { 'mediaId' => c[:mediaId], 'playbackId' => c[:mediaPlaybackId] } } },
   { op: 'update-user-agent-restrictions', phase: 'UPDATE', needs: %i[mediaId mediaPlaybackId], retry_on: 'not ready for updates', request: ->(c) { { 'mediaId' => c[:mediaId], 'playbackId' => c[:mediaPlaybackId] } } },
+  { op: 'update-live-stream-domain-restrictions', phase: 'UPDATE', needs: %i[streamId streamPlaybackId], request: ->(c) { { 'streamId' => c[:streamId], 'playbackId' => c[:streamPlaybackId] } } },
+  { op: 'update-live-stream-user-agent-restrictions', phase: 'UPDATE', needs: %i[streamId streamPlaybackId], request: ->(c) { { 'streamId' => c[:streamId], 'playbackId' => c[:streamPlaybackId] } } },
   { op: 'update-a-playlist', phase: 'UPDATE', needs: %i[playlistId], request: ->(c) { { 'playlistId' => c[:playlistId] } } },
   { op: 'add-media-to-playlist', phase: 'UPDATE', needs: %i[playlistId mediaId], request: ->(c) { { 'playlistId' => c[:playlistId], 'mediaId' => c[:mediaId] } } },
   { op: 'change-media-order-in-playlist', phase: 'UPDATE', needs: %i[playlistId mediaId], request: ->(c) { { 'playlistId' => c[:playlistId], 'mediaId' => c[:mediaId] } } },
@@ -672,8 +679,16 @@ end
 def append_consolidated_rows(lines, results)
   PHASE_ORDER.each do |phase|
     results.select { |r| r[:phase] == phase }.each do |r|
-      ov = r[:openapi_valid].nil? ? '—' : (r[:openapi_valid] ? '✅' : '❌')
-      sdk = r[:status] == 'SKIP' ? '—' : (r[:sdk_ok] ? '✅' : '❌')
+      ov = if r[:openapi_valid].nil?
+             '—'
+           else
+             (r[:openapi_valid] ? '✅' : '❌')
+           end
+      sdk = if r[:status] == 'SKIP'
+              '—'
+            else
+              (r[:sdk_ok] ? '✅' : '❌')
+            end
       mis = ->(a) { a.any? ? a.join(', ') : 'None' }
       st = consolidated_status_label(r[:status])
       lines << "| #{r[:phase]} | #{r[:method]} | `#{r[:operation_id]}` | #{r[:http_status] || '—'} | #{ov} | #{sdk} | #{mis.call(r[:missing_in_sdk])} | #{mis.call(r[:missing_in_api])} | #{st} |"
@@ -725,9 +740,7 @@ def main
   base_url = ENV.fetch('FASTPIX_BASE_URL', nil) || ENV.fetch('FASTPIX_SERVER_URL', nil) || spec.dig('servers', 0, 'url') || 'https://api.fastpix.com/v1/'
   username = ENV.fetch('FASTPIX_USERNAME', nil)
   password = ENV.fetch('FASTPIX_PASSWORD', nil)
-  if username.to_s.empty? || password.to_s.empty?
-    abort 'Set FASTPIX_USERNAME and FASTPIX_PASSWORD env vars (real credentials) for live API validation.'
-  end
+  abort 'Set FASTPIX_USERNAME and FASTPIX_PASSWORD env vars (real credentials) for live API validation.' if username.to_s.empty? || password.to_s.empty?
 
   conn = { base_url: base_url, username: username, password: password }
   ctx = {}
@@ -751,9 +764,7 @@ def process_step(step, i, spec, endpoints, ctx, conn)
            phase: step[:phase], openapi_errors: [], missing_in_sdk: [], missing_in_api: [] }
   warn "[#{i + 1}/#{STEPS.size}] (#{step[:phase]}) #{step[:op]}"
 
-  unless ep
-    return base.merge(status: 'SKIP', http_status: nil, openapi_valid: nil, sdk_ok: false, note: 'operationId not found in spec')
-  end
+  return base.merge(status: 'SKIP', http_status: nil, openapi_valid: nil, sdk_ok: false, note: 'operationId not found in spec') unless ep
 
   missing = (step[:needs] || []).reject { |k| ctx[k] }
   if missing.any?

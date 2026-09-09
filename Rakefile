@@ -9,25 +9,15 @@ rescue LoadError
 end
 
 require 'bundler/gem_tasks'
-require 'minitest/test_task'
+require 'rspec/core/rake_task'
 require 'rubocop/rake_task'
 
 RuboCop::RakeTask.new
 
-Minitest::TestTask.create do |t|
-  # workaround to avoid throwing warnings from Janeway library circular require...
-  t.warning = false
+# Offline RSpec suite under spec/ (no credentials needed).
+# Fails on any failing example and (via spec_helper) when zero examples are found.
+RSpec::Core::RakeTask.new(:test) do |t|
+  t.rspec_opts = '--require spec_helper'
 end
 
-task :default => :test
-
-
-# Developers can run all tests with:
-#
-# $ rake test
-#
-# Developers can run individual test files with:
-#
-# $ rake test test/parameter_test
-#
-# and run individual tests by adding `focus` to the line before the test definition.
+task default: :test

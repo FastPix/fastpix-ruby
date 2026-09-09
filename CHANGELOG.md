@@ -2,6 +2,71 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0]
+
+Syncs the SDK with the FastPix API's live playback access restrictions,
+live-to-VOD recording flag, and numeric media duration.
+
+### Breaking
+
+- **Media `duration` is now a `Float` (seconds)** instead of an `"HH:MM:SS"`
+  string, matching the updated API. It stays optional and is `nil` while the
+  media is processing. Affects `manage_videos.get_media`, `list_media`,
+  `list_live_clips`, `get_media_clips`, `updated_media`, `updated_source_access`,
+  `updated_mp4_support`, and the playlist `media_list` items returned by
+  `playlist.create_a_playlist`, `get_playlist_by_id`, `update_a_playlist`,
+  `add_media_to_playlist`, `change_media_order_in_playlist` and
+  `delete_media_from_playlist`.
+
+  ```ruby
+  # 1.1.x: media.duration == "00:02:25"
+  # 1.2.0:
+  media.duration # => 145.821315
+  ```
+
+- Non-numeric values for any `Float` field now raise `TypeError` when
+  unmarshaling instead of silently becoming `0.0`.
+
+### Added
+
+- `enable_recording` on `InputMediaSettings` for live stream creation
+  (`enableRecording`, defaults to `true`). Set it to `false` to skip the
+  Live-to-VOD recording.
+- `access_restrictions` (domain and user-agent allow/deny policies, reusing
+  `PlaybackIdAccessRestrictions`) on `PlaybackIdRequest`,
+  `PlaybackIdSuccessResponseData`, `PlaybackSettings` and `PlaybackIdResponse`,
+  so live playback IDs carry restrictions on create, get, and in live stream
+  responses.
+- `live_playback.update_live_stream_domain_restrictions` for
+  `PATCH /live/streams/{streamId}/playback-ids/{playbackId}/domains`.
+- `live_playback.update_live_stream_user_agent_restrictions` for
+  `PATCH /live/streams/{streamId}/playback-ids/{playbackId}/user-agents`.
+- Offline RSpec suites: model contracts (`spec/models_spec.rb`), WebMock-stubbed
+  live playback endpoints (`spec/live_playback_spec.rb`), and a return-type scan
+  asserting every resource method's Sorbet signature names the response
+  envelope it builds (`spec/return_types_spec.rb`). `rspec` and `webmock` are
+  now declared development dependencies.
+
+### Changed
+
+- `bundle exec rake test` (the default task) now runs the offline RSpec suite in
+  `spec/` and fails on any failing example or when no examples are found; it
+  previously ran a Minitest glob that matched nothing.
+- The legacy live test suites (`spec/*_spec.rb` referencing the retired
+  `FastpixApiSDK` module, `tests/test_*.rb`, `tests/run_all_tests.rb`) were
+  removed; `tests/validate_get_endpoints.rb` and
+  `tests/validate_non_get_endpoints.rb` cover those endpoints against the live
+  API. `minitest`, `minitest-focus` and `rubocop-minitest` are no longer
+  development dependencies.
+- Added a repository `.rubocop.yml` so `bundle exec rubocop` completes and exits
+  0, with generated-code cops disabled for `lib/` only.
+
+### Fixed
+
+- The live validators now read the OpenAPI snapshot from `openapi.yaml` only
+  (untracked; the stale bundled `fastpixapi.yaml` was removed) and refresh
+  `tests/README.md` as UTF-8.
+
 ## [1.1.5]
 
 ### Changed

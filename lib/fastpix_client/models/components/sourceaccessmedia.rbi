@@ -33,7 +33,7 @@ class FastpixClient::Models::Components::SourceAccessMedia
   def moderation(); end
   def moderation=(str_); end
   def duration(); end
-  def duration=(str_); end
+  def duration=(float_); end
   def created_at(); end
   def created_at=(str_); end
   def updated_at(); end

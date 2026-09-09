@@ -37,7 +37,7 @@ class FastpixClient::Models::Components::GetMediaDetailResponse
   def moderation(); end
   def moderation=(str_); end
   def duration(); end
-  def duration=(str_); end
+  def duration=(float_); end
   def frame_rate(); end
   def frame_rate=(str_); end
   def created_at(); end

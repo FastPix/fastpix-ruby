@@ -19,6 +19,9 @@ module FastpixClient
         # Enables DVR (Digital Video Recorder) functionality, allowing viewers to pause, rewind, and resume live playback.
         # 
         field :enable_dvr_mode, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('enableDvrMode') } }
+        # Controls whether the livestream is recorded to a VOD asset (Live-to-VOD). When true (default), FastPix records and stores the livestream for on-demand viewing. When false, the livestream is not recorded.
+        # 
+        field :enable_recording, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('enableRecording') } }
         # Defines the maximum resolution for encoding, storage, and playback of the live stream.
         # 
         field :max_resolution, Crystalline::Nilable.new(Models::Components::CreateLiveStreamRequestMaxResolution), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('maxResolution'), 'decoder': Utils.enum_from_string(Models::Components::CreateLiveStreamRequestMaxResolution, true) } }
@@ -28,10 +31,11 @@ module FastpixClient
         # Basic access policy for media content
         field :media_policy, Crystalline::Nilable.new(Models::Components::BasicAccessPolicy), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mediaPolicy'), 'decoder': Utils.enum_from_string(Models::Components::BasicAccessPolicy, true) } }
 
-        sig { params(metadata: T.nilable(T::Hash[Symbol, ::String]), enable_dvr_mode: T.nilable(T::Boolean), max_resolution: T.nilable(Models::Components::CreateLiveStreamRequestMaxResolution), reconnect_window: T.nilable(::Integer), media_policy: T.nilable(Models::Components::BasicAccessPolicy)).void }
-        def initialize(metadata: nil, enable_dvr_mode: nil, max_resolution: Models::Components::CreateLiveStreamRequestMaxResolution::ONE_THOUSAND_AND_EIGHTYP, reconnect_window: 60, media_policy: Models::Components::BasicAccessPolicy::PUBLIC)
+        sig { params(metadata: T.nilable(T::Hash[Symbol, ::String]), enable_dvr_mode: T.nilable(T::Boolean), enable_recording: T.nilable(T::Boolean), max_resolution: T.nilable(Models::Components::CreateLiveStreamRequestMaxResolution), reconnect_window: T.nilable(::Integer), media_policy: T.nilable(Models::Components::BasicAccessPolicy)).void }
+        def initialize(metadata: nil, enable_dvr_mode: nil, enable_recording: true, max_resolution: Models::Components::CreateLiveStreamRequestMaxResolution::ONE_THOUSAND_AND_EIGHTYP, reconnect_window: 60, media_policy: Models::Components::BasicAccessPolicy::PUBLIC)
           @metadata = metadata
           @enable_dvr_mode = enable_dvr_mode
+          @enable_recording = enable_recording
           @max_resolution = max_resolution
           @reconnect_window = reconnect_window
           @media_policy = media_policy
@@ -42,6 +46,7 @@ module FastpixClient
           return false unless other.is_a? self.class
           return false unless @metadata == other.metadata
           return false unless @enable_dvr_mode == other.enable_dvr_mode
+          return false unless @enable_recording == other.enable_recording
           return false unless @max_resolution == other.max_resolution
           return false unless @reconnect_window == other.reconnect_window
           return false unless @media_policy == other.media_policy

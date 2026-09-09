@@ -11,7 +11,7 @@ class FastpixClient::Models::Components::PlaylistByIdResponseMediaListItem
   def created_at(); end
   def created_at=(str_); end
   def duration(); end
-  def duration=(str_); end
+  def duration=(float_); end
   def id(); end
   def id=(str_); end
   def source_resolution(); end

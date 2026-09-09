@@ -11,5 +11,17 @@ tests/NON_GET_ENDPOINTS_VALIDATION_REPORT.md
 # Vendored gems (build output, restored by `bundle install`)
 vendor/
 
-# Local SDK usage examples (contain real credentials/resource IDs)
+# Local SDK usage examples
 tests/examples/
+
+# Local OpenAPI snapshot and per-change check script
+/openapi.yaml
+/spec_sync_check.*
+
+# RSpec example status file (written on every run)
+/spec/examples.txt
+
+# Local environment files (keep the committed examples)
+.env
+.env.*
+!.env.example
