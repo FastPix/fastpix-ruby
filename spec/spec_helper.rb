@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rspec'
 require 'webmock/rspec'
 
@@ -12,7 +14,8 @@ RSpec.configure do |config|
 
   config.shared_context_metadata_behavior = :apply_to_host_groups
   config.filter_run_when_matching :focus
-  config.example_status_persistence_file_path = "spec/examples.txt"
+  config.example_status_persistence_file_path = 'spec/examples.txt'
+  config.fail_if_no_examples = true
   config.disable_monkey_patching!
 
   config.order = :random
@@ -22,6 +25,4 @@ end
 # Disable WebMock for real HTTP requests
 WebMock.disable_net_connect!(allow_localhost: true)
 
-if defined?(WebMock)
-  WebMock.allow_net_connect!
-end 
+WebMock.allow_net_connect! if defined?(WebMock)

@@ -1,0 +1,77 @@
+# Hand-maintained RuboCop configuration. Do not replace with --auto-gen-config:
+# a .rubocop_todo.yml hides new offences under stale per-cop counts.
+#
+# lib/ is generated-style SDK code. Cops it violates structurally are disabled
+# for lib/ only, so hand-written files (Rakefile, spec/, tests/) keep the full
+# default cop set minus metrics, documentation and line length.
+
+AllCops:
+  NewCops: disable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.2
+  Exclude:
+    - 'vendor/**/*'
+    - 'examples/**/vendor/**/*'
+    - 'examples/rails-example/**/*'
+    - 'tests/artifacts*/**/*'
+    - 'tests/examples/**/*'
+    - 'pkg/**/*'
+    # Stray tracked scratch files, not part of the SDK
+    - 'config/**/*'
+    - 'test_snippet.rb'
+
+# Structural cops the generated resource and model files cannot meet anywhere.
+Metrics/AbcSize: { Enabled: false }
+Metrics/BlockLength: { Enabled: false }
+Metrics/ClassLength: { Enabled: false }
+Metrics/CyclomaticComplexity: { Enabled: false }
+Metrics/MethodLength: { Enabled: false }
+Metrics/ModuleLength: { Enabled: false }
+Metrics/ParameterLists: { Enabled: false }
+Metrics/PerceivedComplexity: { Enabled: false }
+Style/Documentation: { Enabled: false }
+Layout/LineLength: { Enabled: false }
+
+# Generated lib/ style: blank-line and return conventions from the generator.
+Layout/ElseAlignment: { Exclude: ['lib/**/*'] }
+Layout/EmptyLineAfterGuardClause: { Exclude: ['lib/**/*'] }
+Layout/EmptyLines: { Exclude: ['lib/**/*'] }
+Layout/EmptyLinesAroundClassBody: { Exclude: ['lib/**/*'] }
+Layout/EmptyLinesAroundMethodBody: { Exclude: ['lib/**/*'] }
+Layout/EmptyLinesAroundModuleBody: { Exclude: ['lib/**/*'] }
+Layout/EndAlignment: { Exclude: ['lib/**/*'] }
+Layout/FirstHashElementIndentation: { Exclude: ['lib/**/*'] }
+Layout/HashAlignment: { Exclude: ['lib/**/*'] }
+Layout/IndentationWidth: { Exclude: ['lib/**/*'] }
+Layout/LeadingCommentSpace: { Exclude: ['lib/**/*'] }
+Layout/TrailingWhitespace: { Exclude: ['lib/**/*'] }
+Lint/MissingSuper: { Exclude: ['lib/**/*'] }
+Lint/RedundantCopDisableDirective: { Exclude: ['lib/**/*'] }
+Naming/AccessorMethodName: { Exclude: ['lib/**/*'] }
+Style/Alias: { Exclude: ['lib/**/*'] }
+Style/ConditionalAssignment: { Exclude: ['lib/**/*'] }
+Style/FrozenStringLiteralComment: { Exclude: ['lib/**/*'] }
+Style/GuardClause: { Exclude: ['lib/**/*'] }
+Style/IfInsideElse: { Exclude: ['lib/**/*'] }
+Style/NegatedIf: { Exclude: ['lib/**/*'] }
+Style/RedundantReturn: { Exclude: ['lib/**/*'] }
+Style/TrailingCommaInArrayLiteral: { Exclude: ['lib/**/*'] }
+Style/TrailingCommaInHashLiteral: { Exclude: ['lib/**/*'] }
+
+# Shared by generated lib/, the runnable examples and the live validators.
+Naming/MethodParameterName:
+  Exclude: ['lib/**/*', 'examples/**/*', 'tests/**/*']
+Style/IfUnlessModifier:
+  Exclude: ['lib/**/*', 'examples/**/*']
+
+# Examples are run with `ruby examples/foo.rb`; no exec bit is needed.
+Lint/ScriptPermission: { Exclude: ['examples/**/*', 'tests/**/*'] }
+Style/RescueModifier: { Exclude: ['examples/**/*'] }
+Style/StringConcatenation: { Exclude: ['examples/**/*'] }
+
+# Live validators.
+Naming/PredicateName: { Exclude: ['tests/**/*'] }
+Style/SafeNavigation: { Exclude: ['tests/**/*'] }
+
+# RSpec files define fixture constants inside describe blocks.
+Lint/ConstantDefinitionInBlock: { Exclude: ['spec/**/*'] }

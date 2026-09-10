@@ -51,7 +51,7 @@ end
 
 # Verify FastPix-Signature = Base64(HMAC-SHA256(decoded secret, raw body)).
 def valid_signature?(raw_body, signature)
-  secret = ENV['FASTPIX_WEBHOOK_SECRET']
+  secret = ENV.fetch('FASTPIX_WEBHOOK_SECRET', nil)
   return false if secret.to_s.empty? || signature.to_s.empty?
 
   key = Base64.decode64(secret) # Signing Secret is Base64; use its decoded bytes.
@@ -59,7 +59,10 @@ def valid_signature?(raw_body, signature)
   secure_compare(expected, signature)
 end
 
-class AppController < ActionController::Base
+class ApplicationController < ActionController::Base
+end
+
+class AppController < ApplicationController
   # Webhooks are server-to-server and HMAC-authed with no cookie, so CSRF
   # protection doesn't apply. Add auth to /uploads before you ship it.
   skip_forgery_protection

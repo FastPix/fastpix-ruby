@@ -11,7 +11,7 @@ class FastpixClient::Models::Components::MediaClipResponseData
   def id(); end
   def id=(str_); end
   def duration(); end
-  def duration=(str_); end
+  def duration=(float_); end
   def status(); end
   def status=(str_); end
   def thumbnail(); end

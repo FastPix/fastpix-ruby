@@ -32,19 +32,7 @@ module Crystalline
     if type.instance_of?(Class) && type.include?(::Crystalline::MetadataFields)
       type.from_dict(data)
     elsif Crystalline::Utils.union? type
-      union_types = Crystalline::Utils.get_union_types(type)
-      union_types = union_types.sort_by { |klass| Crystalline.non_nilable_attr_count(klass) }
-
-      union_types.each do |union_type|
-        unmarshalled_val = Crystalline.unmarshal_json(data, union_type)
-        return unmarshalled_val
-      rescue TypeError
-        next
-      rescue NoMethodError
-        next
-      rescue KeyError
-        next
-      end
+      unmarshal_union(data, type)
     elsif Crystalline::Utils.arr? type
       data.map { |v| Crystalline.unmarshal_json(v, Crystalline::Utils.arr_of(type)) }
     elsif Crystalline::Utils.hash? type
@@ -57,6 +45,17 @@ module Crystalline
       type.deserialize(data)
     else
       data
+    end
+  end
+
+  def self.unmarshal_union(data, type)
+    union_types = Crystalline::Utils.get_union_types(type)
+    union_types = union_types.sort_by { |klass| Crystalline.non_nilable_attr_count(klass) }
+
+    union_types.each do |union_type|
+      return Crystalline.unmarshal_json(data, union_type)
+    rescue TypeError, NoMethodError, KeyError
+      next
     end
   end
 

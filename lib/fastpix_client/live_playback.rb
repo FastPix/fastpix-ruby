@@ -439,5 +439,258 @@ module FastpixClient
         end
       end
     end
+
+
+
+    sig { params(body: Models::Operations::UpdateLiveStreamDomainRestrictionsRequestBody, stream_id: ::String, playback_id: ::String, timeout_ms: T.nilable(Integer)).returns(Models::Operations::UpdateLiveStreamDomainRestrictionsResponse) }
+    def update_live_stream_domain_restrictions(body:, stream_id:, playback_id:, timeout_ms: nil)
+      # update_live_stream_domain_restrictions - Update domain restrictions for a live stream playback ID
+      # This endpoint updates domain-level restrictions for a specific playback ID associated with a live stream.
+      # It allows you to restrict playback to specific domains or block known unauthorized domains.
+      # 
+      # **How it works:**
+      # 1. Make a `PATCH` request to this endpoint with your desired domain access configuration.
+      # 2. Set a default policy (`allow` or `deny`) and specify domain names in the `allow` or `deny` lists.
+      # 3. This is commonly used to restrict video playback to your website or approved client domains.
+      # 
+      # **Example:**
+      # A streaming service can allow playback only from `example.com` and deny all others by setting: `"defaultPolicy": "deny"` and `"allow": ["example.com"]`.
+      # 
+      request = Models::Operations::UpdateLiveStreamDomainRestrictionsRequest.new(
+        stream_id: stream_id,
+        playback_id: playback_id,
+        body: body
+      )
+      url, params = @sdk_configuration.get_server_details
+      base_url = Utils.template_url(url, params)
+      url = Utils.generate_url(
+        Models::Operations::UpdateLiveStreamDomainRestrictionsRequest,
+        base_url,
+        '/live/streams/{streamId}/playback-ids/{playbackId}/domains',
+        request
+      )
+      headers = {}
+      headers = T.cast(headers, T::Hash[String, String])
+      req_content_type, data, form = Utils.serialize_request_body(request, false, false, :body, :json)
+      headers['content-type'] = req_content_type
+      body = encode_request_body(req_content_type, data, form)
+      headers['Accept'] = CONTENT_TYPE_JSON
+      headers[USER_AGENT_HEADER] = @sdk_configuration.user_agent
+
+      security = @sdk_configuration.security_source&.call
+
+      timeout = (timeout_ms.to_f / 1000) unless timeout_ms.nil?
+      timeout ||= @sdk_configuration.timeout
+      
+
+      connection = @sdk_configuration.client
+
+      hook_ctx = SDKHooks::HookContext.new(
+        config: @sdk_configuration,
+        base_url: base_url,
+        oauth2_scopes: nil,
+        operation_id: 'update-live-stream-domain-restrictions',
+        security_source: @sdk_configuration.security_source
+      )
+
+      error = T.let(nil, T.nilable(StandardError))
+      http_response = T.let(nil, T.nilable(Faraday::Response))
+      
+      
+      begin
+        http_response = T.must(connection).patch(url) do |req|
+          req.body = body
+          req.headers.merge!(headers)
+          req.options.timeout = timeout unless timeout.nil?
+          Utils.configure_request_security(req, security)
+
+          @sdk_configuration.hooks.before_request(
+            hook_ctx: SDKHooks::BeforeRequestHookContext.new(
+              hook_ctx: hook_ctx
+            ),
+            request: req
+          )
+        end
+      rescue StandardError => e
+        error = e
+      ensure
+        http_response = apply_after_request_hooks(http_response, error, hook_ctx)
+      end
+      
+      content_type = http_response.headers.fetch(CONTENT_TYPE_HEADER, DEFAULT_CONTENT_TYPE)
+      if Utils.match_status_code(http_response.status, ['200'])
+        if Utils.match_content_type(content_type, CONTENT_TYPE_JSON)
+          http_response = @sdk_configuration.hooks.after_success(
+            hook_ctx: SDKHooks::AfterSuccessHookContext.new(
+              hook_ctx: hook_ctx
+            ),
+            response: http_response
+          )
+          response_data = http_response.env.response_body
+          obj = Crystalline.unmarshal_json(JSON.parse(response_data), Models::Operations::UpdateLiveStreamDomainRestrictionsResponseBody)
+          response = Models::Operations::UpdateLiveStreamDomainRestrictionsResponse.new(
+            status_code: http_response.status,
+            content_type: content_type,
+            raw_response: http_response,
+            object: T.unsafe(obj)
+          )
+
+          return response
+        else
+          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), UNKNOWN_CONTENT_TYPE_ERROR
+        end
+      elsif Utils.match_status_code(http_response.status, ['4XX'])
+        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), API_ERROR_OCCURRED
+      elsif Utils.match_status_code(http_response.status, ['5XX'])
+        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), API_ERROR_OCCURRED
+      else
+        if Utils.match_content_type(content_type, CONTENT_TYPE_JSON)
+          http_response = @sdk_configuration.hooks.after_success(
+            hook_ctx: SDKHooks::AfterSuccessHookContext.new(
+              hook_ctx: hook_ctx
+            ),
+            response: http_response
+          )
+          response_data = http_response.env.response_body
+          obj = Crystalline.unmarshal_json(JSON.parse(response_data), Models::Components::DefaultError)
+          response = Models::Operations::UpdateLiveStreamDomainRestrictionsResponse.new(
+            status_code: http_response.status,
+            content_type: content_type,
+            raw_response: http_response,
+            default_error: T.unsafe(obj)
+          )
+
+          return response
+        else
+          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), UNKNOWN_CONTENT_TYPE_ERROR
+        end
+      end
+    end
+
+
+    sig { params(body: Models::Operations::UpdateLiveStreamUserAgentRestrictionsRequestBody, stream_id: ::String, playback_id: ::String, timeout_ms: T.nilable(Integer)).returns(Models::Operations::UpdateLiveStreamUserAgentRestrictionsResponse) }
+    def update_live_stream_user_agent_restrictions(body:, stream_id:, playback_id:, timeout_ms: nil)
+      # update_live_stream_user_agent_restrictions - Update user-agent restrictions for a live stream playback ID
+      # This endpoint allows updating user-agent restrictions for a specific playback ID associated with a live stream. 
+      # It can be used to allow or deny specific user-agents during playback request evaluation.
+      # 
+      # **How it works:**
+      # 1. Make a `PATCH` request to this endpoint with your desired user-agent access configuration.
+      # 2. Specify a default policy (`allow` or `deny`) and provide specific `allow` or `deny` lists.
+      # 3. Use this to restrict access to specific browsers, devices, or bots.
+      # 
+      # **Example:**
+      # A developer may configure a playback ID to deny access from known scraping user-agents while allowing all others by default.
+      # 
+      request = Models::Operations::UpdateLiveStreamUserAgentRestrictionsRequest.new(
+        stream_id: stream_id,
+        playback_id: playback_id,
+        body: body
+      )
+      url, params = @sdk_configuration.get_server_details
+      base_url = Utils.template_url(url, params)
+      url = Utils.generate_url(
+        Models::Operations::UpdateLiveStreamUserAgentRestrictionsRequest,
+        base_url,
+        '/live/streams/{streamId}/playback-ids/{playbackId}/user-agents',
+        request
+      )
+      headers = {}
+      headers = T.cast(headers, T::Hash[String, String])
+      req_content_type, data, form = Utils.serialize_request_body(request, false, false, :body, :json)
+      headers['content-type'] = req_content_type
+      body = encode_request_body(req_content_type, data, form)
+      headers['Accept'] = CONTENT_TYPE_JSON
+      headers[USER_AGENT_HEADER] = @sdk_configuration.user_agent
+
+      security = @sdk_configuration.security_source&.call
+
+      timeout = (timeout_ms.to_f / 1000) unless timeout_ms.nil?
+      timeout ||= @sdk_configuration.timeout
+      
+
+      connection = @sdk_configuration.client
+
+      hook_ctx = SDKHooks::HookContext.new(
+        config: @sdk_configuration,
+        base_url: base_url,
+        oauth2_scopes: nil,
+        operation_id: 'update-live-stream-user-agent-restrictions',
+        security_source: @sdk_configuration.security_source
+      )
+
+      error = T.let(nil, T.nilable(StandardError))
+      http_response = T.let(nil, T.nilable(Faraday::Response))
+      
+      
+      begin
+        http_response = T.must(connection).patch(url) do |req|
+          req.body = body
+          req.headers.merge!(headers)
+          req.options.timeout = timeout unless timeout.nil?
+          Utils.configure_request_security(req, security)
+
+          @sdk_configuration.hooks.before_request(
+            hook_ctx: SDKHooks::BeforeRequestHookContext.new(
+              hook_ctx: hook_ctx
+            ),
+            request: req
+          )
+        end
+      rescue StandardError => e
+        error = e
+      ensure
+        http_response = apply_after_request_hooks(http_response, error, hook_ctx)
+      end
+      
+      content_type = http_response.headers.fetch(CONTENT_TYPE_HEADER, DEFAULT_CONTENT_TYPE)
+      if Utils.match_status_code(http_response.status, ['200'])
+        if Utils.match_content_type(content_type, CONTENT_TYPE_JSON)
+          http_response = @sdk_configuration.hooks.after_success(
+            hook_ctx: SDKHooks::AfterSuccessHookContext.new(
+              hook_ctx: hook_ctx
+            ),
+            response: http_response
+          )
+          response_data = http_response.env.response_body
+          obj = Crystalline.unmarshal_json(JSON.parse(response_data), Models::Operations::UpdateLiveStreamUserAgentRestrictionsResponseBody)
+          response = Models::Operations::UpdateLiveStreamUserAgentRestrictionsResponse.new(
+            status_code: http_response.status,
+            content_type: content_type,
+            raw_response: http_response,
+            object: T.unsafe(obj)
+          )
+
+          return response
+        else
+          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), UNKNOWN_CONTENT_TYPE_ERROR
+        end
+      elsif Utils.match_status_code(http_response.status, ['4XX'])
+        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), API_ERROR_OCCURRED
+      elsif Utils.match_status_code(http_response.status, ['5XX'])
+        raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), API_ERROR_OCCURRED
+      else
+        if Utils.match_content_type(content_type, CONTENT_TYPE_JSON)
+          http_response = @sdk_configuration.hooks.after_success(
+            hook_ctx: SDKHooks::AfterSuccessHookContext.new(
+              hook_ctx: hook_ctx
+            ),
+            response: http_response
+          )
+          response_data = http_response.env.response_body
+          obj = Crystalline.unmarshal_json(JSON.parse(response_data), Models::Components::DefaultError)
+          response = Models::Operations::UpdateLiveStreamUserAgentRestrictionsResponse.new(
+            status_code: http_response.status,
+            content_type: content_type,
+            raw_response: http_response,
+            default_error: T.unsafe(obj)
+          )
+
+          return response
+        else
+          raise ::FastpixClient::Models::Errors::APIError.new(status_code: http_response.status, body: http_response.env.response_body, raw_response: http_response), UNKNOWN_CONTENT_TYPE_ERROR
+        end
+      end
+    end
   end
 end

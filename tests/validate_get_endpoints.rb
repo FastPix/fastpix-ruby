@@ -31,7 +31,6 @@
 
 require 'json'
 require 'yaml'
-require 'set'
 require 'base64'
 require 'fileutils'
 require 'net/http'
@@ -72,15 +71,11 @@ def resolve_spec_path
   # Allow an explicit override via FASTPIX_SPEC; otherwise use the bundled spec.
   return ENV.fetch('FASTPIX_SPEC', nil) if ENV.fetch('FASTPIX_SPEC', nil) && File.exist?(ENV.fetch('FASTPIX_SPEC', nil))
 
-  candidates = [
-    File.join(ROOT_DIR, 'fastpixapi.yaml'),
-    File.join(ROOT_DIR, 'fastpix.yaml'),
-    File.join(ROOT_DIR, 'openapi.yaml')
-  ]
+  candidates = [File.join(ROOT_DIR, 'openapi.yaml')]
   found = candidates.find { |p| File.exist?(p) }
   return found unless found.nil?
 
-  raise SpecNotFoundError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(", ")}"
+  raise SpecNotFoundError, "OpenAPI spec not found. Tried: #{candidates.map(&:inspect).join(', ')}"
 end
 
 def load_openapi_spec
@@ -162,8 +157,6 @@ def default_sdk_request(operation_id)
     { 'limit' => 10, 'offset' => 1 }
   when 'get-all-playlists', 'list_signing_keys'
     { 'limit' => 5, 'offset' => 1 }
-  else
-    nil
   end
 end
 
@@ -298,9 +291,7 @@ def invoke_sdk(operation_id, request, base_url, username, password)
 
   res = invoke_sdk_media_ops(operation_id, g, s)
   res = invoke_sdk_analytics_ops(operation_id, g, s) if res == :unhandled
-  if res == :unhandled
-    return { ok: false, error: { 'name' => 'SDKMappingError', 'message' => "No Ruby SDK method mapping for operationId '#{operation_id}'" } }
-  end
+  return { ok: false, error: { 'name' => 'SDKMappingError', 'message' => "No Ruby SDK method mapping for operationId '#{operation_id}'" } } if res == :unhandled
 
   { ok: true, value: extract_sdk_data(res) }
 rescue StandardError => e
@@ -610,11 +601,11 @@ def remap_api_for_comparison(operation_id, body)
 
     event.each_with_object({}) do |(k, v), acc|
       nk = EVENT_OUTER_REMAP[k] || k
-      if nk == 'event_details' && v.is_a?(Hash)
-        acc[nk] = v.transform_keys { |ik| EVENT_INNER_REMAP[ik] || ik }
-      else
-        acc[nk] = v
-      end
+      acc[nk] = if nk == 'event_details' && v.is_a?(Hash)
+                  v.transform_keys { |ik| EVENT_INNER_REMAP[ik] || ik }
+                else
+                  v
+                end
     end
   end
 
@@ -1041,7 +1032,7 @@ def update_readme(results, generated_at)
   readme = File.join(TESTS_DIR, 'README.md')
   return unless File.exist?(readme)
 
-  content = File.read(readme)
+  content = File.read(readme, encoding: 'UTF-8')
   begin_marker = '<!-- BEGIN GET_ENDPOINTS_CONSOLIDATED -->'
   end_marker = '<!-- END GET_ENDPOINTS_CONSOLIDATED -->'
   return unless content.include?(begin_marker) && content.include?(end_marker)
@@ -1091,9 +1082,7 @@ def main
   username = ENV.fetch('FASTPIX_USERNAME', nil)
   password = ENV.fetch('FASTPIX_PASSWORD', nil)
 
-  if username.to_s.empty? || password.to_s.empty? || username == 'your-access-token' || password == 'your-secret-key'
-    abort 'Set FASTPIX_USERNAME and FASTPIX_PASSWORD env vars (real credentials) for live API validation.'
-  end
+  abort 'Set FASTPIX_USERNAME and FASTPIX_PASSWORD env vars (real credentials) for live API validation.' if username.to_s.empty? || password.to_s.empty? || username == 'your-access-token' || password == 'your-secret-key'
 
   conn = { base_url: base_url, username: username, password: password }
   results = endpoints.each_with_index.map do |ep, i|

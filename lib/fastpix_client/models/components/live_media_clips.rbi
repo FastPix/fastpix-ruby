@@ -27,7 +27,7 @@ class FastpixClient::Models::Components::LiveMediaClips
   def mp4_support(); end
   def mp4_support=(str_); end
   def duration(); end
-  def duration=(str_); end
+  def duration=(float_); end
   def created_at(); end
   def created_at=(str_); end
   def updated_at(); end

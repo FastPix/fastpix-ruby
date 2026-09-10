@@ -91,16 +91,16 @@ module FastpixClient
       end
       @language = 'ruby'
       @openapi_doc_version = '1.0.0'
-      @sdk_version = '1.1.5'
+      @sdk_version = '1.2.0'
       @gen_version = '2.801.0'
-      @user_agent = 'fastpixapi-ruby 1.1.5'
+      @user_agent = 'fastpixapi-ruby 1.2.0'
     end
 
     sig { returns([String, T::Hash[Symbol, String]]) }
     def get_server_details
       return [@server_url.delete_suffix('/'), {}] if !@server_url.nil?
       @server_idx = T.must(@server_idx)
-      [T.must(SERVERS[@server_idx]), {}]
+      [T.must(SERVERS[@server_idx]).delete_suffix('/'), {}]
     end
   end
 end

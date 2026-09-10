@@ -29,7 +29,8 @@ begin
     request: Models::Components::CreateLiveStreamRequest.new(
       playback_settings: Models::Components::PlaybackSettings.new,
       input_media_settings: Models::Components::InputMediaSettings.new(
-        metadata: { 'source' => 'live_streaming_example' }
+        metadata: { 'source' => 'live_streaming_example' },
+        enable_recording: true
       )
     )
   )
@@ -46,12 +47,38 @@ puts "  stream key: #{data['streamKey']}"
 get = sdk.manage_live_stream.get_live_stream_by_id(stream_id: stream_id)
 puts "get_by_id         -> HTTP #{get.status_code}"
 
-# 3. Toggle: a fresh stream is already enabled, so disable first.
+# 3. Create a playback ID restricted to example.com, then tighten its domain policy.
+playback = sdk.live_playback.create_playback_id_of_stream(
+  stream_id: stream_id,
+  body: Models::Components::PlaybackIdRequest.new(
+    access_policy: Models::Components::BasicAccessPolicy::PUBLIC,
+    access_restrictions: Models::Components::PlaybackIdAccessRestrictions.new(
+      domains: Models::Components::PlaybackIdDomains.new(
+        default_policy: Models::Components::PolicyAction::DENY, allow: ['example.com']
+      ),
+      user_agents: Models::Components::PlaybackIdUserAgents.new(default_policy: Models::Components::PolicyAction::ALLOW)
+    )
+  )
+)
+playback_id = playback.playback_id_success_response&.data&.id
+puts "create_playback_id -> HTTP #{playback.status_code}, playback id #{playback_id}"
+
+domains = sdk.live_playback.update_live_stream_domain_restrictions(
+  stream_id: stream_id,
+  playback_id: playback_id,
+  body: Models::Operations::UpdateLiveStreamDomainRestrictionsRequestBody.new(
+    default_policy: Models::Operations::UpdateLiveStreamDomainRestrictionsDefaultPolicy::DENY,
+    allow: ['example.com', '*.example.com']
+  )
+)
+puts "update_domains    -> HTTP #{domains.status_code}, allow #{domains.object&.data&.allow.inspect}"
+
+# 4. Toggle: a fresh stream is already enabled, so disable first.
 disable = sdk.manage_live_stream.disable_live_stream(stream_id: stream_id)
 puts "disable           -> HTTP #{disable.status_code}"
 enable = sdk.manage_live_stream.enable_live_stream(stream_id: stream_id)
 puts "enable            -> HTTP #{enable.status_code}"
 
-# 4. Clean up.
+# 5. Clean up.
 del = sdk.manage_live_stream.delete_live_stream(stream_id: stream_id)
 puts "delete            -> HTTP #{del.status_code}"

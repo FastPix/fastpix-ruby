@@ -7,6 +7,9 @@ require 'minitest/autorun'
 require 'open3'
 
 HERE = __dir__
+
+# Load verify_webhook.rb (defines valid_signature?) without running its demo main.
+require File.join(HERE, 'verify_webhook.rb')
 RUBY_EXAMPLES = Dir[File.join(HERE, '*.rb')].reject { |f| File.basename(f) == 'test_examples.rb' } +
                 Dir[File.join(HERE, 'rails-example', 'app.rb')]
 
@@ -41,8 +44,6 @@ end
 
 class WebhookVerifierTest < Minitest::Test
   def setup
-    # Load verify_webhook.rb without running its demo main.
-    require File.join(HERE, 'verify_webhook.rb')
     @secret = Base64.strict_encode64('signing-secret')
     @body = '{"type":"video.media.ready","data":{"id":"abc-123"}}'
     key = Base64.decode64(@secret)

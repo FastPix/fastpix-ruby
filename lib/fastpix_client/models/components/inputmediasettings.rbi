@@ -12,6 +12,8 @@ class FastpixClient::Models::Components::InputMediaSettings
   def metadata=(str_); end
   def enable_dvr_mode(); end
   def enable_dvr_mode=(str_); end
+  def enable_recording(); end
+  def enable_recording=(str_); end
   def max_resolution(); end
   def max_resolution=(str_); end
   def reconnect_window(); end
