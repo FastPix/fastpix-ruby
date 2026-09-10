@@ -67,11 +67,6 @@ live-to-VOD recording flag, and numeric media duration.
   (untracked; the stale bundled `fastpixapi.yaml` was removed) and refresh
   `tests/README.md` as UTF-8.
 
-## [1.1.5]
-
-### Changed
-- Licence updated to Apache-2.0.
-
 ## [1.1.4]
 
 Aligns the media models with the FastPix API. Contains three breaking changes.
