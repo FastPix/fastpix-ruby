@@ -27,7 +27,7 @@ module FastpixClient
         # Title of the track.
         field :title, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('title') } }
 
-        sig { params(id: T.nilable(::String), type: T.nilable(Models::Components::GenerateTrackResponseType), language_code: T.nilable(Models::Components::GenerateTrackResponseLanguageCode), language_name: T.nilable(::String), metadata: T.nilable(T::Hash[Symbol, ::String]), title: T.nilable(::String)).void }
+        sig { params(id: T.nilable(::String), type: T.nilable(T.any(Models::Components::GenerateTrackResponseType, String)), language_code: T.nilable(T.any(Models::Components::GenerateTrackResponseLanguageCode, String)), language_name: T.nilable(::String), metadata: T.nilable(T::Hash[Symbol, ::String]), title: T.nilable(::String)).void }
         def initialize(id: nil, type: nil, language_code: nil, language_name: nil, metadata: nil, title: nil)
           @id = id
           @type = type

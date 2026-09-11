@@ -19,7 +19,7 @@ module FastpixClient
         # Restrictions applied to this playback ID.
         field :access_restrictions, Crystalline::Nilable.new(Models::Operations::GetPlaybackIdAccessRestrictions), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('accessRestrictions') } }
 
-        sig { params(id: T.nilable(::String), access_policy: T.nilable(Models::Operations::GetPlaybackIdAccessPolicy), access_restrictions: T.nilable(Models::Operations::GetPlaybackIdAccessRestrictions)).void }
+        sig { params(id: T.nilable(::String), access_policy: T.nilable(T.any(Models::Operations::GetPlaybackIdAccessPolicy, String)), access_restrictions: T.nilable(Models::Operations::GetPlaybackIdAccessRestrictions)).void }
         def initialize(id: nil, access_policy: nil, access_restrictions: nil)
           @id = id
           @access_policy = access_policy

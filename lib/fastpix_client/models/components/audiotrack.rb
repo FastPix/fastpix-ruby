@@ -27,7 +27,7 @@ module FastpixClient
         # 
         field :language_code, Crystalline::Nilable.new(::String), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('languageCode') } }
 
-        sig { params(id: T.nilable(::String), type: T.nilable(Models::Components::AudioTrackType), status: T.nilable(::String), title: T.nilable(::String), language_name: T.nilable(::String), language_code: T.nilable(::String)).void }
+        sig { params(id: T.nilable(::String), type: T.nilable(T.any(Models::Components::AudioTrackType, String)), status: T.nilable(::String), title: T.nilable(::String), language_name: T.nilable(::String), language_code: T.nilable(::String)).void }
         def initialize(id: nil, type: nil, status: nil, title: nil, language_name: nil, language_code: nil)
           @id = id
           @type = type

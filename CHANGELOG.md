@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1]
+
+Makes enum-typed response fields tolerant of values the server sends that this
+SDK version does not yet list.
+
+### Changed
+
+- **Response enum fields are now open.** A value the API returns that is not in
+  this SDK's generated enum list (for example a new `sourceResolution` tier or a
+  new `status`) is preserved as the raw `String` instead of raising and failing
+  the whole response. Known values still decode to their typed enum member, and
+  an absent optional field stays `nil`. Affects the enum fields returned by
+  `manage_videos` (`get_media`, `list_media`, `updated_media`,
+  `updated_source_access`, `updated_mp4_support`, `get_media_clips`,
+  `list_live_clips`, track add/update/generate, direct-upload create/list/cancel),
+  `playback` playback-ID responses, and `playlist.get_playlist_by_id`.
+
+  A response enum field can therefore be either the enum member or a `String`.
+  Guard before calling enum-only methods:
+
+  ```ruby
+  r = media.source_resolution
+  r.respond_to?(:serialize) ? r.serialize : r   # String when the value is unknown
+  ```
+
+- Request and input models are unchanged — their enum fields still accept only
+  known members, so typos are caught before a request is sent.
+
 ## [1.2.0]
 
 Syncs the SDK with the FastPix API's live playback access restrictions,

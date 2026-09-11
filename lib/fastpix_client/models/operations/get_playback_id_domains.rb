@@ -19,7 +19,7 @@ module FastpixClient
 
         field :deny, Crystalline::Nilable.new(Crystalline::Array.new(::String)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('deny') } }
 
-        sig { params(default_policy: T.nilable(Models::Operations::GetPlaybackIdDomainsDefaultPolicy), allow: T.nilable(T::Array[::String]), deny: T.nilable(T::Array[::String])).void }
+        sig { params(default_policy: T.nilable(T.any(Models::Operations::GetPlaybackIdDomainsDefaultPolicy, String)), allow: T.nilable(T::Array[::String]), deny: T.nilable(T::Array[::String])).void }
         def initialize(default_policy: nil, allow: nil, deny: nil)
           @default_policy = default_policy
           @allow = allow

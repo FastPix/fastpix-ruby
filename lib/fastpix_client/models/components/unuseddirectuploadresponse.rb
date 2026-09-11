@@ -26,7 +26,7 @@ module FastpixClient
         # 
         field :optimize_audio, Crystalline::Nilable.new(Crystalline::Boolean.new), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('optimizeAudio') } }
 
-        sig { params(playback_ids: T.nilable(T::Array[Models::Components::UnusedUploadsPlaybackId]), metadata: T.nilable(T::Hash[Symbol, ::String]), media_quality: T.nilable(Models::Components::UnusedDirectUploadResponseMediaQuality), source_access: T.nilable(T::Boolean), optimize_audio: T.nilable(T::Boolean)).void }
+        sig { params(playback_ids: T.nilable(T::Array[Models::Components::UnusedUploadsPlaybackId]), metadata: T.nilable(T::Hash[Symbol, ::String]), media_quality: T.nilable(T.any(Models::Components::UnusedDirectUploadResponseMediaQuality, String)), source_access: T.nilable(T::Boolean), optimize_audio: T.nilable(T::Boolean)).void }
         def initialize(playback_ids: nil, metadata: nil, media_quality: nil, source_access: nil, optimize_audio: nil)
           @playback_ids = playback_ids
           @metadata = metadata
