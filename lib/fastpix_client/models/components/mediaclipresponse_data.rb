@@ -25,7 +25,7 @@ module FastpixClient
 
         field :playback_ids, Crystalline::Nilable.new(Crystalline::Array.new(Models::Components::MediaClipResponsePlaybackId)), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('playbackIds') } }
 
-        sig { params(id: T.nilable(::String), duration: T.nilable(::Float), status: T.nilable(Models::Components::MediaClipResponseStatus), thumbnail: T.nilable(::String), created_at: T.nilable(::DateTime), playback_ids: T.nilable(T::Array[Models::Components::MediaClipResponsePlaybackId])).void }
+        sig { params(id: T.nilable(::String), duration: T.nilable(::Float), status: T.nilable(T.any(Models::Components::MediaClipResponseStatus, String)), thumbnail: T.nilable(::String), created_at: T.nilable(::DateTime), playback_ids: T.nilable(T::Array[Models::Components::MediaClipResponsePlaybackId])).void }
         def initialize(id: nil, duration: nil, status: nil, thumbnail: nil, created_at: nil, playback_ids: nil)
           @id = id
           @duration = duration

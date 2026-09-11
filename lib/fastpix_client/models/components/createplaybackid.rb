@@ -21,7 +21,7 @@ module FastpixClient
         # The maximum resolution for the playback ID.
         field :resolution, Crystalline::Nilable.new(Models::Components::Resolution), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('resolution'), 'decoder': Utils.enum_from_string(Models::Components::Resolution, true) } }
 
-        sig { params(id: T.nilable(::String), access_policy: T.nilable(Models::Components::AccessPolicy), access_restrictions: T.nilable(Models::Components::CreatePlaybackIdAccessRestrictions), resolution: T.nilable(Models::Components::Resolution)).void }
+        sig { params(id: T.nilable(::String), access_policy: T.nilable(T.any(Models::Components::AccessPolicy, String)), access_restrictions: T.nilable(Models::Components::CreatePlaybackIdAccessRestrictions), resolution: T.nilable(T.any(Models::Components::Resolution, String))).void }
         def initialize(id: nil, access_policy: nil, access_restrictions: nil, resolution: nil)
           @id = id
           @access_policy = access_policy

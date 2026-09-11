@@ -86,13 +86,14 @@ module FastpixClient
 
     sig do
       params(enum_type: T.class_of(T::Enum), optional: T::Boolean)
-        .returns(T.nilable(T.proc.params(s: String).returns(T.nilable(T::Enum))))
+        .returns(T.nilable(T.proc.params(s: String).returns(T.nilable(T.any(T::Enum, String)))))
     end
     def self.enum_from_string(enum_type, optional)
       Kernel.lambda do |s|
         return nil if optional && s.nil?
 
-        return enum_type.deserialize(s)
+        # unknown values pass through as the raw string instead of raising
+        return enum_type.try_deserialize(s) || s
       end
     end
 

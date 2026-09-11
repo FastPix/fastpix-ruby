@@ -37,7 +37,7 @@ module FastpixClient
         # No. of media present in the playlist
         field :media_count, Crystalline::Nilable.new(::Integer), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mediaCount') } }
 
-        sig { params(type: Models::Components::PlaylistByIdResponseDataSmartType, play_order: Models::Components::PlaylistOrder, metadata: Models::Components::PlaylistByIdResponseMetadata, id: T.nilable(::String), name: T.nilable(::String), reference_id: T.nilable(::String), description: T.nilable(::String), media_list: T.nilable(T::Array[Models::Components::PlaylistByIdResponseMediaListItem]), workspace_id: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), media_count: T.nilable(::Integer)).void }
+        sig { params(type: T.any(Models::Components::PlaylistByIdResponseDataSmartType, String), play_order: T.any(Models::Components::PlaylistOrder, String), metadata: Models::Components::PlaylistByIdResponseMetadata, id: T.nilable(::String), name: T.nilable(::String), reference_id: T.nilable(::String), description: T.nilable(::String), media_list: T.nilable(T::Array[Models::Components::PlaylistByIdResponseMediaListItem]), workspace_id: T.nilable(::String), created_at: T.nilable(::DateTime), updated_at: T.nilable(::DateTime), media_count: T.nilable(::Integer)).void }
         def initialize(type:, play_order:, metadata:, id: nil, name: nil, reference_id: nil, description: nil, media_list: nil, workspace_id: nil, created_at: nil, updated_at: nil, media_count: nil)
           @type = type
           @play_order = play_order

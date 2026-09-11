@@ -17,7 +17,7 @@ module FastpixClient
         # Controls access based on domains and user agents. Defines a default policy (either "allow" or "deny") and provides lists for explicitly allowed or denied domains and user agents.
         field :access_restrictions, Crystalline::Nilable.new(Models::Components::UnusedUploadsPlaybackIdAccessRestrictions), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('accessRestrictions') } }
 
-        sig { params(access_policy: T.nilable(Models::Components::AccessPolicy), access_restrictions: T.nilable(Models::Components::UnusedUploadsPlaybackIdAccessRestrictions)).void }
+        sig { params(access_policy: T.nilable(T.any(Models::Components::AccessPolicy, String)), access_restrictions: T.nilable(Models::Components::UnusedUploadsPlaybackIdAccessRestrictions)).void }
         def initialize(access_policy: nil, access_restrictions: nil)
           @access_policy = access_policy
           @access_restrictions = access_restrictions

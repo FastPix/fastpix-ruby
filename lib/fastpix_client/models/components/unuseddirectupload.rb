@@ -28,7 +28,7 @@ module FastpixClient
         # 
         field :timeout, Crystalline::Nilable.new(::Float), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('timeout') } }
 
-        sig { params(upload_id: T.nilable(::String), trial: T.nilable(T::Boolean), status: T.nilable(Models::Components::UnusedDirectUploadStatus), url: T.nilable(::String), cors_origin: T.nilable(::String), push_media_settings: T.nilable(Models::Components::UnusedDirectUploadResponse), timeout: T.nilable(::Float)).void }
+        sig { params(upload_id: T.nilable(::String), trial: T.nilable(T::Boolean), status: T.nilable(T.any(Models::Components::UnusedDirectUploadStatus, String)), url: T.nilable(::String), cors_origin: T.nilable(::String), push_media_settings: T.nilable(Models::Components::UnusedDirectUploadResponse), timeout: T.nilable(::Float)).void }
         def initialize(upload_id: nil, trial: nil, status: nil, url: nil, cors_origin: nil, push_media_settings: nil, timeout: 14_400.0)
           @upload_id = upload_id
           @trial = trial

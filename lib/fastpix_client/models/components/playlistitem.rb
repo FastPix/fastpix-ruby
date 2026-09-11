@@ -25,7 +25,7 @@ module FastpixClient
         # No. of media present in the playlist
         field :media_count, Crystalline::Nilable.new(::Integer), { 'format_json': { 'letter_case': ::FastpixClient::Utils.field_name('mediaCount') } }
 
-        sig { params(id: T.nilable(::String), name: T.nilable(::String), type: T.nilable(Models::Components::PlaylistItemType), reference_id: T.nilable(::String), created_at: T.nilable(::DateTime), media_count: T.nilable(::Integer)).void }
+        sig { params(id: T.nilable(::String), name: T.nilable(::String), type: T.nilable(T.any(Models::Components::PlaylistItemType, String)), reference_id: T.nilable(::String), created_at: T.nilable(::DateTime), media_count: T.nilable(::Integer)).void }
         def initialize(id: nil, name: nil, type: nil, reference_id: nil, created_at: nil, media_count: nil)
           @id = id
           @name = name
